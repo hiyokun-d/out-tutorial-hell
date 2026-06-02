@@ -1,0 +1,9 @@
+{
+  "_comment": "All features default to true. Only add a key here to DISABLE it.",
+  "features": {
+    "snippets": true,
+    "hints": true,
+    "livePreview": true,
+    "formatButton": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "language": "html",
+  "instructions": "Describe what the student needs to build.",
+  "starter": "<!-- Write your code here -->",
+  "hints": [
+    "First hint here.",
+    "Second hint here."
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "Has an h1 heading",
+      "check": "has-tag",
+      "value": "h1"
+    }
+  ]
+}

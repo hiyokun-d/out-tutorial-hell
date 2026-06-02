@@ -1,0 +1,8 @@
+{
+  "id": "your-course-id",
+  "title": "Course Title",
+  "description": "What students will build in this course.",
+  "difficulty": "BEGINNER",
+  "order": 99,
+  "icon": "📚"
+}
