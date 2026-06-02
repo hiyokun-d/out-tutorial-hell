@@ -1,0 +1,61 @@
+{
+  "language": "html",
+  "instructions": "Build a personal page with an h2 subheading, a paragraph about yourself, and a link to any website you like.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>About Me</title>\n  </head>\n  <body>\n    <h1>My Page</h1>\n    <!-- Add your h2, p, and a tags below -->\n\n  </body>\n</html>",
+  "tests": [
+    {
+      "id": 1,
+      "description": "Has <!DOCTYPE html> declaration",
+      "check": "has-doctype"
+    },
+    {
+      "id": 2,
+      "description": "Has an <h2> subheading",
+      "check": "has-tag",
+      "value": "h2"
+    },
+    {
+      "id": 3,
+      "description": "h2 is not empty",
+      "check": "not-empty",
+      "selector": "h2"
+    },
+    {
+      "id": 4,
+      "description": "Has a <p> paragraph",
+      "check": "has-tag",
+      "value": "p"
+    },
+    {
+      "id": 5,
+      "description": "Paragraph has some text",
+      "check": "not-empty",
+      "selector": "p"
+    },
+    {
+      "id": 6,
+      "description": "Has an <a> link",
+      "check": "has-tag",
+      "value": "a"
+    },
+    {
+      "id": 7,
+      "description": "Link has an href attribute",
+      "check": "has-attribute",
+      "selector": "a",
+      "attribute": "href"
+    },
+    {
+      "id": 8,
+      "description": "href is not empty",
+      "check": "attribute-not-empty",
+      "selector": "a",
+      "attribute": "href"
+    }
+  ],
+  "hints": [
+    "An h2 looks just like h1 but with a 2: <h2>Your subheading</h2>",
+    "A paragraph wraps your text in <p> tags: <p>Some text about yourself.</p>",
+    "A link needs an href attribute: <a href=\"https://example.com\">Link text</a>"
+  ]
+}

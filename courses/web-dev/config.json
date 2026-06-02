@@ -1,0 +1,8 @@
+{
+  "features": {
+    "snippets": true,
+    "hints": true,
+    "livePreview": true,
+    "formatButton": true
+  }
+}
