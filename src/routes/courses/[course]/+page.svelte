@@ -9,14 +9,18 @@
 <main>
 	<a href="/courses" class="back">← All Courses</a>
 
-	<CourseHeader {course} />
+	<CourseHeader {course} {lessons} courseId={course.id} />
 
 	<section>
 		<h2>Lessons</h2>
 		<ol class="lesson-list">
-			{#each lessons as lesson}
+			{#each lessons as lesson, i}
 				<li>
-					<LessonRow {lesson} courseId={course.id} />
+					<LessonRow
+						{lesson}
+						courseId={course.id}
+						prevLessonId={i > 0 ? lessons[i - 1].id : null}
+					/>
 				</li>
 			{/each}
 		</ol>
@@ -25,19 +29,31 @@
 
 <style>
 	main {
-		max-width: 720px;
+		max-width: 740px;
 		margin: 0 auto;
-		padding: 2rem;
+		padding: 2.5rem 2rem;
 	}
 
 	.back {
-		color: #6366f1;
+		display: inline-block;
+		color: var(--text-muted);
 		text-decoration: none;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
+		margin-bottom: 0.5rem;
+		transition: color 0.15s;
+	}
+
+	.back:hover {
+		color: var(--accent);
 	}
 
 	h2 {
-		margin-bottom: 0.75rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.09em;
+		color: var(--text-muted);
+		margin: 0 0 0.75rem;
 	}
 
 	.lesson-list {
@@ -46,6 +62,6 @@
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.4rem;
 	}
 </style>

@@ -24,9 +24,9 @@
 		list-style: none;
 	}
 
-	.item.pass .desc { color: #059669; }
-	.item.fail .desc { color: #dc2626; }
-	.item:not(.pass):not(.fail) .desc { color: #6b7280; }
+	.item.pass .desc { color: var(--success); }
+	.item.fail .desc { color: var(--error); }
+	.item:not(.pass):not(.fail) .desc { color: var(--text-muted); }
 
 	.dot {
 		width: 1.1rem;
@@ -50,10 +50,10 @@
 
 	.detail {
 		font-size: 0.76rem;
-		color: #6b7280;
+		color: var(--text-muted);
 		line-height: 1.5;
 		padding: 0.25rem 0.5rem;
-		border-left: 2px solid #e5e7eb;
+		border-left: 2px solid var(--border);
 		margin-top: 0.1rem;
 	}
 </style>

@@ -66,11 +66,12 @@
 	}
 
 	h3 {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		text-transform: uppercase;
-		letter-spacing: 0.07em;
-		color: #9ca3af;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
 		margin: 0;
+		font-weight: 700;
 	}
 
 	.progress {
@@ -78,20 +79,20 @@
 		font-weight: 700;
 		padding: 0.15rem 0.45rem;
 		border-radius: 999px;
-		background: #fee2e2;
-		color: #dc2626;
+		background: var(--error-muted);
+		color: var(--error);
 		transition: background 0.2s, color 0.2s;
 	}
 
 	.progress.all {
-		background: #d1fae5;
-		color: #059669;
+		background: var(--success-muted);
+		color: var(--success);
 	}
 
-.run-btn {
+	.run-btn {
 		width: 100%;
 		padding: 0.55rem;
-		background: #6366f1;
+		background: var(--accent);
 		color: #fff;
 		border: none;
 		border-radius: 8px;
@@ -101,14 +102,14 @@
 		transition: background 0.15s;
 	}
 
-	.run-btn:hover:not(:disabled) { background: #4f46e5; }
+	.run-btn:hover:not(:disabled) { background: var(--accent-hover); }
 	.run-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 	.success {
 		text-align: center;
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: #059669;
+		color: var(--success);
 		margin: 0;
 		animation: pop 0.3s ease;
 	}

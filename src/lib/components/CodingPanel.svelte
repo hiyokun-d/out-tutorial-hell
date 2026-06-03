@@ -113,9 +113,9 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.35rem 0.75rem;
-		background: #f9fafb;
+		background: #17171f;
 		border-top: 2px solid #11111b;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid #272733;
 		flex-shrink: 0;
 	}
 
@@ -123,12 +123,12 @@
 		font-size: 0.68rem;
 		font-weight: 700;
 		letter-spacing: 0.07em;
-		color: #6b7280;
+		color: #8888a8;
 	}
 
 	.note {
 		font-size: 0.65rem;
-		color: #9ca3af;
+		color: #4e4e6a;
 	}
 
 	.editor-section {

@@ -30,7 +30,7 @@
 
 <style>
 	.hints {
-		border-top: 1px solid #f3f4f6;
+		border-top: 1px solid var(--border);
 		padding-top: 0.75rem;
 	}
 
@@ -45,38 +45,39 @@
 
 	li {
 		font-size: 0.82rem;
-		color: #374151;
-		background: #fffbeb;
-		border: 1px solid #fde68a;
+		color: var(--text);
+		background: var(--warning-muted);
+		border: 1px solid rgba(245, 158, 11, 0.25);
 		border-radius: 6px;
 		padding: 0.45rem 0.65rem;
 	}
 
 	.num {
 		font-weight: 700;
-		color: #d97706;
+		color: var(--warning);
 		margin-right: 0.3rem;
 	}
 
 	button {
 		width: 100%;
 		font-size: 0.8rem;
-		color: #6366f1;
+		color: var(--accent);
 		background: none;
-		border: 1px dashed #c7d2fe;
+		border: 1px dashed rgba(99, 102, 241, 0.35);
 		border-radius: 6px;
 		padding: 0.3rem 0.65rem;
 		cursor: pointer;
-		transition: background 0.15s;
+		transition: background 0.15s, border-color 0.15s;
 	}
 
 	button:hover {
-		background: #eef2ff;
+		background: var(--accent-muted);
+		border-color: var(--accent);
 	}
 
 	.done {
 		font-size: 0.78rem;
-		color: #9ca3af;
+		color: var(--text-dim);
 		text-align: center;
 		margin: 0;
 	}
