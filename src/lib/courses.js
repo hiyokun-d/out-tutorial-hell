@@ -4,12 +4,12 @@
 
 const metaFiles = import.meta.glob('/courses/*/meta.json', { eager: true, import: 'default' });
 const configFiles = import.meta.glob('/courses/*/config.json', { eager: true, import: 'default' });
-const lessonFiles = import.meta.glob('/courses/*/lessons/*.md', {
+const lessonFiles = import.meta.glob('/courses/*/lessons/*/*.md', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
 });
-const challengeFiles = import.meta.glob('/courses/*/lessons/*.json', {
+const challengeFiles = import.meta.glob('/courses/*/lessons/*/*.json', {
 	eager: true,
 	import: 'default'
 });
@@ -95,7 +95,11 @@ export function getCourseConfig(courseId) {
  * Excludes the _template folder.
  */
 export function getAllCourses() {
-	return Object.values(metaFiles)
+	return Object.entries(metaFiles)
+		.map(([path, data]) => {
+			const id = path.match(/\/courses\/([^/]+)\/meta\.json/)?.[1] ?? '';
+			return { ...data, id };
+		})
 		.filter((c) => c.id !== '_template')
 		.sort((a, b) => a.order - b.order);
 }
@@ -113,11 +117,14 @@ export function getLessons(courseId) {
 
 		const { data, content } = parseFrontmatter(raw);
 
+		const folderMatch = path.match(/\/lessons\/(\d+)\//);
+		const order = folderMatch ? Number(folderMatch[1]) : 0;
+
 		// Look for a matching .json challenge file (same path, different extension)
 		const challengePath = path.replace(/\.md$/, '.json');
 		const challenge = challengeFiles[challengePath] ?? null;
 
-		lessons.push({ ...data, content, challenge });
+		lessons.push({ ...data, order, content, challenge });
 	}
 
 	return lessons.sort((a, b) => a.order - b.order);

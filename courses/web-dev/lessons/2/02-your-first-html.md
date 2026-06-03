@@ -1,7 +1,6 @@
 ---
 id: "your-first-html"
 title: "Your First HTML"
-order: 2
 type: "PRACTICE"
 xpReward: 20
 ---

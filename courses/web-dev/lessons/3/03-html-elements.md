@@ -1,7 +1,6 @@
 ---
 id: "html-elements"
 title: "More HTML Elements"
-order: 3
 type: "PRACTICE"
 xpReward: 25
 ---

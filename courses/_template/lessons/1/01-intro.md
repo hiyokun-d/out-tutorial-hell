@@ -1,7 +1,6 @@
 ---
 id: "intro"
 title: "Introduction"
-order: 1
 type: "THEORY"
 xpReward: 10
 ---

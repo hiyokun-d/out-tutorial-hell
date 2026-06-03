@@ -1,8 +1,7 @@
 {
-  "id": "web-dev",
   "title": "Web Development",
   "description": "Learn HTML, CSS, and JavaScript by building real things. No fluff, no tutorials — just you and the code.",
   "difficulty": "BEGINNER",
-  "order": 1,
+  "order": 2,
   "icon": "🌐"
 }

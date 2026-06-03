@@ -1,7 +1,6 @@
 ---
 id: "what-is-code"
 title: "What is Code?"
-order: 1
 type: "THEORY"
 xpReward: 10
 ---
