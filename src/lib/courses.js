@@ -41,20 +41,21 @@ function parseFrontmatter(raw) {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const KNOWN_FEATURES = ['snippets', 'hints', 'livePreview', 'formatButton'];
+const KNOWN_FEATURES = ['snippets', 'hints', 'livePreview', 'formatButton', 'walkthroughStyle'];
 
 /**
  * Global default — all features ON.
  * Any course without a config.json gets this automatically.
  * Per-course config.json can only override individual flags.
- * @type {{ features: { snippets: boolean, hints: boolean, livePreview: boolean, formatButton: boolean } }}
+ * @type {{ features: { snippets: boolean, hints: boolean, livePreview: boolean, formatButton: boolean, walkthroughStyle: string } }}
  */
 export const DEFAULT_CONFIG = {
 	features: {
 		snippets: true,
 		hints: true,
 		livePreview: true,
-		formatButton: true
+		formatButton: true,
+		walkthroughStyle: 'spotlight'
 	}
 };
 
@@ -76,7 +77,14 @@ export function getCourseConfig(courseId) {
 					`Unknown feature "${key}" in courses/${courseId}/config.json — valid features: ${KNOWN_FEATURES.join(', ')}`
 				);
 			}
-			if (typeof val !== 'boolean') {
+			if (key === 'walkthroughStyle') {
+				const valid = ['spotlight', 'pulse', 'none'];
+				if (!valid.includes(val)) {
+					throw new Error(
+						`Feature "walkthroughStyle" must be one of: ${valid.join(', ')}, got: ${JSON.stringify(val)}`
+					);
+				}
+			} else if (typeof val !== 'boolean') {
 				throw new Error(
 					`Feature "${key}" in courses/${courseId}/config.json must be true or false, got: ${JSON.stringify(val)}`
 				);
@@ -110,19 +118,59 @@ export function getAllCourses() {
  * @param {string} courseId
  */
 export function getLessons(courseId) {
+	const prefix = `/courses/${courseId}/lessons/`;
+
+	// ── Validate: exactly 1 .md and at most 1 .json per lesson folder ─────────
+	const mdByFolder = /** @type {Map<string, string[]>} */ (new Map());
+	const jsonByFolder = /** @type {Map<string, string[]>} */ (new Map());
+
+	for (const p of Object.keys(lessonFiles)) {
+		if (!p.startsWith(prefix)) continue;
+		const folder = p.slice(0, p.lastIndexOf('/') + 1);
+		const entry = mdByFolder.get(folder) ?? [];
+		entry.push(p.split('/').pop() ?? p);
+		mdByFolder.set(folder, entry);
+	}
+	for (const p of Object.keys(challengeFiles)) {
+		if (!p.startsWith(prefix)) continue;
+		const folder = p.slice(0, p.lastIndexOf('/') + 1);
+		const entry = jsonByFolder.get(folder) ?? [];
+		entry.push(p.split('/').pop() ?? p);
+		jsonByFolder.set(folder, entry);
+	}
+
+	for (const [folder, files] of mdByFolder) {
+		if (files.length > 1) {
+			throw new Error(
+				`Lesson folder "${folder}" has ${files.length} .md files: ${files.join(', ')} — only one allowed.`
+			);
+		}
+	}
+	for (const [folder, files] of jsonByFolder) {
+		if (files.length > 1) {
+			throw new Error(
+				`Lesson folder "${folder}" has ${files.length} .json files: ${files.join(', ')} — only one allowed.`
+			);
+		}
+	}
+
+	// ── Build lesson list ──────────────────────────────────────────────────────
 	const lessons = [];
 
 	for (const [path, raw] of Object.entries(lessonFiles)) {
-		if (!path.startsWith(`/courses/${courseId}/lessons/`)) continue;
+		if (!path.startsWith(prefix)) continue;
 
 		const { data, content } = parseFrontmatter(raw);
 
 		const folderMatch = path.match(/\/lessons\/(\d+)\//);
 		const order = folderMatch ? Number(folderMatch[1]) : 0;
 
-		// Look for a matching .json challenge file (same path, different extension)
-		const challengePath = path.replace(/\.md$/, '.json');
-		const challenge = challengeFiles[challengePath] ?? null;
+		// Find the single .json in the same lesson folder — name doesn't matter
+		const folderPath = path.slice(0, path.lastIndexOf('/') + 1);
+		const challenge =
+			Object.entries(challengeFiles).find(
+				([p]) => p.startsWith(folderPath) && p.endsWith('.json')
+			)?.[1] ?? null;
 
 		lessons.push({ ...data, order, content, challenge });
 	}

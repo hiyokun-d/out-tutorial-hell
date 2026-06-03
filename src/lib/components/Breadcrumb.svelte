@@ -17,15 +17,16 @@
 		gap: 0.4rem;
 		align-items: center;
 		font-size: 0.78rem;
-		color: #9ca3af;
+		color: var(--text-dim);
 	}
 
 	a {
-		color: #6366f1;
+		color: var(--text-muted);
 		text-decoration: none;
+		transition: color 0.15s;
 	}
 
 	a:hover {
-		text-decoration: underline;
+		color: var(--accent);
 	}
 </style>

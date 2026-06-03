@@ -23,34 +23,37 @@
 		justify-content: space-between;
 		gap: 0.5rem;
 		padding-top: 0.75rem;
-		border-top: 1px solid #f3f4f6;
+		border-top: 1px solid var(--border);
 	}
 
 	.btn {
 		padding: 0.45rem 0.8rem;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--border);
 		border-radius: 8px;
 		text-decoration: none;
-		color: #374151;
+		color: var(--text-muted);
 		font-size: 0.78rem;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: 46%;
-		transition: border-color 0.15s;
+		transition: border-color 0.15s, color 0.15s;
+		background: transparent;
 	}
 
 	.btn:hover {
-		border-color: #6366f1;
+		border-color: var(--accent);
+		color: var(--text);
 	}
 
 	.btn.primary {
-		background: #6366f1;
+		background: var(--accent);
 		color: #fff;
-		border-color: #6366f1;
+		border-color: var(--accent);
 	}
 
 	.btn.primary:hover {
-		background: #4f46e5;
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
 	}
 </style>

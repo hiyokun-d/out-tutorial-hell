@@ -1,11 +1,13 @@
 <script>
 	import InstructionsPanel from './InstructionsPanel.svelte';
 	import CodingPanel from './CodingPanel.svelte';
+	import WalkthroughOverlay from './WalkthroughOverlay.svelte';
 	import { runCheck, buildDetail, computeTestDiagnostics } from '$lib/checker.js';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
+	import { markComplete } from '$lib/utils/progress.js';
 
-	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any }} */
-	let { lesson, course, prev, next, config = DEFAULT_CONFIG } = $props();
+	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any, courseSlug?: string, lessonId?: string }} */
+	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
 
 	const { challenge } = lesson;
 
@@ -28,6 +30,17 @@
 		if (!editorApi) return;
 		editorApi.setExternalDiags(computeTestDiagnostics(testResults, code));
 	});
+
+	// ── Mark lesson complete when all tests pass ──────────────────────────────
+	$effect(() => {
+		if (allPassed && courseSlug && lessonId) {
+			markComplete(courseSlug, lessonId);
+		}
+	});
+
+	// ── Walkthrough overlay ───────────────────────────────────────────────────
+	let walkthroughOpen = $state(false);
+	let hasWalkthrough = $derived(!!(challenge.walkthrough?.steps?.length));
 
 	// ── Panel resize ──────────────────────────────────────────────────────────
 	let leftWidth = $state(390);
@@ -85,6 +98,16 @@
 
 <svelte:window on:mouseup={() => (dragging = false)} />
 
+{#if walkthroughOpen}
+	<WalkthroughOverlay
+		{code}
+		language={challenge.language}
+		steps={challenge.walkthrough.steps}
+		walkthroughStyle={config.features?.walkthroughStyle ?? 'spotlight'}
+		onClose={() => (walkthroughOpen = false)}
+	/>
+{/if}
+
 <div class="layout" class:dragging style="grid-template-columns: {leftWidth}px 4px 1fr">
 	<InstructionsPanel
 		{lesson}
@@ -96,6 +119,8 @@
 		{running}
 		onRun={runTests}
 		features={config.features}
+		{courseSlug}
+		{lessonId}
 	/>
 
 	<div
@@ -116,6 +141,14 @@
 	/>
 </div>
 
+{#if allPassed && hasWalkthrough && !walkthroughOpen}
+	<div class="wt-trigger">
+		<button onclick={() => (walkthroughOpen = true)}>
+			Walk through your solution →
+		</button>
+	</div>
+{/if}
+
 <style>
 	.layout {
 		display: grid;
@@ -128,7 +161,7 @@
 	}
 
 	.resize-handle {
-		background: #e5e7eb;
+		background: #272733;
 		cursor: col-resize;
 		transition: background 0.15s;
 		position: relative;
@@ -143,5 +176,37 @@
 		content: '';
 		position: absolute;
 		inset: 0 -4px;
+	}
+
+	.wt-trigger {
+		position: fixed;
+		bottom: 1.5rem;
+		right: 1.5rem;
+		z-index: 100;
+		animation: wtSlideUp 0.3s ease;
+	}
+
+	.wt-trigger button {
+		padding: 0.65rem 1.25rem;
+		background: var(--accent);
+		color: #fff;
+		border: none;
+		border-radius: 10px;
+		font-size: 0.9rem;
+		font-weight: 700;
+		cursor: pointer;
+		box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+		transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+	}
+
+	.wt-trigger button:hover {
+		background: var(--accent-hover);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 24px rgba(99, 102, 241, 0.55);
+	}
+
+	@keyframes wtSlideUp {
+		from { opacity: 0; transform: translateY(12px); }
+		to { opacity: 1; transform: translateY(0); }
 	}
 </style>

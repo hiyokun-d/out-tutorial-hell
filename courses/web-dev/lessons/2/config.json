@@ -1,0 +1,84 @@
+{
+  "language": "html",
+  "instructions": "Build a complete HTML page. Give it a title in the <head> and an <h1> heading in the <body> that says 'Hello, World!'",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>My Page</title>\n  </head>\n  <body>\n    <!-- Write your h1 here -->\n  </body>\n</html>",
+  "tests": [
+    {
+      "id": 1,
+      "description": "Has <!DOCTYPE html> declaration",
+      "check": "has-doctype"
+    },
+    {
+      "id": 2,
+      "description": "Has <html>, <head>, and <body> tags",
+      "check": "has-structure"
+    },
+    {
+      "id": 3,
+      "description": "Has a <title> tag in the head",
+      "check": "has-tag",
+      "value": "title"
+    },
+    {
+      "id": 4,
+      "description": "Title is not empty",
+      "check": "not-empty",
+      "selector": "title"
+    },
+    {
+      "id": 5,
+      "description": "Has an <h1> tag",
+      "check": "has-tag",
+      "value": "h1"
+    },
+    {
+      "id": 6,
+      "description": "h1 says Hello, World!",
+      "check": "tag-text",
+      "tag": "h1",
+      "value": "Hello, World!"
+    }
+  ],
+  "hints": [
+    "An h1 tag looks like this: <h1>Your text here</h1> — open tag, content, close tag.",
+    "Put your h1 inside the <body> tag. The body is where everything visible goes.",
+    "Make sure the text is exactly: Hello, World! — capital H, capital W, comma, exclamation mark."
+  ],
+  "walkthrough": {
+    "steps": [
+      {
+        "title": "You started with DOCTYPE",
+        "explanation": "The very first line you wrote declares this as an HTML5 document. Browsers need this to render your page correctly — without it they fall into a broken legacy mode.",
+        "why": "Always write this on line 1, with no spaces before it.",
+        "highlight": { "line": 1 }
+      },
+      {
+        "title": "The root <html> element",
+        "explanation": "Your entire page lives inside <html>. It opens at the top and closes at the very bottom — it's the container for everything.",
+        "highlight": { "text": "<html>" }
+      },
+      {
+        "title": "The <head> — invisible metadata",
+        "explanation": "Everything in <head> is invisible to the user. It holds information about the page: the title that shows in the tab, links to stylesheets, and other metadata.",
+        "highlight": { "text": "<head>" }
+      },
+      {
+        "title": "You gave the page a title",
+        "explanation": "Your <title> text appears in the browser tab and in search engine results. It's not the heading on the page — it's the label for the page itself.",
+        "why": "A good, specific title improves SEO and helps users know what tab they're looking at.",
+        "highlight": { "text": "<title>" }
+      },
+      {
+        "title": "The <body> — everything visible",
+        "explanation": "Everything a user sees on the page lives inside <body>. Text, images, buttons, links — it all goes here.",
+        "highlight": { "text": "<body>" }
+      },
+      {
+        "title": "Your <h1> heading",
+        "explanation": "You wrote the most important heading on the page. <h1> is the top-level heading — browsers render it large and bold by default, and search engines treat it as the main topic of your page.",
+        "why": "One <h1> per page. It tells both humans and search engines: this is what this page is about.",
+        "highlight": { "text": "<h1>" }
+      }
+    ]
+  }
+}

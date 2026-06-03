@@ -3,10 +3,14 @@
 	import { expandEmmet, HTML_BOILERPLATE, SNIPPET_CURSOR_OFFSET, EMMET_ABBREVIATIONS } from '$lib/emmet.js';
 
 	/**
-	 * @typedef {{ setExternalDiags: (d: import('@codemirror/lint').Diagnostic[]) => void, setContent: (s: string) => void }} EditorApi
-	 * @type {{ value?: string, language?: string, snippets?: boolean, onReady?: (api: EditorApi) => void }}
+	 * @typedef {{ setExternalDiags: (d: import('@codemirror/lint').Diagnostic[]) => void, setContent: (s: string) => void, scrollToLine: (n: number) => void, getLineY: (n: number) => number | null }} EditorApi
+	 * @type {{ value?: string, language?: string, snippets?: boolean, onReady?: (api: EditorApi) => void, readonly?: boolean, spotlight?: { fromLine: number, toLine: number, style: string } | null }}
 	 */
-	let { value = $bindable(''), language = 'html', snippets = true, onReady } = $props();
+	let { value = $bindable(''), language = 'html', snippets = true, onReady, readonly = false, spotlight = null } = $props();
+
+	// Spotlight effect — set inside onMount once StateEffect is available
+	/** @type {any} */
+	let spotlightEffect = null;
 
 	/** @type {HTMLDivElement} */
 	let editorEl;
@@ -68,10 +72,10 @@
 			{ oneDark },
 			{ linter, lintGutter, forceLinting },
 			{ syntaxTree },
-			{ keymap },
+			{ keymap, Decoration },
 			{ acceptCompletion },
 			{ indentWithTab },
-			{ Prec }
+			{ Prec, StateEffect, StateField }
 		] = await Promise.all([
 			import('codemirror'),
 			import('@codemirror/theme-one-dark'),
@@ -82,6 +86,38 @@
 			import('@codemirror/commands'),
 			import('@codemirror/state')
 		]);
+
+		// ── Spotlight decorations ─────────────────────────────────────────────────
+		const _spotlightEffect = StateEffect.define();
+		spotlightEffect = _spotlightEffect;
+
+		const spotlightField = StateField.define({
+			create() { return Decoration.none; },
+			update(deco, tr) {
+				deco = deco.map(tr.changes);
+				for (const e of tr.effects) {
+					if (e.is(_spotlightEffect)) {
+						const hl = e.value;
+						if (!hl) return Decoration.none;
+						const { fromLine, toLine, style } = hl;
+						const doc = tr.newDoc;
+						const marks = [];
+						for (let i = 1; i <= doc.lines; i++) {
+							const ln = doc.line(i);
+							const isHighlighted = i >= fromLine && i <= toLine;
+							if (isHighlighted) {
+								marks.push(Decoration.line({ class: style === 'pulse' ? 'wt-pulse' : 'wt-spotlight' }).range(ln.from));
+							} else if (style === 'spotlight') {
+								marks.push(Decoration.line({ class: 'wt-dim' }).range(ln.from));
+							}
+						}
+						return marks.length ? Decoration.set(marks) : Decoration.none;
+					}
+				}
+				return deco;
+			},
+			provide(f) { return EditorView.decorations.from(f); }
+		});
 
 		function expandSnippet(view) {
 			if (language !== 'html') return false;
@@ -267,6 +303,8 @@
 				basicSetup,
 				lang,
 				oneDark,
+				spotlightField,
+				...(readonly ? [EditorView.editable.of(false)] : []),
 				lintGutter(),
 				linter(mergedLintFn, { delay: 450 }),
 				// Emmet autocomplete — attached to the HTML language data so it merges
@@ -303,14 +341,17 @@
 			parent: editorEl
 		});
 
+		// Apply initial spotlight if already set
+		if (spotlight && spotlightEffect) {
+			view.dispatch({ effects: spotlightEffect.of(spotlight) });
+		}
+
 		// ── Expose API to parent ──────────────────────────────────────────────────
 		onReady?.({
-			/** Inject test-failure diagnostics into the editor */
 			setExternalDiags(diags) {
 				extDiags = diags;
 				forceLinting(view);
 			},
-			/** Replace editor content while preserving undo history */
 			setContent(content) {
 				if (!view) return;
 				view.dispatch(
@@ -319,11 +360,32 @@
 						scrollIntoView: true
 					})
 				);
+			},
+			scrollToLine(lineNumber) {
+				if (!view) return;
+				const doc = view.state.doc;
+				const n = Math.max(1, Math.min(lineNumber, doc.lines));
+				view.dispatch({ effects: EditorView.scrollIntoView(doc.line(n).from, { y: 'start', yMargin: 60 }) });
+			},
+			getLineY(lineNumber) {
+				if (!view) return null;
+				const doc = view.state.doc;
+				const n = Math.max(1, Math.min(lineNumber, doc.lines));
+				const block = view.lineBlockAt(doc.line(n).from);
+				return block.top - view.scrollDOM.scrollTop;
 			}
 		});
 	});
 
 	onDestroy(() => view?.destroy());
+
+	// Reactive spotlight — fires whenever spotlight prop changes after mount
+	$effect(() => {
+		const s = spotlight; // track dependency
+		if (view && spotlightEffect) {
+			view.dispatch({ effects: spotlightEffect.of(s ?? null) });
+		}
+	});
 </script>
 
 <div class="wrap" bind:this={editorEl}></div>
@@ -364,5 +426,29 @@
 
 	.wrap :global(.cm-diagnosticText) {
 		color: #cdd6f4;
+	}
+
+	/* Walkthrough spotlight decorations */
+	.wrap :global(.cm-line) {
+		transition: opacity 0.25s ease, background-color 0.25s ease;
+	}
+
+	.wrap :global(.cm-line.wt-spotlight) {
+		background: rgba(99, 102, 241, 0.12) !important;
+		opacity: 1 !important;
+		border-left: 2px solid rgba(99, 102, 241, 0.6);
+	}
+
+	.wrap :global(.cm-line.wt-dim) {
+		opacity: 0.22;
+	}
+
+	.wrap :global(.cm-line.wt-pulse) {
+		animation: wtPulse 1.8s ease-in-out infinite;
+	}
+
+	@keyframes wtPulse {
+		0%, 100% { background: transparent; }
+		50% { background: rgba(99, 102, 241, 0.18); }
 	}
 </style>

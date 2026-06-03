@@ -1,5 +1,9 @@
-import { getAllCourses } from '$lib/courses.js';
+import { getAllCourses, getLessons } from '$lib/courses.js';
 
 export function load() {
-	return { courses: getAllCourses() };
+	const courses = getAllCourses().map((course) => ({
+		...course,
+		lessonCount: getLessons(course.id).length
+	}));
+	return { courses };
 }

@@ -1,0 +1,57 @@
+{
+  "language": "html",
+  "code": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <title>My First Page</title>\n  </head>\n  <body>\n    <h1>Hello, World!</h1>\n    <p>This is my first webpage.</p>\n    <a href=\"https://example.com\">Visit Example</a>\n  </body>\n</html>",
+  "steps": [
+    {
+      "title": "The DOCTYPE",
+      "explanation": "This one line tells the browser: I'm an HTML5 document. Without it, the browser enters quirks mode — a broken compatibility mode from the 1990s where everything looks slightly wrong.",
+      "why": "Always write this as the very first line. No spaces before it, no exceptions.",
+      "highlight": { "line": 1 }
+    },
+    {
+      "title": "The <html> element",
+      "explanation": "Everything on the page lives inside <html>. It's the root container — the outermost box that holds your entire document. Notice the lang attribute tells the browser (and screen readers) what language the page is in.",
+      "why": "The lang attribute helps search engines and accessibility tools understand your content. Always include it.",
+      "highlight": { "lines": [2, 12] }
+    },
+    {
+      "title": "The <head> section",
+      "explanation": "The <head> is invisible to users — nothing here shows up on the page. It contains metadata: information about the page, like its title, character encoding, and linked stylesheets.",
+      "highlight": { "lines": [3, 6] }
+    },
+    {
+      "title": "The charset meta tag",
+      "explanation": "This tells the browser to use UTF-8 encoding — a system that supports every character in every language, including emoji. Without this, special characters can appear as gibberish.",
+      "why": "UTF-8 is the universal standard. Always include it as the first tag inside <head>.",
+      "highlight": { "line": 4 }
+    },
+    {
+      "title": "The <title> tag",
+      "explanation": "This text appears in the browser tab and in search results. It's not the same as the heading inside your page — it's metadata about your page.",
+      "why": "A good title improves SEO and helps users know what tab they're on when they have 20 tabs open.",
+      "highlight": { "line": 5 }
+    },
+    {
+      "title": "The <body> section",
+      "explanation": "Everything visible goes here. Text, images, buttons, links — all of it lives in <body>. This is where your actual page content lives.",
+      "highlight": { "lines": [7, 11] }
+    },
+    {
+      "title": "The <h1> heading",
+      "explanation": "<h1> is the most important heading on the page. Think of it as the title of a book chapter. It's large, bold, and tells both users and search engines what this page is about.",
+      "why": "Every page should have exactly one <h1>. Having more than one confuses search engines about what your page is about.",
+      "highlight": { "text": "<h1>" }
+    },
+    {
+      "title": "The <p> paragraph",
+      "explanation": "<p> wraps a paragraph of text. Browsers automatically add some spacing above and below each paragraph, so your text doesn't look like a wall of words.",
+      "highlight": { "text": "<p>" }
+    },
+    {
+      "title": "The <a> link",
+      "explanation": "The anchor tag creates a clickable link. The href attribute tells the browser where to go. This is the foundation of the entire web — every hyperlink you've ever clicked was an <a> tag.",
+      "why": "href stands for Hypertext REFerence. It's the destination URL.",
+      "highlight": { "text": "<a " }
+    }
+  ]
+}
