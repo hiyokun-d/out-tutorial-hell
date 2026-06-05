@@ -1,0 +1,29 @@
+{
+  "language": "javascript",
+  "instructions": "A variable `age` is already set to `20`.\n\nWrite an `if/else` statement that prints **adult** if age is 18 or over, or **minor** if not.",
+  "starter": "let age = 20\n\n// Write your if/else below\n",
+  "hints": [
+    "An if statement looks like: if (condition) { ... } else { ... }",
+    "To check if age is 18 or over, use: if (age >= 18)",
+    "Put console.log(\"adult\") inside the if block, and console.log(\"minor\") inside the else block."
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "No errors in your code",
+      "check": "console-no-error"
+    },
+    {
+      "id": 2,
+      "description": "Uses an if statement",
+      "check": "code-contains",
+      "value": "if"
+    },
+    {
+      "id": 3,
+      "description": "Prints \"adult\" (age 20 is >= 18)",
+      "check": "console-output-equals",
+      "value": "adult"
+    }
+  ]
+}

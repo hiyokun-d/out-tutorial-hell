@@ -1,0 +1,23 @@
+{
+  "language": "javascript",
+  "instructions": "Use `console.log()` to print exactly: **Hello, World!**\n\nCapitalisation and punctuation matter — the computer checks for an exact match.",
+  "starter": "// Type your code below\n",
+  "hints": [
+    "console.log() prints whatever is inside the parentheses.",
+    "Text needs to be wrapped in quotes: console.log(\"Hello, World!\")",
+    "Check the capitalisation: capital H, capital W, a comma after Hello, and an exclamation mark at the end."
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "No errors in your code",
+      "check": "console-no-error"
+    },
+    {
+      "id": 2,
+      "description": "Prints exactly \"Hello, World!\"",
+      "check": "console-output-equals",
+      "value": "Hello, World!"
+    }
+  ]
+}

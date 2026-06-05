@@ -265,6 +265,103 @@ export function buildDetail(test, actual, doc, src) {
 	}
 }
 
+// ── JS console check runner ───────────────────────────────────────────────────
+
+/**
+ * @param {any} test
+ * @param {{ type: string, text: string }[]} logs  output from ConsolePane.runCode()
+ * @param {string} src  raw source code
+ * @returns {{ passed: boolean, actual?: string }}
+ */
+export function runJsCheck(test, logs, src) {
+	try {
+		const outputLogs = logs.filter((l) => l.type !== 'error');
+
+		switch (test.check) {
+			case 'console-output-contains': {
+				const passed = logs.some((l) => l.text.includes(test.value));
+				return { passed, actual: logs.map((l) => l.text).join('\n') || '(no output)' };
+			}
+			case 'console-output-equals': {
+				const first = outputLogs[0]?.text ?? null;
+				return { passed: first === test.value, actual: first ?? '(no output)' };
+			}
+			case 'console-output-line': {
+				const line = outputLogs[test.line];
+				return { passed: line?.text === test.value, actual: line?.text ?? `(no line ${test.line})` };
+			}
+			case 'console-output-count': {
+				const count = outputLogs.length;
+				return { passed: count === Number(test.count), actual: `${count} line(s)` };
+			}
+			case 'console-no-error': {
+				const errors = logs.filter((l) => l.type === 'error');
+				return { passed: errors.length === 0, actual: errors.length ? errors[0].text : 'no errors' };
+			}
+			case 'code-contains':
+				return { passed: src.includes(test.value), actual: src.includes(test.value) ? 'found' : 'not found' };
+			case 'code-not-contains':
+				return { passed: !src.includes(test.value), actual: src.includes(test.value) ? 'found (should not be here)' : 'not found' };
+			default:
+				return { passed: false, actual: 'unknown check type' };
+		}
+	} catch (err) {
+		return { passed: false, actual: `error: ${err.message}` };
+	}
+}
+
+/**
+ * @param {any} test
+ * @param {string|null|undefined} actual
+ * @param {{ type: string, text: string }[]} logs
+ */
+export function buildJsDetail(test, actual, logs) {
+	switch (test.check) {
+		case 'console-output-contains':
+			return `Your code needs to print something containing "${test.value}" — use console.log("${test.value}")`;
+
+		case 'console-output-equals': {
+			const outputLogs = logs.filter((l) => l.type !== 'error');
+			if (outputLogs.length === 0) {
+				return `Nothing was printed — add console.log("${test.value}") to your code`;
+			}
+			const got = outputLogs[0]?.text ?? '';
+			if (got.toLowerCase() === test.value.toLowerCase()) {
+				return `Almost! Check the exact spelling and capitalisation — it needs to print exactly: "${test.value}"`;
+			}
+			return `Your code printed "${got}" but it needs to print exactly "${test.value}"`;
+		}
+
+		case 'console-output-line': {
+			const outputLogs = logs.filter((l) => l.type !== 'error');
+			if (outputLogs.length <= test.line) {
+				return `Expected output on line ${test.line + 1} but only ${outputLogs.length} line(s) were printed`;
+			}
+			return `Line ${test.line + 1} printed "${outputLogs[test.line].text}" but should be "${test.value}"`;
+		}
+
+		case 'console-output-count': {
+			const outputLogs = logs.filter((l) => l.type !== 'error');
+			if (outputLogs.length === 0) return `Nothing was printed — add ${test.count} console.log() call(s)`;
+			return `Got ${outputLogs.length} line(s) of output, need exactly ${test.count}`;
+		}
+
+		case 'console-no-error': {
+			const errors = logs.filter((l) => l.type === 'error');
+			return `Your code has an error: ${errors[0]?.text ?? 'unknown error'} — fix it and try again`;
+		}
+
+		case 'code-contains':
+			return `Your code needs to include: ${test.value}`;
+
+		case 'code-not-contains':
+			return `Remove "${test.value}" from your code`;
+
+		default:
+			return actual ?? null;
+	}
+}
+
 // ── Test → editor diagnostic mapping ─────────────────────────────────────────
 
 function buildDiagMessage(test) {

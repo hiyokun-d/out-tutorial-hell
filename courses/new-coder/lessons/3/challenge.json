@@ -1,0 +1,29 @@
+{
+  "language": "javascript",
+  "instructions": "Create a variable called `name` and set it to your name.\n\nThen use `console.log()` to print: **My name is [your name]**",
+  "starter": "// Create a variable for your name\n\n// Then print it\n",
+  "hints": [
+    "Declare the variable like this: let name = \"Alice\";",
+    "To print it with text, use a template literal: console.log(`My name is ${name}`)",
+    "Template literals use backtick characters ` (the key above Tab), not regular quotes."
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "No errors in your code",
+      "check": "console-no-error"
+    },
+    {
+      "id": 2,
+      "description": "Creates a variable called name",
+      "check": "code-contains",
+      "value": "name"
+    },
+    {
+      "id": 3,
+      "description": "Output starts with \"My name is\"",
+      "check": "console-output-contains",
+      "value": "My name is"
+    }
+  ]
+}

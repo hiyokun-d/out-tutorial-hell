@@ -41,7 +41,7 @@ function parseFrontmatter(raw) {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const KNOWN_FEATURES = ['snippets', 'hints', 'livePreview', 'formatButton', 'walkthroughStyle'];
+const KNOWN_FEATURES = ['snippets', 'hints', 'livePreview', 'consoleOutput', 'theorySandbox', 'formatButton', 'walkthroughStyle'];
 
 /**
  * Global default — all features ON.
@@ -54,6 +54,8 @@ export const DEFAULT_CONFIG = {
 		snippets: true,
 		hints: true,
 		livePreview: true,
+		consoleOutput: false,
+		theorySandbox: false,
 		formatButton: true,
 		walkthroughStyle: 'spotlight'
 	}

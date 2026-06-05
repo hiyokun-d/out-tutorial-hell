@@ -2,17 +2,19 @@
 	import EditorToolbar from './EditorToolbar.svelte';
 	import CodeEditor from './CodeEditor.svelte';
 	import PreviewPane from './PreviewPane.svelte';
+	import ConsolePane from './ConsolePane.svelte';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 
 	/**
 	 * @typedef {import('./CodeEditor.svelte').EditorApi} EditorApi
-	 * @type {{ code?: string, language?: string, starter?: string, onReset?: () => void, onEditorReady?: (api: EditorApi) => void, features?: any }}
+	 * @type {{ code?: string, language?: string, starter?: string, onReset?: () => void, onEditorReady?: (api: EditorApi) => void, onConsolePaneReady?: (api: any) => void, features?: any }}
 	 */
-	let { code = $bindable(''), language = 'html', starter = '', onReset, onEditorReady, features = DEFAULT_CONFIG.features } = $props();
+	let { code = $bindable(''), language = 'html', starter = '', onReset, onEditorReady, onConsolePaneReady, features = DEFAULT_CONFIG.features } = $props();
 
 	const snippets = features.snippets !== false;
 	const showFormat = features.formatButton !== false;
-	const showPreview = features.livePreview !== false;
+	const showConsole = features.consoleOutput === true;
+	const showPreview = features.livePreview !== false && !showConsole;
 
 	let resetKey = $state(0);
 	let formatting = $state(false);
@@ -92,6 +94,15 @@
 		<div class="preview-section">
 			<PreviewPane {code} {language} />
 		</div>
+	{:else if showConsole}
+		<div class="preview-bar">
+			<span class="label">Console</span>
+			<span class="note">updates as you type</span>
+		</div>
+
+		<div class="console-section">
+			<ConsolePane {code} onReady={onConsolePaneReady} />
+		</div>
 	{/if}
 </div>
 
@@ -138,5 +149,10 @@
 	.preview-section {
 		overflow: hidden;
 		background: #fff;
+	}
+
+	.console-section {
+		overflow: hidden;
+		background: #11111b;
 	}
 </style>

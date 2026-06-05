@@ -163,6 +163,10 @@
 
 		// Capture htmlLanguage for attaching Emmet completions to the HTML language data
 		let htmlLanguage = null;
+		/** Extra extensions added by the language loader (e.g. JS autocomplete) */
+		/** @type {import('@codemirror/state').Extension[]} */
+		const extraExtensions = [];
+
 		const langLoaders = {
 			html: async () => {
 				const m = await import('@codemirror/lang-html');
@@ -170,7 +174,82 @@
 				return m.html({ autoCloseTags: true });
 			},
 			css: () => import('@codemirror/lang-css').then((m) => m.css()),
-			javascript: () => import('@codemirror/lang-javascript').then((m) => m.javascript())
+			javascript: async () => {
+				const { snippetCompletion } = await import('@codemirror/autocomplete');
+				const m = await import('@codemirror/lang-javascript');
+				const { javascriptLanguage, localCompletionSource } = m;
+
+				// ── Info panel builder ────────────────────────────────────────────────
+				/** @param {string} sig @param {string} desc */
+				function makeJsInfoEl(sig, desc) {
+					const el = document.createElement('div');
+					el.className = 'cm-js-info';
+					const code = el.appendChild(document.createElement('code'));
+					code.textContent = sig;
+					const p = el.appendChild(document.createElement('p'));
+					p.textContent = desc;
+					return el;
+				}
+
+				// ── Snippet completions (with tab stops) ──────────────────────────────
+				/** @type {import('@codemirror/autocomplete').Completion[]} */
+				const SNIPPETS = [
+					{ ...snippetCompletion('console.log(${value})', { label: 'console.log', detail: 'print output', type: 'function' }),
+					  info: () => makeJsInfoEl('console.log(value)', 'Prints a value to the console.\nExample: console.log("Hello!")') },
+					{ ...snippetCompletion('console.error(${message})', { label: 'console.error', detail: 'print error', type: 'function' }),
+					  info: () => makeJsInfoEl('console.error(msg)', 'Prints an error in red.') },
+					{ ...snippetCompletion('console.warn(${message})', { label: 'console.warn', detail: 'print warning', type: 'function' }),
+					  info: () => makeJsInfoEl('console.warn(msg)', 'Prints a warning in yellow.') },
+					{ ...snippetCompletion('let ${name} = ${value}', { label: 'let', detail: 'declare variable', type: 'keyword', boost: 10 }),
+					  info: () => makeJsInfoEl('let name = value', 'Creates a variable you can change later.\nExample: let score = 0') },
+					{ ...snippetCompletion('const ${name} = ${value}', { label: 'const', detail: 'declare constant', type: 'keyword', boost: 10 }),
+					  info: () => makeJsInfoEl('const name = value', 'Creates a value that cannot be reassigned.\nExample: const PI = 3.14') },
+					{ ...snippetCompletion('if (${condition}) {\n\t${}\n}', { label: 'if', detail: 'conditional', type: 'keyword' }),
+					  info: () => makeJsInfoEl('if (condition) { }', 'Runs code only when condition is true.\nExample: if (age >= 18) { console.log("adult") }') },
+					{ ...snippetCompletion('if (${condition}) {\n\t${}\n} else {\n\t${}\n}', { label: 'if/else', detail: 'conditional with fallback', type: 'keyword' }),
+					  info: () => makeJsInfoEl('if (cond) { } else { }', 'Runs first block if true, second block if false.') },
+					{ ...snippetCompletion('for (let ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}', { label: 'for', detail: 'count loop', type: 'keyword' }),
+					  info: () => makeJsInfoEl('for (let i = 0; i < n; i++) { }', 'Repeats code a set number of times.\nExample: for (let i = 1; i <= 5; i++) { console.log(i) }') },
+					{ ...snippetCompletion('while (${condition}) {\n\t${}\n}', { label: 'while', detail: 'loop while true', type: 'keyword' }),
+					  info: () => makeJsInfoEl('while (condition) { }', 'Keeps looping as long as condition is true.\nExample: while (count < 10) { count++ }') },
+					{ ...snippetCompletion('function ${name}(${params}) {\n\t${}\n}', { label: 'function', detail: 'define function', type: 'keyword' }),
+					  info: () => makeJsInfoEl('function name(params) { }', 'Creates a reusable block of code.\nExample: function greet(name) { console.log("Hi " + name) }') },
+					{ ...snippetCompletion('(${params}) => ${expression}', { label: 'arrow', detail: 'arrow function', type: 'keyword' }),
+					  info: () => makeJsInfoEl('(params) => expression', 'Short function syntax.\nExample: const double = (n) => n * 2') },
+					{ ...snippetCompletion('return ${value}', { label: 'return', detail: 'exit function with value', type: 'keyword' }),
+					  info: () => makeJsInfoEl('return value', 'Exits the current function and sends back a value.') },
+				];
+
+				// ── Source 1: keyword/snippet completions (word boundary only) ────────
+				/** @param {import('@codemirror/autocomplete').CompletionContext} ctx */
+				function snippetSource(ctx) {
+					const word = ctx.matchBefore(/\w+/);
+					if (!word && !ctx.explicit) return null;
+					return { from: word?.from ?? ctx.pos, options: SNIPPETS, validFor: /^\w*$/ };
+				}
+
+				// ── Source 2: console.* completions (dot-aware) ───────────────────────
+				const CONSOLE_COMPLETIONS = SNIPPETS.filter((s) => s.label.startsWith('console.'));
+				/** @param {import('@codemirror/autocomplete').CompletionContext} ctx */
+				function consoleSource(ctx) {
+					const word = ctx.matchBefore(/console\.\w*/);
+					if (!word) return null;
+					return { from: word.from, options: CONSOLE_COMPLETIONS, validFor: /^console\.\w*$/ };
+				}
+
+				// ── Source 3: local scope names ───────────────────────────────────────
+				// localCompletionSource already handles its own matching
+
+				// Register all three separately so CodeMirror merges them correctly.
+				// NO extra autocompletion() — basicSetup already includes it.
+				extraExtensions.push(
+					javascriptLanguage.data.of({ autocomplete: snippetSource }),
+					javascriptLanguage.data.of({ autocomplete: consoleSource }),
+					javascriptLanguage.data.of({ autocomplete: localCompletionSource })
+				);
+
+				return m.javascript();
+			}
 		};
 		const lang = await (langLoaders[language] ?? langLoaders.html)();
 
@@ -304,6 +383,7 @@
 				lang,
 				oneDark,
 				spotlightField,
+				...extraExtensions,
 				...(readonly ? [EditorView.editable.of(false)] : []),
 				lintGutter(),
 				linter(mergedLintFn, { delay: 450 }),
@@ -332,7 +412,11 @@
 					'.cm-emmet-info pre': { margin: '0', fontSize: '0.75rem', color: '#cdd6f4', fontFamily: "'Fira Code',monospace", whiteSpace: 'pre', lineHeight: '1.5' },
 					// Squiggles
 					'.cm-lintRange-error': { backgroundImage: 'none', borderBottom: '2px solid #f38ba8' },
-					'.cm-lintRange-warning': { backgroundImage: 'none', borderBottom: '2px dotted #fab387' }
+					'.cm-lintRange-warning': { backgroundImage: 'none', borderBottom: '2px dotted #fab387' },
+					// JS beginner info panel
+					'.cm-js-info': { padding: '0.5rem 0.75rem', maxWidth: '280px' },
+					'.cm-js-info code': { display: 'block', fontSize: '0.78rem', color: '#cba6f7', fontFamily: "'Fira Code',monospace", marginBottom: '0.35rem', background: '#181825', padding: '0.25rem 0.4rem', borderRadius: '4px' },
+					'.cm-js-info p': { margin: '0', fontSize: '0.72rem', color: '#a6adc8', lineHeight: '1.5', whiteSpace: 'pre-line' }
 				}),
 				EditorView.updateListener.of((u) => {
 					if (u.docChanged) value = u.state.doc.toString();

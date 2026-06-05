@@ -1,8 +1,10 @@
 {
   "features": {
-    "snippets": true,
+    "snippets": false,
     "hints": true,
-    "livePreview": true,
+    "livePreview": false,
+    "consoleOutput": true,
+    "theorySandbox": true,
     "formatButton": true
   }
 }

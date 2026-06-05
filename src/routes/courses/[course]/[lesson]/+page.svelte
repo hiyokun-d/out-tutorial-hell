@@ -12,5 +12,5 @@
 {:else if lesson.challenge}
 	<ChallengeEditor {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
 {:else}
-	<TheoryLesson {lesson} {course} {prev} {next} courseSlug={course.id} lessonId={lesson.id} />
+	<TheoryLesson {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
 {/if}

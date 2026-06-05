@@ -2,7 +2,7 @@
 	import InstructionsPanel from './InstructionsPanel.svelte';
 	import CodingPanel from './CodingPanel.svelte';
 	import WalkthroughOverlay from './WalkthroughOverlay.svelte';
-	import { runCheck, buildDetail, computeTestDiagnostics } from '$lib/checker.js';
+	import { runCheck, buildDetail, computeTestDiagnostics, runJsCheck, buildJsDetail } from '$lib/checker.js';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 	import { markComplete } from '$lib/utils/progress.js';
 
@@ -25,9 +25,14 @@
 	/** @type {{ setExternalDiags: (d: any[]) => void, setContent: (s: string) => void } | null} */
 	let editorApi = $state.raw(null);
 
+	/** @type {{ runCode: (src: string) => Promise<{type:string,text:string}[]> } | null} */
+	let consolePaneApi = $state.raw(null);
+
 	// ── Push test diagnostics into editor whenever results change ─────────────
 	$effect(() => {
 		if (!editorApi) return;
+		// Console-mode challenges: errors show in ConsolePane, not as editor squiggles
+		if (config.features?.consoleOutput) { editorApi.setExternalDiags([]); return; }
 		editorApi.setExternalDiags(computeTestDiagnostics(testResults, code));
 	});
 
@@ -71,20 +76,26 @@
 	 * @param {string} src
 	 * @param {boolean} [silent]
 	 */
-	function executeTests(src, silent = false) {
-		return new Promise((resolve) => {
-			if (!silent) running = true;
+	async function executeTests(src, silent = false) {
+		if (!silent) running = true;
 
+		if (config.features?.consoleOutput) {
+			if (!consolePaneApi) { if (!silent) running = false; return testResults; }
+			const logs = await consolePaneApi.runCode(src);
+			testResults = challenge.tests.map((test) => {
+				const { passed, actual } = runJsCheck(test, logs, src);
+				return { ...test, passed, actual, detail: passed ? null : buildJsDetail(test, actual, logs) };
+			});
+		} else {
 			const doc = new DOMParser().parseFromString(src, 'text/html');
-
 			testResults = challenge.tests.map((test) => {
 				const { passed, actual } = runCheck(test, doc, src);
 				return { ...test, passed, actual, detail: passed ? null : buildDetail(test, actual, doc, src) };
 			});
+		}
 
-			if (!silent) running = false;
-			resolve(testResults);
-		});
+		if (!silent) running = false;
+		return testResults;
 	}
 
 	function runTests() {
@@ -137,6 +148,7 @@
 		starter={challenge.starter}
 		onReset={handleReset}
 		onEditorReady={(api) => (editorApi = api)}
+		onConsolePaneReady={(api) => (consolePaneApi = api)}
 		features={config.features}
 	/>
 </div>
