@@ -264,7 +264,34 @@
 			python:     () => import('@codemirror/lang-python').then((m) => m.python()),
 			rust:       () => import('@codemirror/lang-rust').then((m) => m.rust()),
 			cpp:        () => import('@codemirror/lang-cpp').then((m) => m.cpp()),
-			c:          () => import('@codemirror/lang-cpp').then((m) => m.cpp()),
+			c: async () => {
+				const { cpp, cppLanguage } = await import('@codemirror/lang-cpp');
+				const { snippetCompletion } = await import('@codemirror/autocomplete');
+				const C_SNIPPETS = [
+					snippetCompletion('#include <stdio.h>',                                    { label: '#include <stdio.h>', type: 'keyword' }),
+					snippetCompletion('#include <stdlib.h>',                                   { label: '#include <stdlib.h>', type: 'keyword' }),
+					snippetCompletion('#include <string.h>',                                   { label: '#include <string.h>', type: 'keyword' }),
+					snippetCompletion('int main() {\n\t${}\n\treturn 0;\n}',                   { label: 'main', detail: 'entry point', type: 'function' }),
+					snippetCompletion('printf("${text}\\n")',                                   { label: 'printf', detail: 'print output', type: 'function' }),
+					snippetCompletion('scanf("%d", &${var})',                                  { label: 'scanf', detail: 'read input', type: 'function' }),
+					snippetCompletion('int ${name} = ${0}',                                   { label: 'int', detail: 'integer', type: 'keyword' }),
+					snippetCompletion('float ${name} = ${0.0}',                               { label: 'float', detail: 'decimal', type: 'keyword' }),
+					snippetCompletion('char ${name} = \'${c}\'',                              { label: 'char', detail: 'character', type: 'keyword' }),
+					snippetCompletion('if (${condition}) {\n\t${}\n}',                        { label: 'if', type: 'keyword' }),
+					snippetCompletion('if (${condition}) {\n\t${}\n} else {\n\t${}\n}',       { label: 'if/else', type: 'keyword' }),
+					snippetCompletion('for (int ${i} = 0; ${i} < ${n}; ${i}++) {\n\t${}\n}', { label: 'for', type: 'keyword' }),
+					snippetCompletion('while (${condition}) {\n\t${}\n}',                     { label: 'while', type: 'keyword' }),
+					snippetCompletion('return ${value}',                                       { label: 'return', type: 'keyword' }),
+					snippetCompletion('struct ${Name} {\n\t${}\n}',                           { label: 'struct', type: 'keyword' }),
+				];
+				function cSource(ctx) {
+					const word = ctx.matchBefore(/\w+/);
+					if (!word && !ctx.explicit) return null;
+					return { from: word?.from ?? ctx.pos, options: C_SNIPPETS, validFor: /^\w*$/ };
+				}
+				extraExtensions.push(cppLanguage.data.of({ autocomplete: cSource }));
+				return cpp();
+			},
 			java:       () => import('@codemirror/lang-java').then((m) => m.java()),
 			asm:        () => legacyMode('gas', 'gas'),
 			nasm:       () => legacyMode('gas', 'gas'),

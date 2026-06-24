@@ -1,0 +1,29 @@
+{
+  "instructions": "Use a `for` loop to calculate the sum of numbers from **1 to 10** (inclusive).\n\nStart with `total = 0`, then add each number inside the loop. Print `total` at the end.\n\nExpected output: `55`",
+  "starter": "total = 0\n\n# Loop from 1 to 10 and add each number to total\n\nprint(total)\n",
+  "hints": [
+    "Use range(1, 11) to get numbers 1 through 10.",
+    "Inside the loop, write: total = total + i",
+    "for i in range(1, 11):\n    total = total + i"
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "Prints 55",
+      "check": "stdout-contains",
+      "value": "55"
+    },
+    {
+      "id": 2,
+      "description": "Uses a for loop",
+      "check": "code-contains",
+      "value": "for"
+    },
+    {
+      "id": 3,
+      "description": "Uses range()",
+      "check": "code-contains",
+      "value": "range"
+    }
+  ]
+}

@@ -12,6 +12,9 @@
 	} from '$lib/utils/tracer.js';
 	import TracerStep from './TracerStep.svelte';
 	import TracerVars from './TracerVars.svelte';
+	import PistonPane from './PistonPane.svelte';
+	import { isPistonLanguage, pistonRun, langLabel } from '$lib/utils/piston.js';
+	import { buildPythonTracerCode, parsePythonTrace } from '$lib/utils/python-tracer.js';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
 	import { browser } from '$app/environment';
 
@@ -19,11 +22,32 @@
 	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
 
 	const showSandbox = config.features?.theorySandbox === true;
+	const sandboxLang = config.language ?? 'javascript';
+	const sandboxIsPiston = isPistonLanguage(sandboxLang);
+	const sandboxIsPythonTraceable = sandboxLang === 'python' || sandboxLang === 'python3';
 
-	let sandboxCode = $state('// Try it out!\n');
+	const SANDBOX_STARTERS = /** @type {Record<string,string>} */ ({
+		c:       '#include <stdio.h>\n\nint main() {\n    // Write your C code here\n    \n    return 0;\n}\n',
+		cpp:     '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ code here\n    \n    return 0;\n}\n',
+		'c++':   '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ code here\n    \n    return 0;\n}\n',
+		python:  'x = 5\ny = 3\n\ntotal = x + y\nprint("Total:", total)\n\nfor i in range(1, 4):\n    total += i\n    print(f"Step {i}: total = {total}")\n',
+		python3: 'x = 5\ny = 3\n\ntotal = x + y\nprint("Total:", total)\n\nfor i in range(1, 4):\n    total += i\n    print(f"Step {i}: total = {total}")\n',
+		rust:    'fn main() {\n    // Write your Rust code here\n}\n',
+		go:      'package main\n\nimport "fmt"\n\nfunc main() {\n    // Write your Go code here\n    fmt.Println("Hello!")\n}\n',
+		java:    'public class Main {\n    public static void main(String[] args) {\n        // Write your Java code here\n    }\n}\n',
+	});
+
+	let sandboxCode = $state(SANDBOX_STARTERS[sandboxLang] ?? '// Try it out!\n');
 	let sandboxOpen = $state(false);
 	let showNotes = $state(false);
 	let completed = $state(false);
+
+	// ── Wandbox sandbox state (non-JS courses) ────────────────────────────────
+	let sandboxPistonStdout = $state('');
+	let sandboxPistonStderr = $state('');
+	let sandboxPistonExitCode = $state(0);
+	let sandboxPistonRunning = $state(false);
+	let sandboxPistonError = $state(/** @type {string|null} */ (null));
 
 	// ── Tracer state ──────────────────────────────────────────────────────────
 	let traceMode = $state(false);
@@ -198,6 +222,59 @@
 			completed = true;
 		}
 	}
+
+	async function runSandbox() {
+		if (sandboxPistonRunning) return;
+		sandboxPistonRunning = true;
+		sandboxPistonError = null;
+		try {
+			const result = await pistonRun(sandboxCode, sandboxLang);
+			sandboxPistonStdout = result.stdout;
+			sandboxPistonStderr = result.stderr;
+			sandboxPistonExitCode = result.exitCode;
+		} catch (err) {
+			sandboxPistonError = err instanceof Error ? err.message : String(err);
+		} finally {
+			sandboxPistonRunning = false;
+		}
+	}
+
+	async function runPythonTracer() {
+		if (tracing) return;
+		tracing = true;
+		exitTrace();
+
+		try {
+			const instrumented = buildPythonTracerCode(sandboxCode);
+			const result = await pistonRun(instrumented, 'python');
+			const rawEvents = parsePythonTrace(result.stderr);
+
+			if (rawEvents.length === 0) {
+				const errText = result.stderr.replace('__TRACE__', '').trim() || result.stdout.trim() || 'No trace events — check for syntax errors.';
+				traceEvents = [{ type: 'error', line: 0, text: errText }];
+			} else {
+				const srcLines = sandboxCode.split('\n');
+				/** @type {TraceEvent[]} */
+				const enriched = rawEvents.map((/** @type {TraceEvent} */ e, /** @type {number} */ idx) => {
+					if (e.type !== 'step') return e;
+					const lineText = srcLines[(e.line ?? 1) - 1] ?? '';
+					const stepType = classifyStep(lineText);
+					const pv = rawEvents.slice(0, idx).filter((/** @type {TraceEvent} */ x) => x.type === 'step').at(-1)?.vars ?? {};
+					return { ...e, stepType, explanation: explainStep(lineText, pv, e.vars ?? {}) };
+				});
+				traceEvents = enriched;
+			}
+
+			traceIndex = 0;
+			traceMode = true;
+		} catch (err) {
+			traceEvents = [{ type: 'error', line: 0, text: err instanceof Error ? err.message : String(err) }];
+			traceIndex = 0;
+			traceMode = true;
+		} finally {
+			tracing = false;
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -246,10 +323,18 @@
 			<!-- Header bar -->
 			<div class="panel-bar">
 				<span class="panel-label">Sandbox</span>
-				{#if !traceMode}
+				{#if sandboxIsPiston && !sandboxIsPythonTraceable}
+					<span class="lang-badge">{langLabel(sandboxLang)}</span>
+					<button class="trace-btn" onclick={runSandbox} disabled={sandboxPistonRunning}>
+						{sandboxPistonRunning ? 'Running…' : '▶ Run'}
+					</button>
+				{:else if !traceMode}
+					{#if sandboxIsPythonTraceable}
+						<span class="lang-badge">{langLabel(sandboxLang)}</span>
+					{/if}
 					<button
 						class="trace-btn"
-						onclick={runTracer}
+						onclick={sandboxIsPythonTraceable ? runPythonTracer : runTracer}
 						disabled={tracing}
 						title="Step through your code line by line"
 					>
@@ -282,10 +367,10 @@
 			>
 				<CodeEditor
 					bind:value={sandboxCode}
-					language="javascript"
+					language={sandboxLang}
 					snippets={true}
 					readonly={traceMode}
-					{spotlight}
+					spotlight={sandboxIsPiston && !sandboxIsPythonTraceable ? null : spotlight}
 				/>
 			</div>
 
@@ -347,6 +432,24 @@
 						<button class="step-btn" disabled={traceIndex >= traceEvents.length - 1} onclick={() => traceIndex++}>
 							Next →
 						</button>
+					</div>
+				</div>
+			{:else if sandboxIsPiston && !sandboxIsPythonTraceable}
+				<div class="sandbox-lower piston-lower">
+					<PistonPane
+						language={sandboxLang}
+						stdout={sandboxPistonStdout}
+						stderr={sandboxPistonStderr}
+						exitCode={sandboxPistonExitCode}
+						running={sandboxPistonRunning}
+						error={sandboxPistonError}
+					/>
+				</div>
+			{:else if sandboxIsPythonTraceable}
+				<div class="sandbox-lower">
+					<div class="trace-prompt">
+						<span class="trace-prompt-icon">▶</span>
+						Press <strong>Step Through</strong> to trace your code line by line
 					</div>
 				</div>
 			{:else}
@@ -482,6 +585,8 @@
 
 	.panel-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; color: #8888a8; }
 	.panel-hint  { font-size: 0.62rem; color: #4e4e6a; flex: 1; }
+	.lang-badge  { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; color: #6366f1; text-transform: uppercase; flex: 1; }
+	.piston-lower { flex: 1; overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
 
 	.trace-btn {
 		font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.6rem;
@@ -635,6 +740,22 @@
 	.step-counter { font-size: 0.68rem; color: #6c7086; font-family: 'Fira Code', monospace; }
 	.step-sep { color: #4e4e6a; margin: 0 0.1rem; }
 	.truncated-note { font-size: 0.58rem; color: #f9e2af; }
+
+	/* ── Python trace prompt ────────────────────────────────────────────────── */
+
+	.trace-prompt {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		font-size: 0.8rem;
+		color: #4e4e6a;
+		padding: 1.5rem;
+		text-align: center;
+	}
+	.trace-prompt strong { color: #8888a8; font-weight: 600; }
+	.trace-prompt-icon { font-size: 1rem; color: var(--accent); opacity: 0.6; }
 
 	/* ── Notes panel ────────────────────────────────────────────────────────── */
 
