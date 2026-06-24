@@ -1,0 +1,8 @@
+{
+  "language": "c",
+  "features": {
+    "livePreview": false,
+    "formatButton": false,
+    "snippets": false
+  }
+}

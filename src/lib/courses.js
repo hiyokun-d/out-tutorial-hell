@@ -55,7 +55,7 @@ export const DEFAULT_CONFIG = {
 		hints: true,
 		livePreview: true,
 		consoleOutput: false,
-		theorySandbox: false,
+		theorySandbox: true,
 		formatButton: true,
 		walkthroughStyle: 'spotlight'
 	}
@@ -95,7 +95,7 @@ export function getCourseConfig(courseId) {
 		}
 	}
 
-	return { features };
+	return { features, language: raw.language ?? null };
 }
 
 // ── Courses ───────────────────────────────────────────────────────────────────

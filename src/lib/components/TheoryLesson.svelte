@@ -10,6 +10,8 @@
 		instrumentCode, buildTracerSrcdoc,
 		classifyStep, explainStep, STEP_COLORS, TRACE_STEP_LIMIT
 	} from '$lib/utils/tracer.js';
+	import TracerStep from './TracerStep.svelte';
+	import TracerVars from './TracerVars.svelte';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
 	import { browser } from '$app/environment';
 
@@ -96,20 +98,6 @@
 			? { fromLine: currentLine, toLine: currentLine, style: 'pulse' }
 			: null
 	);
-
-	// ── Helpers ───────────────────────────────────────────────────────────────
-
-	/** @param {unknown} v @returns {{ display: string, type: string }} */
-	function describeValue(v) {
-		if (v === undefined) return { display: 'undefined', type: 'nil' };
-		if (v === null)      return { display: 'null',      type: 'nil' };
-		if (Array.isArray(v)) return { display: JSON.stringify(v), type: 'array' };
-		if (typeof v === 'object') return { display: JSON.stringify(v), type: 'object' };
-		if (typeof v === 'string')  return { display: `"${v}"`,  type: 'string' };
-		if (typeof v === 'boolean') return { display: String(v), type: 'boolean' };
-		if (typeof v === 'number')  return { display: String(v), type: 'number' };
-		return { display: String(v), type: 'other' };
-	}
 
 	// ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -306,52 +294,23 @@
 				<div class="sandbox-lower">
 
 					<!-- Explanation card -->
-					<div class="explanation-card" style="--step-color: {currentStepColor}; border-left-color: {currentStepColor}">
-						<div class="explanation-top">
-							<span class="step-type-badge" style="background:{currentStepColor}22; color:{currentStepColor}">
-								{currentStepType}
-							</span>
-							{#if currentLineIteration() > 1}
-								<span class="iteration-badge">iteration {currentLineIteration()}</span>
-							{/if}
-							<span class="step-pos">line {currentLine}</span>
-						</div>
-						<div class="explanation-main">
-							<code class="step-source-line">{currentSourceLine}</code>
-							{#if currentExplanation}
-								<span class="explanation-arrow">→</span>
-								<span class="explanation-text">{currentExplanation}</span>
-							{/if}
-						</div>
-						{#if nextSourceLine}
-							<div class="next-preview">
-								<span class="next-label">next</span>
-								<code class="next-source">{nextSourceLine}</code>
-							</div>
-						{/if}
-					</div>
+					<TracerStep
+						{traceIndex}
+						stepType={currentStepType}
+						stepColor={currentStepColor}
+						sourceLine={currentSourceLine}
+						explanation={currentExplanation}
+						nextSourceLine={nextSourceLine}
+						lineIteration={currentLineIteration()}
+						currentLine={currentLine}
+					/>
 
 					<!-- Variable panel -->
 					<div class="panel-bar vars-bar">
 						<span class="panel-label">Variables</span>
 						<span class="panel-hint">state after this step</span>
 					</div>
-					<div class="var-panel">
-						{#each Object.entries(currentVars) as [name, value]}
-							{@const desc = describeValue(value)}
-							<div class="var-row" class:changed={changedVarNames.has(name)}>
-								<span class="var-name">{name}</span>
-								<span class="var-equals">=</span>
-								<span class="var-value type-{desc.type}">{desc.display}</span>
-								<span class="var-type-badge type-badge-{desc.type}">{desc.type}</span>
-								{#if changedVarNames.has(name) && prevVars[name] !== undefined}
-									<span class="var-prev">← was {describeValue(prevVars[name]).display}</span>
-								{/if}
-							</div>
-						{:else}
-							<div class="var-empty">No variables yet</div>
-						{/each}
-					</div>
+					<TracerVars vars={currentVars} prevVars={prevVars} changedNames={changedVarNames} />
 
 					<!-- Console output so far -->
 					<div class="panel-bar console-bar">
@@ -612,166 +571,6 @@
 
 	.console-wrap { flex: 1; overflow: hidden; min-height: 0; }
 
-	/* ── Explanation card ───────────────────────────────────────────────────── */
-
-	.explanation-card {
-		background: #13131c;
-		border-left: 3px solid var(--accent);
-		padding: 0.5rem 0.75rem;
-		flex-shrink: 0;
-		animation: explainSlide 0.18s ease;
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-	}
-
-	@keyframes explainSlide {
-		from { opacity: 0; transform: translateY(-3px); }
-		to   { opacity: 1; transform: translateY(0); }
-	}
-
-	.explanation-top {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-	}
-
-	.step-type-badge {
-		font-size: 0.58rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		padding: 0.1rem 0.45rem;
-		border-radius: 999px;
-		text-transform: uppercase;
-		white-space: nowrap;
-		flex-shrink: 0;
-	}
-
-	.iteration-badge {
-		font-size: 0.6rem;
-		color: #fab387;
-		font-family: 'Fira Code', monospace;
-		background: #fab38718;
-		padding: 0.05rem 0.4rem;
-		border-radius: 999px;
-	}
-
-	.step-pos {
-		font-size: 0.6rem;
-		color: #4e4e6a;
-		margin-left: auto;
-		font-family: 'Fira Code', monospace;
-	}
-
-	.explanation-main {
-		display: flex;
-		align-items: baseline;
-		gap: 0.4rem;
-		flex-wrap: wrap;
-	}
-
-	.step-source-line {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.75rem;
-		color: #cdd6f4;
-		background: #1e1e2e;
-		padding: 0.1rem 0.4rem;
-		border-radius: 4px;
-		white-space: nowrap;
-		max-width: 200px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.explanation-arrow { color: #6c7086; font-size: 0.7rem; }
-
-	.explanation-text {
-		font-size: 0.72rem;
-		color: #a6adc8;
-		flex: 1;
-	}
-
-	.next-preview {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		padding-top: 0.15rem;
-		border-top: 1px solid #1e1e2e;
-	}
-
-	.next-label {
-		font-size: 0.58rem;
-		color: #4e4e6a;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		flex-shrink: 0;
-	}
-
-	.next-source {
-		font-family: 'Fira Code', monospace;
-		font-size: 0.68rem;
-		color: #6c7086;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	/* ── Variable panel ─────────────────────────────────────────────────────── */
-
-	.var-panel {
-		padding: 0.3rem 0.75rem;
-		overflow-y: auto;
-		max-height: 100px;
-		background: #13131c;
-		flex-shrink: 0;
-	}
-
-	.var-row {
-		display: flex;
-		align-items: baseline;
-		gap: 0.3rem;
-		padding: 0.1rem 0.2rem;
-		border-radius: 4px;
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.76rem;
-		line-height: 1.5;
-	}
-
-	.var-row.changed { animation: varFlash 0.45s ease; }
-
-	@keyframes varFlash {
-		0%   { background: rgba(137, 180, 250, 0.2); }
-		100% { background: transparent; }
-	}
-
-	.var-name   { color: #cba6f7; font-weight: 600; flex-shrink: 0; }
-	.var-equals { color: #6c7086; flex-shrink: 0; }
-
-	.var-value { word-break: break-all; }
-	.var-value.type-number  { color: #fab387; }
-	.var-value.type-string  { color: #a6e3a1; }
-	.var-value.type-boolean { color: #89dceb; }
-	.var-value.type-array   { color: #cba6f7; }
-	.var-value.type-object  { color: #89b4fa; }
-	.var-value.type-nil     { color: #6c7086; font-style: italic; }
-
-	.var-type-badge {
-		font-size: 0.58rem;
-		padding: 0.02rem 0.3rem;
-		border-radius: 3px;
-		opacity: 0.7;
-		flex-shrink: 0;
-	}
-	.var-type-badge.type-badge-number  { background: #fab38720; color: #fab387; }
-	.var-type-badge.type-badge-string  { background: #a6e3a120; color: #a6e3a1; }
-	.var-type-badge.type-badge-boolean { background: #89dceb20; color: #89dceb; }
-	.var-type-badge.type-badge-array   { background: #cba6f720; color: #cba6f7; }
-	.var-type-badge.type-badge-object  { background: #89b4fa20; color: #89b4fa; }
-	.var-type-badge.type-badge-nil     { background: #6c708620; color: #6c7086; }
-
-	.var-prev { color: #6c7086; font-size: 0.65rem; font-style: italic; }
-	.var-empty { font-size: 0.72rem; color: #4e4e6a; font-style: italic; padding: 0.25rem 0; }
-
 	/* ── Trace console ──────────────────────────────────────────────────────── */
 
 	.trace-console {
@@ -793,8 +592,21 @@
 
 	/* ── Progress bar ───────────────────────────────────────────────────────── */
 
-	.step-progress-wrap { height: 3px; background: #11111b; flex-shrink: 0; overflow: hidden; }
-	.step-progress-fill { height: 100%; transition: width 0.2s ease, background 0.3s ease; border-radius: 0 2px 2px 0; }
+	.step-progress-wrap { height: 3px; background: #11111b; flex-shrink: 0; overflow: hidden; position: relative; }
+	.step-progress-fill {
+		height: 100%;
+		transition: width 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.3s ease;
+		border-radius: 0 2px 2px 0;
+		position: relative;
+	}
+	.step-progress-fill::after {
+		content: '';
+		position: absolute;
+		right: 0; top: 0; bottom: 0;
+		width: 20px;
+		background: linear-gradient(to right, transparent, rgba(255,255,255,0.3));
+		border-radius: 0 2px 2px 0;
+	}
 
 	/* ── Step controls ──────────────────────────────────────────────────────── */
 

@@ -1,0 +1,29 @@
+{
+  "instructions": "Write a complete C program that prints exactly: **Hello, C!**\n\nYou need:\n1. `#include <stdio.h>` at the top\n2. A `main()` function\n3. `printf(\"Hello, C!\\n\")` inside it\n4. `return 0;` at the end",
+  "starter": "#include <stdio.h>\n\nint main() {\n    // Write your printf here\n\n    return 0;\n}\n",
+  "hints": [
+    "printf() prints to the terminal. The text goes in quotes inside the parentheses.",
+    "The exact text must be: Hello, C! — capital H, comma, space, capital C, exclamation mark.",
+    "Add \\n at the end of your string so there's a newline: printf(\"Hello, C!\\n\");"
+  ],
+  "tests": [
+    {
+      "id": 1,
+      "description": "Prints \"Hello, C!\"",
+      "check": "stdout-contains",
+      "value": "Hello, C!"
+    },
+    {
+      "id": 2,
+      "description": "Uses printf",
+      "check": "code-contains",
+      "value": "printf"
+    },
+    {
+      "id": 3,
+      "description": "Includes stdio.h",
+      "check": "code-contains",
+      "value": "stdio.h"
+    }
+  ]
+}

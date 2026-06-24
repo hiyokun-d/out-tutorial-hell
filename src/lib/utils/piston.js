@@ -1,6 +1,10 @@
-const PISTON_API = 'https://emkc.org/api/v2/piston/execute';
+// Code runner via Wandbox API — https://wandbox.org/api/compile.json
+// Wandbox is a free public compiler service with no API key required.
+// Full compiler list: https://wandbox.org/api/list.json
 
-// Browsers that don't need Piston — handled in-browser
+const WANDBOX_API = 'https://wandbox.org/api/compile.json';
+
+// Languages handled locally in the browser — never sent to Wandbox
 export const LOCAL_LANGUAGES = new Set(['html', 'css', 'javascript']);
 
 /** @param {string} lang */
@@ -8,148 +12,124 @@ export function isPistonLanguage(lang) {
 	return !LOCAL_LANGUAGES.has(lang?.toLowerCase?.() ?? '');
 }
 
-// Map course config language name → Piston language name
-// Piston supports everything here: https://emkc.org/api/v2/piston/runtimes
-const LANG_MAP = {
+/**
+ * Wandbox compiler names.
+ * Using -head compilers where available for latest stable version.
+ * If a name doesn't exist, Wandbox returns a 400 — update it from /api/list.json.
+ */
+const COMPILER_MAP = /** @type {Record<string,string>} */ ({
 	// Systems
-	c: 'c',
-	cpp: 'c++',
-	'c++': 'c++',
-	rust: 'rust',
-	zig: 'zig',
-	asm: 'nasm',
-	nasm: 'nasm',
-	gas: 'nasm',
+	c:          'gcc-head',
+	cpp:        'gcc-head',
+	'c++':      'gcc-head',
+	rust:       'rust-head',
+	nim:        'nim-head',
+	crystal:    'crystal-head',
+	d:          'dmd-head',
 
 	// JVM
-	java: 'java',
-	kotlin: 'kotlin',
-	scala: 'scala',
-	groovy: 'groovy',
-	clojure: 'clojure',
+	java:       'openjdk-head',
+	kotlin:     'kotlin-head',
+	scala:      'scala-head',
 
 	// Scripting
-	python: 'python',
-	python3: 'python',
-	ruby: 'ruby',
-	perl: 'perl',
-	lua: 'lua',
-	php: 'php',
-	bash: 'bash',
-	sh: 'bash',
-	powershell: 'powershell',
-	pwsh: 'powershell',
-	tcl: 'tcl',
+	python:     'cpython-head',
+	python3:    'cpython-head',
+	ruby:       'ruby-head',
+	perl:       'perl-head',
+	lua:        'lua-head',
+	php:        'php-head',
+	bash:       'bash',
+	sh:         'bash',
+	coffeescript: 'coffeescript-head',
 
 	// Functional
-	haskell: 'haskell',
-	erlang: 'erlang',
-	elixir: 'elixir',
-	ocaml: 'ocaml',
-	fsharp: 'fsharp',
-	'f#': 'fsharp',
-	scheme: 'scheme',
-	racket: 'racket',
-	lisp: 'common lisp',
-	commonlisp: 'common lisp',
-	'common lisp': 'common lisp',
+	haskell:    'ghc-head',
+	erlang:     'erlang-head',
+	ocaml:      'ocaml-head',
 
 	// Modern
-	go: 'go',
-	dart: 'dart',
-	swift: 'swift',
-	typescript: 'typescript',
-	ts: 'typescript',
-	nim: 'nim',
-	crystal: 'crystal',
-	vlang: 'vlang',
-	v: 'vlang',
-	d: 'd',
+	go:         'go-head',
+	swift:      'swift-head',
+	typescript: 'typescript-head',
 
-	// Esoteric
-	brainfuck: 'brainfuck',
-	bf: 'brainfuck',
-	lolcode: 'lolcode',
-	whitespace: 'whitespace',
-	cow: 'cow',
-	befunge93: 'befunge93',
-	befunge: 'befunge93',
-	malbolge: 'malbolge',
-	emojicode: 'emojicode',
-	jelly: 'jelly',
-
-	// Data / scripting
-	r: 'r',
-	julia: 'julia',
-	octave: 'octave',
-	matlab: 'octave',
+	// Data
+	r:          'r-head',
 
 	// Other
-	csharp: 'c#',
-	'c#': 'c#',
-	vb: 'basic',
-	basic: 'basic',
-	cobol: 'cobol',
-	fortran: 'fortran',
-	pascal: 'pascal',
-	prolog: 'prolog',
-	coffeescript: 'coffeescript',
-	sqlite3: 'sqlite3',
-	sql: 'sqlite3',
-};
+	pascal:     'fpc-head',
+});
 
 /**
+ * Extra compiler flags passed in `options` when the default isn't right.
+ * e.g. gcc-head is g++ by default; -x c forces C compilation mode.
+ */
+const LANG_OPTIONS = /** @type {Record<string,string>} */ ({
+	c: '-x c',
+});
+
+/**
+ * Run code via Wandbox and return normalised output.
  * @param {string} code
- * @param {string} language  course config language key
+ * @param {string} language  course config language key (e.g. 'c', 'python')
  * @param {string} [stdin]
  * @returns {Promise<{ stdout: string, stderr: string, exitCode: number, signal: string | null }>}
  */
 export async function pistonRun(code, language, stdin = '') {
-	const pistonLang = /** @type {Record<string,string>} */ (LANG_MAP)[language?.toLowerCase()] ?? language;
+	const lang = (language ?? '').toLowerCase();
+	const compiler = COMPILER_MAP[lang];
 
-	const res = await fetch(PISTON_API, {
+	if (!compiler) {
+		const supported = Object.keys(COMPILER_MAP).sort().join(', ');
+		throw new Error(
+			`Language '${language}' is not supported yet.\nSupported languages: ${supported}`
+		);
+	}
+
+	const res = await fetch(WANDBOX_API, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-			language: pistonLang,
-			version: '*',
-			files: [{ content: code }],
+			compiler,
+			code,
 			stdin,
-			args: [],
+			options: LANG_OPTIONS[lang] ?? '',
 		}),
 	});
 
 	if (!res.ok) {
 		const msg = await res.text().catch(() => res.statusText);
-		throw new Error(`Piston API error ${res.status}: ${msg}`);
+		throw new Error(`Code runner error ${res.status}: ${msg}`);
 	}
 
 	const data = await res.json();
-	if (data.message) throw new Error(`Piston: ${data.message}`);
+	if (data.error) throw new Error(`Wandbox: ${data.error}`);
+
+	// Merge compile-time stderr + runtime stderr
+	const compileErr = (data.compiler_error ?? '').trim();
+	const runtimeErr = (data.program_error ?? '').trim();
+	const stderr = [compileErr, runtimeErr].filter(Boolean).join('\n').trim();
 
 	return {
-		stdout: data.run?.stdout ?? '',
-		stderr: data.run?.stderr ?? '',
-		exitCode: data.run?.code ?? 0,
-		signal: data.run?.signal ?? null,
+		stdout: data.program_output ?? '',
+		stderr,
+		exitCode: parseInt(data.status ?? '0', 10),
+		signal: data.signal ?? null,
 	};
 }
 
 /** @param {string} [language] Display name for a language key */
 export function langLabel(language) {
 	const labels = {
-		c: 'C', cpp: 'C++', 'c++': 'C++', rust: 'Rust', zig: 'Zig',
-		asm: 'Assembly', nasm: 'NASM', java: 'Java', kotlin: 'Kotlin',
-		scala: 'Scala', python: 'Python', python3: 'Python', ruby: 'Ruby',
+		c: 'C', cpp: 'C++', 'c++': 'C++', rust: 'Rust',
+		java: 'Java', kotlin: 'Kotlin', scala: 'Scala',
+		python: 'Python', python3: 'Python', ruby: 'Ruby',
 		perl: 'Perl', lua: 'Lua', php: 'PHP', bash: 'Bash', sh: 'Bash',
-		go: 'Go', dart: 'Dart', swift: 'Swift', typescript: 'TypeScript',
-		ts: 'TypeScript', nim: 'Nim', crystal: 'Crystal', haskell: 'Haskell',
-		erlang: 'Erlang', elixir: 'Elixir', ocaml: 'OCaml', brainfuck: 'Brainfuck',
-		bf: 'Brainfuck', r: 'R', julia: 'Julia', csharp: 'C#', 'c#': 'C#',
-		coffeescript: 'CoffeeScript', javascript: 'JavaScript', html: 'HTML',
-		css: 'CSS', sql: 'SQL', prolog: 'Prolog', lolcode: 'LOLCODE',
-		whitespace: 'Whitespace', cow: 'COW', malbolge: 'Malbolge',
-		emojicode: 'Emojicode',
+		go: 'Go', swift: 'Swift', typescript: 'TypeScript',
+		nim: 'Nim', crystal: 'Crystal', haskell: 'Haskell',
+		erlang: 'Erlang', ocaml: 'OCaml', r: 'R', pascal: 'Pascal',
+		d: 'D', coffeescript: 'CoffeeScript',
+		javascript: 'JavaScript', html: 'HTML', css: 'CSS',
 	};
 	return /** @type {Record<string,string>} */ (labels)[(language ?? '').toLowerCase()] ?? language?.toUpperCase() ?? 'Code';
 }
