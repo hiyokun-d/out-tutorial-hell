@@ -3,18 +3,40 @@
 	import CodeEditor from './CodeEditor.svelte';
 	import PreviewPane from './PreviewPane.svelte';
 	import ConsolePane from './ConsolePane.svelte';
+	import PistonPane from './PistonPane.svelte';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
+	import { isPistonLanguage } from '$lib/utils/piston.js';
 
 	/**
 	 * @typedef {import('./CodeEditor.svelte').EditorApi} EditorApi
-	 * @type {{ code?: string, language?: string, starter?: string, onReset?: () => void, onEditorReady?: (api: EditorApi) => void, onConsolePaneReady?: (api: any) => void, features?: any }}
+	 * @type {{
+	 *   code?: string, language?: string, starter?: string,
+	 *   onReset?: () => void, onEditorReady?: (api: EditorApi) => void,
+	 *   onConsolePaneReady?: (api: any) => void, features?: any,
+	 *   pistonStdout?: string, pistonStderr?: string,
+	 *   pistonExitCode?: number, pistonRunning?: boolean, pistonError?: string | null
+	 * }}
 	 */
-	let { code = $bindable(''), language = 'html', starter = '', onReset, onEditorReady, onConsolePaneReady, features = DEFAULT_CONFIG.features } = $props();
+	let {
+		code = $bindable(''),
+		language = 'html',
+		starter = '',
+		onReset,
+		onEditorReady,
+		onConsolePaneReady,
+		features = DEFAULT_CONFIG.features,
+		pistonStdout = '',
+		pistonStderr = '',
+		pistonExitCode = 0,
+		pistonRunning = false,
+		pistonError = null,
+	} = $props();
 
-	const snippets = features.snippets !== false;
-	const showFormat = features.formatButton !== false;
-	const showConsole = features.consoleOutput === true;
-	const showPreview = features.livePreview !== false && !showConsole;
+	const isPiston = $derived(isPistonLanguage(language));
+	const snippets = $derived(features.snippets !== false && !isPiston);
+	const showFormat = $derived(features.formatButton !== false && !isPiston);
+	const showConsole = $derived(!isPiston && features.consoleOutput === true);
+	const showPreview = $derived(!isPiston && features.livePreview !== false && !showConsole);
 
 	let resetKey = $state(0);
 	let formatting = $state(false);
@@ -22,10 +44,9 @@
 	/** @type {EditorApi | null} */
 	let editorApi = null;
 
-	/** Called by CodeEditor once its view is ready */
 	function handleReady(api) {
 		editorApi = api;
-		onEditorReady?.(api); // also notify parent (ChallengeEditor)
+		onEditorReady?.(api);
 	}
 
 	function handleReset() {
@@ -76,7 +97,11 @@
 	}
 </script>
 
-<div class="panel" class:no-preview={!showPreview}>
+<div
+	class="panel"
+	class:no-right={!showPreview && !showConsole && !isPiston}
+	class:with-piston={isPiston}
+>
 	<EditorToolbar {language} onReset={handleReset} onFormat={handleFormat} {formatting} {showFormat} />
 
 	<div class="editor-section">
@@ -85,12 +110,22 @@
 		{/key}
 	</div>
 
-	{#if showPreview}
+	{#if isPiston}
+		<div class="right-section">
+			<PistonPane
+				{language}
+				stdout={pistonStdout}
+				stderr={pistonStderr}
+				exitCode={pistonExitCode}
+				running={pistonRunning}
+				error={pistonError}
+			/>
+		</div>
+	{:else if showPreview}
 		<div class="preview-bar">
 			<span class="label">Preview</span>
 			<span class="note">updates as you type</span>
 		</div>
-
 		<div class="preview-section">
 			<PreviewPane {code} {language} />
 		</div>
@@ -99,7 +134,6 @@
 			<span class="label">Console</span>
 			<span class="note">updates as you type</span>
 		</div>
-
 		<div class="console-section">
 			<ConsolePane {code} onReady={onConsolePaneReady} />
 		</div>
@@ -115,8 +149,29 @@
 		background: #1e1e2e;
 	}
 
-	.panel.no-preview {
+	.panel.no-right {
 		grid-template-rows: auto 1fr;
+	}
+
+	.panel.with-piston {
+		grid-template-rows: auto 1fr;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.panel.with-piston .editor-section {
+		grid-row: 2;
+		grid-column: 1;
+	}
+
+	.panel.with-piston :global(> :first-child) {
+		grid-column: 1 / -1;
+	}
+
+	.right-section {
+		grid-row: 2;
+		grid-column: 2;
+		border-left: 1px solid #272733;
+		overflow: hidden;
 	}
 
 	.preview-bar {
@@ -142,17 +197,7 @@
 		color: #4e4e6a;
 	}
 
-	.editor-section {
-		overflow: hidden;
-	}
-
-	.preview-section {
-		overflow: hidden;
-		background: #fff;
-	}
-
-	.console-section {
-		overflow: hidden;
-		background: #11111b;
-	}
+	.editor-section { overflow: hidden; }
+	.preview-section { overflow: hidden; background: #fff; }
+	.console-section { overflow: hidden; background: #11111b; }
 </style>

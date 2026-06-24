@@ -25,7 +25,7 @@
 		} else {
 			// Last step — mark complete and navigate to next lesson
 			if (courseSlug && lessonId) {
-				markComplete(courseSlug, lessonId);
+				markComplete(courseSlug, lessonId, lesson.xpReward ?? 10);
 			}
 			if (next) {
 				goto(`/courses/${course.id}/${next.id}`);

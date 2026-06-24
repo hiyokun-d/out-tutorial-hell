@@ -206,7 +206,7 @@
 
 	function handleMarkRead() {
 		if (courseSlug && lessonId) {
-			markComplete(courseSlug, lessonId);
+			markComplete(courseSlug, lessonId, lesson.xpReward ?? 10);
 			completed = true;
 		}
 	}

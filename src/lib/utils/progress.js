@@ -1,4 +1,6 @@
 import { browser } from '$app/environment';
+import { xp } from '$lib/stores/xp.js';
+import { showXpToast } from '$lib/stores/toast.js';
 
 /** @param {string} courseSlug @returns {Set<string>} */
 export function getProgress(courseSlug) {
@@ -11,17 +13,27 @@ export function getProgress(courseSlug) {
 	}
 }
 
-/** @param {string} courseSlug @param {string} lessonId */
-export function markComplete(courseSlug, lessonId) {
-	if (!browser) return;
-	const progress = getProgress(courseSlug);
-	progress.add(lessonId);
-	localStorage.setItem(`progress:${courseSlug}`, JSON.stringify([...progress]));
-}
-
 /** @param {string} courseSlug @param {string} lessonId @returns {boolean} */
 export function isComplete(courseSlug, lessonId) {
 	return getProgress(courseSlug).has(lessonId);
+}
+
+/**
+ * Mark lesson complete, award XP, show toast.
+ * @param {string} courseSlug
+ * @param {string} lessonId
+ * @param {number} [xpReward]
+ */
+export function markComplete(courseSlug, lessonId, xpReward = 10) {
+	if (!browser) return;
+	if (isComplete(courseSlug, lessonId)) return;
+
+	const progress = getProgress(courseSlug);
+	progress.add(lessonId);
+	localStorage.setItem(`progress:${courseSlug}`, JSON.stringify([...progress]));
+
+	const result = xp.award(xpReward);
+	showXpToast(result.xpAwarded, { level: result.newLevel, levelUp: result.levelUp });
 }
 
 /** @param {string} courseSlug */

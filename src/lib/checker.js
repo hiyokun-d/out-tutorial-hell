@@ -362,6 +362,114 @@ export function buildJsDetail(test, actual, logs) {
 	}
 }
 
+// ── Piston (stdout-based) check runner ───────────────────────────────────────
+
+/**
+ * @param {any} test
+ * @param {string} stdout
+ * @param {string} stderr
+ * @param {string} src
+ * @param {number} exitCode
+ * @returns {{ passed: boolean, actual?: string }}
+ */
+export function runPistonCheck(test, stdout, stderr, src, exitCode = 0) {
+	try {
+		const lines = stdout.split('\n');
+		// drop trailing empty line that most runtimes add
+		const outputLines = lines[lines.length - 1] === '' ? lines.slice(0, -1) : lines;
+
+		switch (test.check) {
+			case 'stdout-equals':
+				return { passed: stdout.trimEnd() === test.value, actual: stdout.trimEnd() || '(no output)' };
+			case 'stdout-contains':
+				return { passed: stdout.includes(test.value), actual: stdout.trimEnd() || '(no output)' };
+			case 'stdout-line': {
+				const line = outputLines[test.line ?? 0] ?? null;
+				return { passed: line === test.value, actual: line ?? `(no line ${(test.line ?? 0) + 1})` };
+			}
+			case 'stdout-line-contains': {
+				const line = outputLines[test.line ?? 0] ?? '';
+				return { passed: line.includes(test.value), actual: line || `(no line ${(test.line ?? 0) + 1})` };
+			}
+			case 'stdout-regex': {
+				const rx = new RegExp(test.value);
+				return { passed: rx.test(stdout), actual: stdout.trimEnd() || '(no output)' };
+			}
+			case 'stdout-line-count': {
+				const count = outputLines.length;
+				return { passed: count === Number(test.count), actual: `${count} line(s)` };
+			}
+			case 'stderr-empty':
+				return { passed: stderr.trim() === '', actual: stderr.trim() || '(no errors)' };
+			case 'exit-code-zero':
+				return { passed: exitCode === 0, actual: `exit code ${exitCode}` };
+			case 'code-contains':
+				return { passed: src.includes(test.value), actual: src.includes(test.value) ? 'found' : 'not found' };
+			case 'code-not-contains':
+				return { passed: !src.includes(test.value), actual: src.includes(test.value) ? 'found (remove it)' : 'not found' };
+			default:
+				return { passed: false, actual: 'unknown check type' };
+		}
+	} catch (err) {
+		return { passed: false, actual: `error: ${err.message}` };
+	}
+}
+
+/**
+ * @param {any} test
+ * @param {string|null|undefined} actual
+ * @param {string} stdout
+ * @param {string} stderr
+ */
+export function buildPistonDetail(test, actual, stdout, stderr) {
+	const outputLines = stdout.trimEnd().split('\n');
+
+	switch (test.check) {
+		case 'stdout-equals':
+			if (!stdout.trim()) return `Nothing was printed — your program needs to output: "${test.value}"`;
+			return `Your program printed "${stdout.trimEnd()}" but expected "${test.value}"`;
+
+		case 'stdout-contains':
+			if (!stdout.trim()) return `Nothing was printed — output needs to include: "${test.value}"`;
+			return `Output "${stdout.trimEnd()}" doesn't contain "${test.value}"`;
+
+		case 'stdout-line': {
+			const n = (test.line ?? 0) + 1;
+			const got = outputLines[test.line ?? 0];
+			if (!got) return `Expected output on line ${n} but only ${outputLines.length} line(s) were printed`;
+			return `Line ${n} printed "${got}" but expected "${test.value}"`;
+		}
+
+		case 'stdout-line-contains': {
+			const n = (test.line ?? 0) + 1;
+			const got = outputLines[test.line ?? 0];
+			if (!got) return `Expected something on line ${n} but only ${outputLines.length} line(s) were printed`;
+			return `Line ${n} is "${got}" — it needs to include "${test.value}"`;
+		}
+
+		case 'stdout-regex':
+			return `Output "${stdout.trimEnd()}" doesn't match the pattern /${test.value}/`;
+
+		case 'stdout-line-count':
+			return `Got ${outputLines.length} line(s) of output, need exactly ${test.count}`;
+
+		case 'stderr-empty':
+			return `Your program has an error: ${stderr.trim()}`;
+
+		case 'exit-code-zero':
+			return `Program exited with code ${actual?.replace('exit code ', '')} — fix any runtime errors`;
+
+		case 'code-contains':
+			return `Your code needs to include: ${test.value}`;
+
+		case 'code-not-contains':
+			return `Remove "${test.value}" from your code`;
+
+		default:
+			return actual ?? null;
+	}
+}
+
 // ── Test → editor diagnostic mapping ─────────────────────────────────────────
 
 function buildDiagMessage(test) {

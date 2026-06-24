@@ -167,7 +167,16 @@
 		/** @type {import('@codemirror/state').Extension[]} */
 		const extraExtensions = [];
 
+		// ── Legacy-mode loader (covers 100+ languages via CodeMirror 5 compat) ──────
+		async function legacyMode(modePath, exportName) {
+			const { StreamLanguage } = await import('@codemirror/language');
+			const mod = await import(/* @vite-ignore */ `@codemirror/legacy-modes/mode/${modePath}`);
+			const mode = mod[exportName] ?? Object.values(mod)[0];
+			return StreamLanguage.define(mode);
+		}
+
 		const langLoaders = {
+			// ── Web ───────────────────────────────────────────────────────────────
 			html: async () => {
 				const m = await import('@codemirror/lang-html');
 				htmlLanguage = m.htmlLanguage;
@@ -249,9 +258,90 @@
 				);
 
 				return m.javascript();
-			}
+			},
+
+			// ── Systems ───────────────────────────────────────────────────────────
+			python:     () => import('@codemirror/lang-python').then((m) => m.python()),
+			rust:       () => import('@codemirror/lang-rust').then((m) => m.rust()),
+			cpp:        () => import('@codemirror/lang-cpp').then((m) => m.cpp()),
+			c:          () => import('@codemirror/lang-cpp').then((m) => m.cpp()),
+			java:       () => import('@codemirror/lang-java').then((m) => m.java()),
+			asm:        () => legacyMode('gas', 'gas'),
+			nasm:       () => legacyMode('gas', 'gas'),
+
+			// ── JVM ──────────────────────────────────────────────────────────────
+			kotlin:     () => legacyMode('clike', 'kotlin'),
+			scala:      () => legacyMode('clike', 'scala'),
+			csharp:     () => legacyMode('clike', 'csharp'),
+			'c#':       () => legacyMode('clike', 'csharp'),
+			groovy:     () => legacyMode('groovy', 'groovy'),
+
+			// ── Scripting ─────────────────────────────────────────────────────────
+			ruby:       () => legacyMode('ruby', 'ruby'),
+			perl:       () => legacyMode('perl', 'perl'),
+			lua:        () => legacyMode('lua', 'lua'),
+			php:        () => legacyMode('php', 'php'),
+			bash:       () => legacyMode('shell', 'shell'),
+			sh:         () => legacyMode('shell', 'shell'),
+			powershell: () => legacyMode('powershell', 'powerShell'),
+			tcl:        () => legacyMode('tcl', 'tcl'),
+			coffeescript: () => legacyMode('coffeescript', 'coffeeScript'),
+
+			// ── Modern ────────────────────────────────────────────────────────────
+			go:         () => legacyMode('go', 'go'),
+			swift:      () => legacyMode('swift', 'swift'),
+			typescript: () => import('@codemirror/lang-javascript').then((m) => m.javascript({ typescript: true })),
+			ts:         () => import('@codemirror/lang-javascript').then((m) => m.javascript({ typescript: true })),
+			dart:       () => legacyMode('clike', 'dart'),
+			nim:        () => import('@codemirror/lang-python').then((m) => m.python()), // closest syntax
+			zig:        () => legacyMode('clike', 'clike'),
+			crystal:    () => legacyMode('ruby', 'ruby'), // closest syntax
+			d:          () => legacyMode('d', 'd'),
+			vlang:      () => legacyMode('go', 'go'), // closest syntax
+
+			// ── Functional ────────────────────────────────────────────────────────
+			haskell:    () => legacyMode('haskell', 'haskell'),
+			erlang:     () => legacyMode('erlang', 'erlang'),
+			elixir:     () => legacyMode('ruby', 'ruby'), // closest available
+			ocaml:      () => legacyMode('mllike', 'oCaml'),
+			fsharp:     () => legacyMode('mllike', 'fSharp'),
+			'f#':       () => legacyMode('mllike', 'fSharp'),
+			scheme:     () => legacyMode('scheme', 'scheme'),
+			clojure:    () => legacyMode('clojure', 'clojure'),
+			racket:     () => legacyMode('scheme', 'scheme'),
+			lisp:       () => legacyMode('commonlisp', 'commonLisp'),
+			commonlisp: () => legacyMode('commonlisp', 'commonLisp'),
+			prolog:     () => legacyMode('prolog', 'prolog'),
+
+			// ── Data / science ────────────────────────────────────────────────────
+			r:          () => legacyMode('r', 'r'),
+			julia:      () => legacyMode('julia', 'julia'),
+			octave:     () => legacyMode('octave', 'octave'),
+			matlab:     () => legacyMode('octave', 'octave'),
+			sql:        () => legacyMode('sql', 'sql'),
+			sqlite3:    () => legacyMode('sql', 'sql'),
+
+			// ── Esoteric ─────────────────────────────────────────────────────────
+			brainfuck:  () => legacyMode('brainfuck', 'brainfuck'),
+			bf:         () => legacyMode('brainfuck', 'brainfuck'),
+			cobol:      () => legacyMode('cobol', 'cobol'),
+			fortran:    () => legacyMode('fortran', 'fortran'),
+			pascal:     () => legacyMode('pascal', 'pascal'),
+			vb:         () => legacyMode('vb', 'vb'),
+
+			// ── Markup / config ───────────────────────────────────────────────────
+			yaml:       () => legacyMode('yaml', 'yaml'),
+			toml:       () => legacyMode('toml', 'toml'),
 		};
-		const lang = await (langLoaders[language] ?? langLoaders.html)();
+
+		async function getLangExtension(lang) {
+			const loader = langLoaders[lang?.toLowerCase()];
+			if (loader) return loader();
+			// Unknown language — plain text (no syntax extension, just the editor)
+			return [];
+		}
+
+		const lang = await getLangExtension(language);
 
 		// ── Emmet completion source ───────────────────────────────────────────────
 
@@ -371,8 +461,9 @@
 			return out;
 		}
 
-		// Merged lint function: syntax errors + externally injected test-failure markers
-		const syntaxFn = language === 'html' ? htmlSyntaxDiags : lezerSyntaxDiags;
+		// Merged lint function — only for web languages; Piston languages rely on stderr
+		const webLang = ['html', 'css', 'javascript', 'typescript', 'ts'].includes(language?.toLowerCase());
+		const syntaxFn = language === 'html' ? htmlSyntaxDiags : webLang ? lezerSyntaxDiags : () => [];
 		const mergedLintFn = (view) => [...syntaxFn(view), ...extDiags];
 
 		// ── Build view ────────────────────────────────────────────────────────────

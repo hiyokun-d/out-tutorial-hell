@@ -1,6 +1,8 @@
 {
-  "_comment": "All features default to true. Only add a key here to DISABLE it.",
+  "_language": "Sets the programming language for ALL lessons in this course. Omit or set to 'html' for web courses. Any other value routes code through the Piston API (https://github.com/engineer-man/piston). Individual lessons can override with challenge.language.",
+  "_language_options": "html | css | javascript | python | rust | c | cpp | java | go | kotlin | swift | haskell | brainfuck | asm | lua | ruby | r | zig | typescript | elixir | erlang | ocaml | scala | dart | nim | crystal | bash | php | perl | ... (all Piston runtimes)",
   "features": {
+    "_comment": "All features default to true. Only add a key here to DISABLE it. For Piston languages: livePreview and formatButton are auto-disabled.",
     "snippets": true,
     "hints": true,
     "livePreview": true,

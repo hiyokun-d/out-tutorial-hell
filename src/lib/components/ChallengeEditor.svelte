@@ -2,17 +2,29 @@
 	import InstructionsPanel from './InstructionsPanel.svelte';
 	import CodingPanel from './CodingPanel.svelte';
 	import WalkthroughOverlay from './WalkthroughOverlay.svelte';
-	import { runCheck, buildDetail, computeTestDiagnostics, runJsCheck, buildJsDetail } from '$lib/checker.js';
+	import { runCheck, buildDetail, computeTestDiagnostics, runJsCheck, buildJsDetail, runPistonCheck, buildPistonDetail } from '$lib/checker.js';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 	import { markComplete } from '$lib/utils/progress.js';
+	import { pistonRun, isPistonLanguage } from '$lib/utils/piston.js';
 
 	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any, courseSlug?: string, lessonId?: string }} */
 	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
 
 	const { challenge } = lesson;
 
+	// Effective language: lesson-level overrides course-level, defaults to html
+	const language = $derived(challenge.language ?? config.language ?? 'html');
+	const usePiston = $derived(isPistonLanguage(language));
+
 	// ── State ─────────────────────────────────────────────────────────────────
 	let code = $state(challenge.starter);
+
+	// Piston output state
+	let pistonStdout = $state('');
+	let pistonStderr = $state('');
+	let pistonExitCode = $state(0);
+	let pistonRunning = $state(false);
+	let pistonError = $state(/** @type {string|null} */ (null));
 
 	/**
 	 * @typedef {{ id: number, description: string, check: string, passed: boolean|null, actual?: string, detail?: string|null, [k: string]: any }} TestResult
@@ -31,16 +43,19 @@
 	// ── Push test diagnostics into editor whenever results change ─────────────
 	$effect(() => {
 		if (!editorApi) return;
-		// Console-mode challenges: errors show in ConsolePane, not as editor squiggles
-		if (config.features?.consoleOutput) { editorApi.setExternalDiags([]); return; }
+		// Piston / console-mode: no editor squiggles (errors shown in output pane)
+		if (usePiston || config.features?.consoleOutput) { editorApi.setExternalDiags([]); return; }
 		editorApi.setExternalDiags(computeTestDiagnostics(testResults, code));
 	});
 
 	// ── Mark lesson complete when all tests pass ──────────────────────────────
+	let _prevAllPassed = false;
 	$effect(() => {
-		if (allPassed && courseSlug && lessonId) {
-			markComplete(courseSlug, lessonId);
+		if (allPassed && !_prevAllPassed && courseSlug && lessonId) {
+			_prevAllPassed = true;
+			markComplete(courseSlug, lessonId, lesson.xpReward ?? 10);
 		}
+		if (!allPassed) _prevAllPassed = false;
 	});
 
 	// ── Walkthrough overlay ───────────────────────────────────────────────────
@@ -79,7 +94,29 @@
 	async function executeTests(src, silent = false) {
 		if (!silent) running = true;
 
-		if (config.features?.consoleOutput) {
+		if (usePiston) {
+			// ── Piston: send to remote execution API ─────────────────────────────
+			pistonRunning = true;
+			pistonError = null;
+			try {
+				const stdin = challenge.stdin ?? '';
+				const result = await pistonRun(src, language, stdin);
+				pistonStdout = result.stdout;
+				pistonStderr = result.stderr;
+				pistonExitCode = result.exitCode;
+				testResults = challenge.tests.map((test) => {
+					const { passed, actual } = runPistonCheck(test, result.stdout, result.stderr, src, result.exitCode);
+					return { ...test, passed, actual, detail: passed ? null : buildPistonDetail(test, actual, result.stdout, result.stderr) };
+				});
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
+				pistonError = msg;
+				testResults = challenge.tests.map((t) => ({ ...t, passed: false, actual: 'run failed', detail: msg }));
+			} finally {
+				pistonRunning = false;
+			}
+		} else if (config.features?.consoleOutput) {
+			// ── JS console runner ─────────────────────────────────────────────────
 			if (!consolePaneApi) { if (!silent) running = false; return testResults; }
 			const logs = await consolePaneApi.runCode(src);
 			testResults = challenge.tests.map((test) => {
@@ -87,6 +124,7 @@
 				return { ...test, passed, actual, detail: passed ? null : buildJsDetail(test, actual, logs) };
 			});
 		} else {
+			// ── HTML DOM runner ───────────────────────────────────────────────────
 			const doc = new DOMParser().parseFromString(src, 'text/html');
 			testResults = challenge.tests.map((test) => {
 				const { passed, actual } = runCheck(test, doc, src);
@@ -144,12 +182,17 @@
 
 	<CodingPanel
 		bind:code
-		language={challenge.language}
+		{language}
 		starter={challenge.starter}
 		onReset={handleReset}
 		onEditorReady={(api) => (editorApi = api)}
 		onConsolePaneReady={(api) => (consolePaneApi = api)}
 		features={config.features}
+		pistonStdout={pistonStdout}
+		pistonStderr={pistonStderr}
+		pistonExitCode={pistonExitCode}
+		pistonRunning={pistonRunning}
+		pistonError={pistonError}
 	/>
 </div>
 
