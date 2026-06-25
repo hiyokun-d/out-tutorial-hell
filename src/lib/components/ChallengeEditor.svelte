@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	import InstructionsPanel from './InstructionsPanel.svelte';
 	import CodingPanel from './CodingPanel.svelte';
 	import WalkthroughOverlay from './WalkthroughOverlay.svelte';
@@ -16,7 +16,6 @@
 	const language = $derived(challenge.language ?? config.language ?? 'html');
 	const usePiston = $derived(isPistonLanguage(language));
 
-	// ── State ─────────────────────────────────────────────────────────────────
 	let code = $state(challenge.starter);
 
 	// Piston output state
@@ -40,7 +39,6 @@
 	/** @type {{ runCode: (src: string) => Promise<{type:string,text:string}[]> } | null} */
 	let consolePaneApi = $state.raw(null);
 
-	// ── Push test diagnostics into editor whenever results change ─────────────
 	$effect(() => {
 		if (!editorApi) return;
 		// Piston / console-mode: no editor squiggles (errors shown in output pane)
@@ -48,7 +46,6 @@
 		editorApi.setExternalDiags(computeTestDiagnostics(testResults, code));
 	});
 
-	// ── Mark lesson complete when all tests pass ──────────────────────────────
 	let _prevAllPassed = false;
 	$effect(() => {
 		if (allPassed && !_prevAllPassed && courseSlug && lessonId) {
@@ -58,11 +55,9 @@
 		if (!allPassed) _prevAllPassed = false;
 	});
 
-	// ── Walkthrough overlay ───────────────────────────────────────────────────
 	let walkthroughOpen = $state(false);
 	let hasWalkthrough = $derived(!!(challenge.walkthrough?.steps?.length));
 
-	// ── Panel resize ──────────────────────────────────────────────────────────
 	let leftWidth = $state(390);
 	let dragging = $state(false);
 
@@ -85,8 +80,6 @@
 		document.addEventListener('mouseup', onUp);
 	}
 
-	// ── Test runner ───────────────────────────────────────────────────────────
-
 	/**
 	 * @param {string} src
 	 * @param {boolean} [silent]
@@ -95,7 +88,6 @@
 		if (!silent) running = true;
 
 		if (usePiston) {
-			// ── Piston: send to remote execution API ─────────────────────────────
 			pistonRunning = true;
 			pistonError = null;
 			try {
@@ -116,7 +108,6 @@
 				pistonRunning = false;
 			}
 		} else if (config.features?.consoleOutput) {
-			// ── JS console runner ─────────────────────────────────────────────────
 			if (!consolePaneApi) { if (!silent) running = false; return testResults; }
 			const logs = await consolePaneApi.runCode(src);
 			testResults = challenge.tests.map((test) => {
@@ -124,7 +115,6 @@
 				return { ...test, passed, actual, detail: passed ? null : buildJsDetail(test, actual, logs) };
 			});
 		} else {
-			// ── HTML DOM runner ───────────────────────────────────────────────────
 			const doc = new DOMParser().parseFromString(src, 'text/html');
 			testResults = challenge.tests.map((test) => {
 				const { passed, actual } = runCheck(test, doc, src);
@@ -207,8 +197,13 @@
 <style>
 	.layout {
 		display: grid;
-		height: 100vh;
+		height: clamp(42rem, calc(100dvh - 8.5rem), 50rem);
+		min-height: 0;
 		overflow: hidden;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: color-mix(in srgb, var(--surface) 78%, transparent);
+		box-shadow: var(--depth-shadow);
 	}
 
 	.layout.dragging :global(iframe) {
@@ -216,21 +211,38 @@
 	}
 
 	.resize-handle {
-		background: #272733;
+		background: color-mix(in srgb, var(--border) 72%, transparent);
 		cursor: col-resize;
 		transition: background 0.15s;
 		position: relative;
 	}
 
+	.resize-handle::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 2px;
+		height: 44px;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--text-dim) 42%, transparent);
+		transform: translate(-50%, -50%);
+	}
+
 	.resize-handle:hover,
 	.layout.dragging .resize-handle {
-		background: #6366f1;
+		background: color-mix(in srgb, var(--accent) 34%, transparent);
+	}
+
+	.resize-handle:hover::after,
+	.layout.dragging .resize-handle::after {
+		background: var(--accent-strong);
 	}
 
 	.resize-handle::before {
 		content: '';
 		position: absolute;
-		inset: 0 -4px;
+		inset: 0 -5px;
 	}
 
 	.wt-trigger {
@@ -242,22 +254,34 @@
 	}
 
 	.wt-trigger button {
-		padding: 0.65rem 1.25rem;
+		padding: 0.7rem 1rem;
 		background: var(--accent);
-		color: #fff;
+		color: #160d14;
 		border: none;
-		border-radius: 10px;
-		font-size: 0.9rem;
-		font-weight: 700;
+		border-radius: 18px;
+		font-size: 0.86rem;
+		font-weight: 800;
 		cursor: pointer;
-		box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+		box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 28%, transparent);
 		transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
 	}
 
 	.wt-trigger button:hover {
 		background: var(--accent-hover);
 		transform: translateY(-2px);
-		box-shadow: 0 6px 24px rgba(99, 102, 241, 0.55);
+		box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 36%, transparent);
+	}
+
+	@media (max-width: 920px) {
+		.layout {
+			display: flex;
+			flex-direction: column;
+			height: auto;
+			min-height: 0;
+			border-radius: 0;
+		}
+
+		.resize-handle { display: none; }
 	}
 
 	@keyframes wtSlideUp {
@@ -265,3 +289,5 @@
 		to { opacity: 1; transform: translateY(0); }
 	}
 </style>
+
+

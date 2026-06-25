@@ -1,7 +1,7 @@
 {
-  "title": "new coder",
-  "description": "If you're new to code, and don't know where to start we will make it easy for ya",
-  "difficulty": "BEGINNER",
-  "order": 1,
-  "icon": "🌐"
+    "difficulty":  "BEGINNER",
+    "title":  "Start Coding",
+    "description":  "A zero-login path for absolute beginners: mental models, output, values, decisions, and loops.",
+    "order":  1,
+    "icon":  "compass"
 }

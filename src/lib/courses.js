@@ -1,3 +1,4 @@
+// @ts-nocheck
 // File-based course system. Adding a lesson = dropping a .md file.
 // Adding a coding challenge = dropping a matching .json file with the same base name.
 // No DB, no backend, no config changes needed.
@@ -115,6 +116,21 @@ export function getAllCourses() {
 }
 
 /**
+ * Returns courses with lesson and XP totals for roadmap/dashboard views.
+ */
+export function getCourseSummaries() {
+	return getAllCourses().map((course) => {
+		const lessons = getLessons(course.id);
+		return {
+			...course,
+			lessonCount: lessons.length,
+			totalXp: lessons.reduce((sum, lesson) => sum + (lesson.xpReward ?? 10), 0),
+			challengeCount: lessons.filter((lesson) => lesson.challenge).length,
+			projectCount: lessons.filter((lesson) => lesson.type === 'PROJECT').length
+		};
+	});
+}
+/**
  * Returns all lessons for a course, sorted by `order`.
  * Each lesson includes a `challenge` field (null if no .json file exists).
  * @param {string} courseId
@@ -188,3 +204,5 @@ export function getLessons(courseId) {
 export function getLesson(courseId, lessonId) {
 	return getLessons(courseId).find((l) => l.id === lessonId) ?? null;
 }
+
+

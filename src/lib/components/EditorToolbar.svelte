@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	/** @type {{ language: string, onReset: () => void, onFormat: () => void, formatting?: boolean, showFormat?: boolean }} */
 	let { language, onReset, onFormat, formatting = false, showFormat = true } = $props();
 </script>
@@ -9,7 +9,7 @@
 	<div class="actions">
 		{#if showFormat}
 			<button class="fmt-btn" onclick={onFormat} disabled={formatting} title="Format code (Shift+Alt+F)">
-				{formatting ? '…' : '⌥⇧F'}
+				{formatting ? '...' : 'Format'}
 			</button>
 		{/if}
 		<button class="reset-btn" onclick={onReset} title="Restore starter code">Reset</button>
@@ -21,46 +21,55 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.35rem 0.75rem;
-		background: #181825;
-		border-bottom: 1px solid #313244;
+		min-height: 46px;
+		padding: 0.55rem 0.85rem;
+		background: var(--sandbox-bar-bg);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
 	.lang {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
+		padding: 0 0.55rem;
+		border: 1px solid var(--sandbox-border);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--surface-elevated) 62%, transparent);
 		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.09em;
-		color: #cba6f7;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		color: var(--accent);
 	}
 
 	.actions {
 		display: flex;
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
 	button {
-		font-size: 0.7rem;
-		color: #6c7086;
-		background: none;
-		border: 1px solid #313244;
-		border-radius: 4px;
-		padding: 0.15rem 0.5rem;
+		min-height: 28px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--sandbox-text-muted);
+		background: color-mix(in srgb, var(--surface-elevated) 62%, transparent);
+		border: 1px solid var(--sandbox-border);
+		border-radius: 18px;
+		padding: 0.2rem 0.6rem;
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s;
+		transition: color 0.15s, border-color 0.15s, background 0.15s;
 	}
 
 	button:hover:not(:disabled) {
-		color: #cdd6f4;
-		border-color: #585b70;
+		color: var(--sandbox-text);
+		background: color-mix(in srgb, var(--accent) 16%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 42%, var(--sandbox-border));
 	}
 
 	button:disabled {
-		opacity: 0.4;
+		opacity: 0.45;
 		cursor: not-allowed;
 	}
-
-	.fmt-btn {
-		font-family: 'Apple Color Emoji', sans-serif;
-	}
 </style>
+
+

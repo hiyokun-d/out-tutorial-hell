@@ -19,13 +19,13 @@
 	}
 
 	const TYPE_COLORS = /** @type {Record<string,string>} */ ({
-		number:  '#fab387',
-		string:  '#a6e3a1',
-		boolean: '#89dceb',
-		array:   '#cba6f7',
-		object:  '#89b4fa',
-		nil:     '#6c7086',
-		other:   '#cdd6f4',
+		number:  'var(--syntax-num)',
+		string:  'var(--syntax-str)',
+		boolean: 'var(--syntax-bool)',
+		array:   'var(--syntax-arr)',
+		object:  'var(--syntax-obj)',
+		nil:     'var(--syntax-nil)',
+		other:   'var(--syntax-other)',
 	});
 
 	let entries = $derived(
@@ -33,7 +33,7 @@
 			const desc = describeValue(value);
 			const changed = changedNames.has(name);
 			const prevDesc = prevVars[name] !== undefined ? describeValue(prevVars[name]) : null;
-			const color = TYPE_COLORS[desc.type] ?? '#cdd6f4';
+			const color = TYPE_COLORS[desc.type] ?? 'var(--syntax-other)';
 			return { name, desc, changed, prevDesc, color };
 		})
 	);
@@ -77,7 +77,7 @@
 		flex-wrap: wrap;
 		gap: 0.4rem;
 		padding: 0.45rem 0.75rem;
-		background: #13131c;
+		background: var(--sandbox-bg);
 		flex-shrink: 0;
 		max-height: 130px;
 		overflow-y: auto;
@@ -86,7 +86,7 @@
 
 	.empty {
 		font-size: 0.72rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		font-style: italic;
 		font-family: 'Fira Code', monospace;
 		padding: 0.2rem 0;
@@ -98,9 +98,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.12rem;
-		background: #1a1a28;
-		border: 1px solid #272733;
-		border-radius: 8px;
+		background: var(--sandbox-bar-bg);
+		border: 1px solid var(--sandbox-border);
+		border-radius: 18px;
 		padding: 0.28rem 0.5rem 0.32rem;
 		min-width: 64px;
 		max-width: 160px;
@@ -113,15 +113,15 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(135deg, var(--tc, #6366f1) 0%, transparent 55%);
+		background: linear-gradient(135deg, var(--tc, var(--accent)) 0%, transparent 55%);
 		opacity: 0.04;
 		pointer-events: none;
-		border-radius: 8px;
+		border-radius: 18px;
 	}
 
 	.bubble.changed {
-		border-color: var(--tc, #6366f1);
-		box-shadow: 0 0 12px -3px color-mix(in srgb, var(--tc, #6366f1) 60%, transparent);
+		border-color: var(--tc, var(--accent));
+		box-shadow: 0 0 12px -3px color-mix(in srgb, var(--tc, var(--accent)) 60%, transparent);
 		animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
@@ -142,7 +142,7 @@
 		font-family: 'Fira Code', 'Cascadia Code', monospace;
 		font-size: 0.62rem;
 		font-weight: 700;
-		color: #cba6f7;
+		color: var(--sandbox-text);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -157,12 +157,12 @@
 		text-transform: uppercase;
 		flex-shrink: 0;
 	}
-	.type-badge.type-number  { background: #fab38720; color: #fab387; }
-	.type-badge.type-string  { background: #a6e3a120; color: #a6e3a1; }
-	.type-badge.type-boolean { background: #89dceb20; color: #89dceb; }
-	.type-badge.type-array   { background: #cba6f720; color: #cba6f7; }
-	.type-badge.type-object  { background: #89b4fa20; color: #89b4fa; }
-	.type-badge.type-nil     { background: #6c708620; color: #6c7086; }
+	.type-badge.type-number  { background: color-mix(in srgb, var(--syntax-num) 12%, transparent); color: var(--syntax-num); }
+	.type-badge.type-string  { background: color-mix(in srgb, var(--syntax-str) 12%, transparent); color: var(--syntax-str); }
+	.type-badge.type-boolean { background: color-mix(in srgb, var(--syntax-bool) 12%, transparent); color: var(--syntax-bool); }
+	.type-badge.type-array   { background: color-mix(in srgb, var(--syntax-arr) 12%, transparent); color: var(--syntax-arr); }
+	.type-badge.type-object  { background: color-mix(in srgb, var(--syntax-obj) 12%, transparent); color: var(--syntax-obj); }
+	.type-badge.type-nil     { background: color-mix(in srgb, var(--syntax-nil) 12%, transparent); color: var(--syntax-nil); }
 
 	.var-value {
 		font-family: 'Fira Code', 'Cascadia Code', monospace;
@@ -171,16 +171,16 @@
 		word-break: break-all;
 		line-height: 1.25;
 	}
-	.var-value.type-number  { color: #fab387; }
-	.var-value.type-string  { color: #a6e3a1; }
-	.var-value.type-boolean { color: #89dceb; }
-	.var-value.type-array   { color: #cba6f7; }
-	.var-value.type-object  { color: #89b4fa; }
-	.var-value.type-nil     { color: #6c7086; font-style: italic; }
+	.var-value.type-number  { color: var(--syntax-num); }
+	.var-value.type-string  { color: var(--syntax-str); }
+	.var-value.type-boolean { color: var(--syntax-bool); }
+	.var-value.type-array   { color: var(--syntax-arr); }
+	.var-value.type-object  { color: var(--syntax-obj); }
+	.var-value.type-nil     { color: var(--syntax-nil); font-style: italic; }
 
 	.was-prev {
 		font-size: 0.54rem;
-		color: #585870;
+		color: var(--sandbox-text-dim);
 		font-style: italic;
 		font-family: 'Fira Code', monospace;
 		white-space: nowrap;
@@ -188,3 +188,4 @@
 		text-overflow: ellipsis;
 	}
 </style>
+

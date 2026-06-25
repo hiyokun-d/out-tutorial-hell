@@ -103,7 +103,7 @@
 	}
 
 	.resize-handle {
-		background: #272733;
+		background: var(--sandbox-border);
 		cursor: col-resize;
 		transition: background 0.15s;
 		position: relative;
@@ -111,7 +111,7 @@
 
 	.resize-handle:hover,
 	.layout.dragging .resize-handle {
-		background: #6366f1;
+		background: var(--accent);
 	}
 
 	.resize-handle::before {

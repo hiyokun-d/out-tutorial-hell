@@ -42,14 +42,12 @@
 	let showNotes = $state(false);
 	let completed = $state(false);
 
-	// ── Wandbox sandbox state (non-JS courses) ────────────────────────────────
 	let sandboxPistonStdout = $state('');
 	let sandboxPistonStderr = $state('');
 	let sandboxPistonExitCode = $state(0);
 	let sandboxPistonRunning = $state(false);
 	let sandboxPistonError = $state(/** @type {string|null} */ (null));
 
-	// ── Tracer state ──────────────────────────────────────────────────────────
 	let traceMode = $state(false);
 	/**
 	 * @typedef {{ type: string, line: number, vars?: Record<string,any>, text?: string, stepType?: string, explanation?: string | null }} TraceEvent
@@ -58,8 +56,6 @@
 	let traceEvents = $state([]);
 	let traceIndex = $state(0);
 	let tracing = $state(false);
-
-	// ── Derived trace values ──────────────────────────────────────────────────
 
 	let currentEvent = $derived(traceEvents[traceIndex] ?? null);
 	let isTruncated = $derived(traceEvents.some((e) => e.type === 'truncated'));
@@ -123,15 +119,11 @@
 			: null
 	);
 
-	// ── Lifecycle ─────────────────────────────────────────────────────────────
-
 	$effect(() => {
 		if (browser && courseSlug && lessonId) {
 			completed = isComplete(courseSlug, lessonId);
 		}
 	});
-
-	// ── Keyboard navigation for step tracer ──────────────────────────────────
 
 	/** @param {KeyboardEvent} e */
 	function handleKeydown(e) {
@@ -146,8 +138,6 @@
 			exitTrace();
 		}
 	}
-
-	// ── Actions ───────────────────────────────────────────────────────────────
 
 	function toggleSandbox() {
 		sandboxOpen = !sandboxOpen;
@@ -183,7 +173,7 @@
 			const timeout = setTimeout(() => {
 				window.removeEventListener('message', onMsg);
 				iframe.remove();
-				resolve([{ type: 'error', line: 0, text: 'Timed out after 3 seconds — check for infinite loops' }]);
+				resolve([{ type: 'error', line: 0, text: 'Timed out after 3 seconds” check for infinite loops' }]);
 			}, 3000);
 
 			/** @param {MessageEvent} e */
@@ -250,7 +240,7 @@
 			const rawEvents = parsePythonTrace(result.stderr);
 
 			if (rawEvents.length === 0) {
-				const errText = result.stderr.replace('__TRACE__', '').trim() || result.stdout.trim() || 'No trace events — check for syntax errors.';
+				const errText = result.stderr.replace('__TRACE__', '').trim() || result.stdout.trim() || 'No trace events” check for syntax errors.';
 				traceEvents = [{ type: 'error', line: 0, text: errText }];
 			} else {
 				const srcLines = sandboxCode.split('\n');
@@ -326,7 +316,7 @@
 				{#if sandboxIsPiston && !sandboxIsPythonTraceable}
 					<span class="lang-badge">{langLabel(sandboxLang)}</span>
 					<button class="trace-btn" onclick={runSandbox} disabled={sandboxPistonRunning}>
-						{sandboxPistonRunning ? 'Running…' : '▶ Run'}
+						{sandboxPistonRunning ? 'Running' : 'Run'}
 					</button>
 				{:else if !traceMode}
 					{#if sandboxIsPythonTraceable}
@@ -338,25 +328,25 @@
 						disabled={tracing}
 						title="Step through your code line by line"
 					>
-						{tracing ? 'Running…' : '▶ Step Through'}
+						{tracing ? 'Running' : 'Step Through'}
 					</button>
 				{:else}
 					<div class="trace-header-info">
 						<span class="trace-step-badge" style="background:{currentStepColor}22; color:{currentStepColor}; border-color:{currentStepColor}44">
 							{currentStepType}
 						</span>
-						<span class="trace-keyboard-hint">← → to navigate · Esc to exit</span>
+						<span class="trace-keyboard-hint"> to navigate· Esc to exit</span>
 					</div>
-					<button class="exit-trace-btn" onclick={exitTrace}>✕ Exit</button>
+					<button class="exit-trace-btn" onclick={exitTrace}>✖ Exit</button>
 				{/if}
-				<button class="close-btn" onclick={() => (sandboxOpen = false)} aria-label="Close sandbox">✕</button>
+				<button class="close-btn" onclick={() => (sandboxOpen = false)} aria-label="Close sandbox">✖</button>
 			</div>
 
 			<!-- Truncation warning (shown above editor when limit hit) -->
 			{#if isTruncated}
 				<div class="truncation-banner">
-					<span class="truncation-icon">⚠</span>
-					Loop too large — showing first {TRACE_STEP_LIMIT} steps. Try a smaller range.
+					<span class="truncation-icon">⚠️</span>
+					Loop too large” showing first {TRACE_STEP_LIMIT} steps. Try a smaller range.
 				</div>
 			{/if}
 
@@ -493,17 +483,19 @@
 	}
 
 	main {
-		max-width: 700px;
+		flex: 1;
+		max-width: 840px;
+		background: var(--surface);
+		border-radius: 24px;
+		box-shadow: var(--depth-shadow);
+		border: 1px solid var(--border);
+		padding: 3rem;
 		margin: 0 auto;
-		padding: 2.5rem 2rem;
-		width: 100%;
 	}
 
 	main.sandbox-active {
 		max-width: none;
 		margin: 0;
-		height: 100vh;
-		overflow-y: auto;
 		padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
 	}
 
@@ -540,9 +532,9 @@
 	.content :global(h2) { font-size: 1.2rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; color: var(--text); font-weight: 600; }
 	.content :global(h3) { font-size: 1rem; margin: 1.5rem 0 0.4rem; color: var(--text); font-weight: 600; }
 	.content :global(p) { line-height: 1.8; margin: 0.85rem 0; color: var(--text-muted); }
-	.content :global(code) { background: var(--surface-elevated); border: 1px solid var(--border); padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.875em; font-family: 'Fira Code', 'Cascadia Code', monospace; color: #cba6f7; }
-	.content :global(pre) { background: #11111b; color: #cdd6f4; padding: 1.25rem; border-radius: 10px; overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--border); }
-	.content :global(pre code) { background: none; border: none; padding: 0; font-size: 0.9rem; color: #cdd6f4; }
+	.content :global(code) { background: var(--surface-elevated); border: 1px solid var(--border); padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.875em; font-family: 'Fira Code', 'Cascadia Code', monospace; color: var(--accent); }
+	.content :global(pre) { background: var(--sandbox-bg); color: var(--sandbox-text); padding: 1.25rem; border-radius: 20px; overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--sandbox-border); }
+	.content :global(pre code) { background: none; border: none; padding: 0; font-size: 0.9rem; color: var(--sandbox-text); }
 	.content :global(ul), .content :global(ol) { padding-left: 1.5rem; line-height: 1.8; color: var(--text-muted); margin: 0.75rem 0; }
 	.content :global(li) { margin: 0.3rem 0; }
 	.content :global(table) { width: 100%; border-collapse: collapse; margin: 1.25rem 0; }
@@ -555,19 +547,21 @@
 
 	.lesson-footer { margin: 2rem 0 1.5rem; display: flex; align-items: center; }
 
-	.mark-btn { padding: 0.6rem 1.4rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+	.mark-btn { padding: 0.6rem 1.4rem; background: var(--accent); color: #160d14; border: none; border-radius: 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
 	.mark-btn:hover { background: var(--accent-hover); }
 	.done-label { font-size: 0.875rem; font-weight: 600; color: var(--success); }
-
-	/* ── Sandbox panel ──────────────────────────────────────────────────────── */
 
 	.sandbox-panel {
 		display: flex;
 		flex-direction: column;
-		height: 100vh;
-		border-left: 1px solid var(--border);
-		background: #1e1e2e;
+		height: calc(100vh - 4rem);
+		border: 1px solid var(--sandbox-border);
+		border-radius: 24px;
+		background: var(--sandbox-bg);
 		overflow: hidden;
+		flex: 1;
+		max-width: 600px;
+		box-shadow: var(--depth-shadow);
 	}
 
 	.panel-bar {
@@ -575,17 +569,17 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.35rem 0.75rem;
-		background: #17171f;
-		border-bottom: 1px solid #11111b;
+		background: var(--sandbox-bar-bg);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
-	.console-bar { border-top: 2px solid #11111b; }
-	.vars-bar    { border-top: 2px solid #11111b; }
+	.console-bar { border-top: 1px solid var(--sandbox-border); }
+	.vars-bar    { border-top: 1px solid var(--sandbox-border); }
 
-	.panel-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; color: #8888a8; }
-	.panel-hint  { font-size: 0.62rem; color: #4e4e6a; flex: 1; }
-	.lang-badge  { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; color: #6366f1; text-transform: uppercase; flex: 1; }
+	.panel-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; color: var(--sandbox-text-muted); }
+	.panel-hint  { font-size: 0.62rem; color: var(--sandbox-text-dim); flex: 1; }
+	.lang-badge  { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent); text-transform: uppercase; flex: 1; }
 	.piston-lower { flex: 1; overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
 
 	.trace-btn {
@@ -594,7 +588,7 @@
 		border-radius: 5px; color: var(--accent); cursor: pointer;
 		transition: background 0.15s, color 0.15s;
 	}
-	.trace-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+	.trace-btn:hover:not(:disabled) { background: var(--accent); color: #160d14; }
 	.trace-btn:disabled { opacity: 0.5; cursor: default; }
 
 	.trace-header-info {
@@ -620,7 +614,7 @@
 
 	.trace-keyboard-hint {
 		font-size: 0.58rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -628,19 +622,19 @@
 
 	.exit-trace-btn {
 		font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.5rem;
-		background: none; border: 1px solid #4e4e6a; border-radius: 5px;
-		color: #8888a8; cursor: pointer;
+		background: none; border: 1px solid var(--sandbox-border); border-radius: 5px;
+		color: var(--sandbox-text-muted); cursor: pointer;
 		transition: border-color 0.15s, color 0.15s;
 		white-space: nowrap; flex-shrink: 0;
 	}
-	.exit-trace-btn:hover { border-color: #f38ba8; color: #f38ba8; }
+	.exit-trace-btn:hover { border-color: var(--error); color: var(--error); }
 
 	.close-btn {
-		background: none; border: none; color: #4e4e6a; cursor: pointer;
+		background: none; border: none; color: var(--sandbox-text-dim); cursor: pointer;
 		font-size: 0.75rem; padding: 0.1rem 0.25rem; border-radius: 4px;
 		transition: color 0.15s; margin-left: auto; flex-shrink: 0;
 	}
-	.close-btn:hover { color: #f38ba8; }
+	.close-btn:hover { color: var(--error); }
 
 	/* Truncation warning */
 	.truncation-banner {
@@ -648,10 +642,10 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.35rem 0.75rem;
-		background: #2c1e14;
-		border-bottom: 1px solid #f9e2af44;
+		background: var(--warning-muted);
+		border-bottom: 1px solid var(--warning);
 		font-size: 0.7rem;
-		color: #f9e2af;
+		color: var(--warning);
 		flex-shrink: 0;
 	}
 	.truncation-icon { font-size: 0.8rem; }
@@ -661,8 +655,8 @@
 
 	.sandbox-editor :global(.wt-pulse) {
 		animation: none;
-		background: color-mix(in srgb, var(--step-color, #6366f1) 12%, transparent);
-		border-left: 3px solid var(--step-color, #6366f1);
+		background: color-mix(in srgb, var(--step-color, var(--accent)) 12%, transparent);
+		border-left: 3px solid var(--step-color, var(--accent));
 		transition: background 0.2s ease, border-left-color 0.2s ease;
 	}
 
@@ -676,8 +670,6 @@
 
 	.console-wrap { flex: 1; overflow: hidden; min-height: 0; }
 
-	/* ── Trace console ──────────────────────────────────────────────────────── */
-
 	.trace-console {
 		flex: 1;
 		overflow-y: auto;
@@ -689,15 +681,13 @@
 	}
 
 	.line { white-space: pre-wrap; word-break: break-word; }
-	.line.log   { color: #cdd6f4; }
-	.line.error { color: #f38ba8; }
-	.line.warn  { color: #f9e2af; }
-	.line.info  { color: #89dceb; }
-	.line-empty { font-size: 0.72rem; color: #4e4e6a; font-style: italic; }
+	.line.log   { color: var(--sandbox-text); }
+	.line.error { color: var(--error); }
+	.line.warn  { color: var(--warning); }
+	.line.info  { color: var(--accent); }
+	.line-empty { font-size: 0.72rem; color: var(--sandbox-text-dim); font-style: italic; }
 
-	/* ── Progress bar ───────────────────────────────────────────────────────── */
-
-	.step-progress-wrap { height: 3px; background: #11111b; flex-shrink: 0; overflow: hidden; position: relative; }
+	.step-progress-wrap { height: 3px; background: var(--sandbox-bar-bg); flex-shrink: 0; overflow: hidden; position: relative; }
 	.step-progress-fill {
 		height: 100%;
 		transition: width 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.3s ease;
@@ -713,14 +703,12 @@
 		border-radius: 0 2px 2px 0;
 	}
 
-	/* ── Step controls ──────────────────────────────────────────────────────── */
-
 	.step-controls {
 		display: flex;
 		align-items: center;
 		padding: 0.4rem 0.75rem;
-		background: #17171f;
-		border-top: 1px solid #11111b;
+		background: var(--sandbox-bar-bg);
+		border-top: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 		gap: 0.5rem;
 	}
@@ -737,11 +725,9 @@
 	.step-btn:disabled { opacity: 0.35; cursor: default; }
 
 	.step-info { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
-	.step-counter { font-size: 0.68rem; color: #6c7086; font-family: 'Fira Code', monospace; }
-	.step-sep { color: #4e4e6a; margin: 0 0.1rem; }
-	.truncated-note { font-size: 0.58rem; color: #f9e2af; }
-
-	/* ── Python trace prompt ────────────────────────────────────────────────── */
+	.step-counter { font-size: 0.68rem; color: var(--sandbox-text-muted); font-family: 'Fira Code', monospace; }
+	.step-sep { color: var(--sandbox-text-dim); margin: 0 0.1rem; }
+	.truncated-note { font-size: 0.58rem; color: var(--warning); }
 
 	.trace-prompt {
 		flex: 1;
@@ -750,15 +736,15 @@
 		justify-content: center;
 		gap: 0.5rem;
 		font-size: 0.8rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		padding: 1.5rem;
 		text-align: center;
 	}
-	.trace-prompt strong { color: #8888a8; font-weight: 600; }
+	.trace-prompt strong { color: var(--sandbox-text-muted); font-weight: 600; }
 	.trace-prompt-icon { font-size: 1rem; color: var(--accent); opacity: 0.6; }
-
-	/* ── Notes panel ────────────────────────────────────────────────────────── */
 
 	.notes-sidebar { border-left: 1px solid var(--border); background: var(--surface); }
 	.notes-inner { padding: 2.5rem 1.25rem; position: sticky; top: 0; }
 </style>
+
+

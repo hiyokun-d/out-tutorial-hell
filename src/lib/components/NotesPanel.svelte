@@ -65,7 +65,7 @@
 		width: 100%;
 		min-height: 120px;
 		resize: vertical;
-		background: var(--bg);
+		background: var(--surface-elevated);
 		border: 1px solid var(--border);
 		border-radius: 6px;
 		color: var(--text);

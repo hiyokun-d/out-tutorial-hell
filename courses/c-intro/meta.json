@@ -1,7 +1,7 @@
 {
-  "title": "C Programming",
-  "description": "Learn C — the language that powers operating systems, embedded chips, and everything fast. No GC, no runtime, just you and the machine.",
-  "difficulty": "INTERMEDIATE",
-  "order": 10,
-  "icon": "⚙️"
+    "difficulty":  "INTERMEDIATE",
+    "title":  "C Programming",
+    "description":  "Learn the compiled language behind operating systems, embedded chips, and fast software.",
+    "order":  4,
+    "icon":  "cpu"
 }

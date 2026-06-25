@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	import { marked } from 'marked';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import TaskBox from './TaskBox.svelte';
@@ -65,11 +65,12 @@
 	.panel {
 		height: 100%;
 		overflow-y: auto;
-		padding: 1.25rem 1.5rem;
+		padding: 1.35rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		background: var(--surface);
+		background:
+			linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 92%, transparent), var(--surface));
 		border-right: 1px solid var(--border);
 	}
 
@@ -77,59 +78,71 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem;
+		gap: 0.75rem;
 		flex-shrink: 0;
 	}
 
 	.notes-toggle {
 		font-size: 0.72rem;
-		font-weight: 600;
-		padding: 0.2rem 0.6rem;
+		font-weight: 800;
+		padding: 0.35rem 0.65rem;
 		background: var(--surface-elevated);
 		border: 1px solid var(--border);
-		border-radius: 6px;
+		border-radius: 18px;
 		color: var(--text-muted);
 		cursor: pointer;
 		white-space: nowrap;
-		transition: border-color 0.15s, color 0.15s;
+		transition: border-color 0.15s, color 0.15s, background 0.15s;
 		flex-shrink: 0;
 	}
 
 	.notes-toggle:hover {
-		border-color: var(--accent);
-		color: var(--accent);
+		background: var(--accent-muted);
+		border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+		color: var(--accent-strong);
 	}
 
 	h1 {
-		font-size: 1.3rem;
+		font-size: clamp(1.55rem, 2vw, 2.05rem);
 		margin: 0;
-		line-height: 1.3;
-		font-weight: 700;
+		line-height: 1.12;
+		font-weight: 800;
+		letter-spacing: 0;
 		color: var(--text);
 	}
 
 	.content {
-		font-size: 0.875rem;
-		line-height: 1.75;
+		font-size: 0.92rem;
+		line-height: 1.78;
 		color: var(--text-muted);
 	}
 
-	.content :global(h1) { font-size: 1.1rem; margin: 1rem 0 0.35rem; color: var(--text); }
-	.content :global(h2) { font-size: 0.95rem; margin: 1.1rem 0 0.3rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2rem; color: var(--text); }
-	.content :global(p) { margin: 0.45rem 0; color: var(--text-muted); }
-	.content :global(code) { background: var(--bg); border: 1px solid var(--border); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.82em; font-family: 'Fira Code', monospace; color: #cba6f7; }
-	.content :global(pre) { background: #11111b; color: #cdd6f4; padding: 0.85rem 1rem; border-radius: 8px; overflow-x: auto; margin: 0.5rem 0; }
-	.content :global(pre code) { background: none; border: none; padding: 0; font-size: 0.8rem; color: #cdd6f4; }
-	.content :global(table) { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.5rem 0; }
-	.content :global(th), .content :global(td) { border: 1px solid var(--border); padding: 0.3rem 0.55rem; }
-	.content :global(th) { background: var(--surface-elevated); font-weight: 600; color: var(--text); }
-	.content :global(ul), .content :global(ol) { padding-left: 1.2rem; margin: 0.4rem 0; }
-	.content :global(li) { margin: 0.15rem 0; }
-	.content :global(strong) { color: var(--text); font-weight: 600; }
+	.content :global(h1) { font-size: 1.15rem; margin: 1.1rem 0 0.4rem; color: var(--text); }
+	.content :global(h2) { font-size: 1rem; margin: 1.2rem 0 0.35rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; color: var(--text); }
+	.content :global(p) { margin: 0.5rem 0; color: var(--text-muted); }
+	.content :global(code) { background: var(--surface-elevated); border: 1px solid var(--border); padding: 0.12rem 0.35rem; border-radius: 5px; font-size: 0.84em; font-family: 'Fira Code', monospace; color: var(--accent-strong); }
+	.content :global(pre) { background: var(--sandbox-bg); color: var(--sandbox-text); padding: 0.9rem 1rem; border-radius: 18px; overflow-x: auto; margin: 0.65rem 0; border: 1px solid var(--sandbox-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+	.content :global(pre code) { background: none; border: none; padding: 0; font-size: 0.82rem; color: var(--sandbox-text); }
+	.content :global(table) { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.65rem 0; }
+	.content :global(th), .content :global(td) { border: 1px solid var(--border); padding: 0.4rem 0.6rem; }
+	.content :global(th) { background: var(--surface-elevated); font-weight: 700; color: var(--text); }
+	.content :global(ul), .content :global(ol) { padding-left: 1.2rem; margin: 0.45rem 0; }
+	.content :global(li) { margin: 0.18rem 0; }
+	.content :global(strong) { color: var(--text); font-weight: 700; }
 
 	.notes-wrap {
 		border-top: 1px solid var(--border);
 		padding-top: 1rem;
 		margin-top: 0.25rem;
 	}
+
+	@media (max-width: 920px) {
+		.panel {
+			height: auto;
+			max-height: none;
+			border-right: none;
+			border-bottom: 1px solid var(--border);
+		}
+	}
 </style>
+

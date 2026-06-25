@@ -1,19 +1,19 @@
-<script>
+﻿<script>
 	/** @type {{ course: any, prev: any, next: any }} */
 	let { course, prev, next } = $props();
 </script>
 
 <nav class="lesson-nav">
 	{#if prev}
-		<a href="/courses/{course.id}/{prev.id}" class="btn">← {prev.title}</a>
+		<a href="/courses/{course.id}/{prev.id}" class="btn">Back: {prev.title}</a>
 	{:else}
 		<span></span>
 	{/if}
 
 	{#if next}
-		<a href="/courses/{course.id}/{next.id}" class="btn primary">Next: {next.title} →</a>
+		<a href="/courses/{course.id}/{next.id}" class="btn primary">Next: {next.title}</a>
 	{:else}
-		<a href="/courses/{course.id}" class="btn primary">Back to course →</a>
+		<a href="/courses/{course.id}" class="btn primary">Back to course</a>
 	{/if}
 </nav>
 
@@ -21,39 +21,43 @@
 	.lesson-nav {
 		display: flex;
 		justify-content: space-between;
-		gap: 0.5rem;
-		padding-top: 0.75rem;
+		gap: 0.65rem;
+		padding-top: 0.9rem;
 		border-top: 1px solid var(--border);
 	}
 
 	.btn {
-		padding: 0.45rem 0.8rem;
+		padding: 0.6rem 0.8rem;
 		border: 1px solid var(--border);
-		border-radius: 8px;
+		border-radius: 18px;
 		text-decoration: none;
 		color: var(--text-muted);
 		font-size: 0.78rem;
+		font-weight: 800;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: 46%;
-		transition: border-color 0.15s, color 0.15s;
-		background: transparent;
+		max-width: 48%;
+		transition: border-color 0.15s, color 0.15s, background 0.15s;
+		background: var(--surface-elevated);
 	}
 
 	.btn:hover {
-		border-color: var(--accent);
+		border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
 		color: var(--text);
+		background: var(--accent-muted);
 	}
 
 	.btn.primary {
 		background: var(--accent);
-		color: #fff;
+		color: #160d14;
 		border-color: var(--accent);
 	}
 
 	.btn.primary:hover {
 		background: var(--accent-hover);
 		border-color: var(--accent-hover);
+		color: #160d14;
 	}
 </style>
+

@@ -41,7 +41,7 @@
 		grid-template-rows: auto 1fr auto 1fr;
 		height: 100%;
 		overflow: hidden;
-		background: #1e1e2e;
+		background: var(--sandbox-bg);
 	}
 
 	.panel.no-preview {
@@ -53,8 +53,8 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.35rem 0.75rem;
-		background: #181825;
-		border-bottom: 1px solid #313244;
+		background: var(--sandbox-bar-bg);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
@@ -62,9 +62,9 @@
 		font-size: 0.65rem;
 		font-weight: 700;
 		letter-spacing: 0.07em;
-		color: #a6e3a1;
-		background: rgba(166, 227, 161, 0.1);
-		border: 1px solid rgba(166, 227, 161, 0.25);
+		color: var(--success);
+		background: var(--success-muted);
+		border: 1px solid var(--success-muted);
 		border-radius: 4px;
 		padding: 0.15rem 0.45rem;
 	}
@@ -73,7 +73,7 @@
 		font-size: 0.68rem;
 		font-weight: 700;
 		letter-spacing: 0.09em;
-		color: #cba6f7;
+		color: var(--accent);
 	}
 
 	.editor-section {
@@ -84,9 +84,9 @@
 		display: flex;
 		align-items: center;
 		padding: 0.35rem 0.75rem;
-		background: #17171f;
-		border-top: 2px solid #11111b;
-		border-bottom: 1px solid #272733;
+		background: var(--sandbox-bar-bg);
+		border-top: 1px solid var(--sandbox-border);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
@@ -94,7 +94,7 @@
 		font-size: 0.68rem;
 		font-weight: 700;
 		letter-spacing: 0.07em;
-		color: #8888a8;
+		color: var(--sandbox-text-muted);
 	}
 
 	.preview-section {
