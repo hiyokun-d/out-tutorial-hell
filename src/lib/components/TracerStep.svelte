@@ -59,8 +59,8 @@
 
 <style>
 	.card {
-		background: #13131c;
-		border-left: 3px solid var(--sc, #6366f1);
+		background: var(--sandbox-bg);
+		border-left: 3px solid var(--sc, var(--accent));
 		padding: 0.5rem 0.75rem;
 		flex-shrink: 0;
 		display: flex;
@@ -101,16 +101,16 @@
 
 	.iter-badge {
 		font-size: 0.6rem;
-		color: #fab387;
+		color: var(--warning);
 		font-family: 'Fira Code', monospace;
-		background: #fab38718;
+		background: var(--warning-muted);
 		padding: 0.05rem 0.4rem;
 		border-radius: 999px;
 	}
 
 	.line-pos {
 		font-size: 0.6rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		margin-left: auto;
 		font-family: 'Fira Code', monospace;
 	}
@@ -125,8 +125,8 @@
 	.src-line {
 		font-family: 'Fira Code', 'Cascadia Code', monospace;
 		font-size: 0.75rem;
-		color: #cdd6f4;
-		background: #1e1e2e;
+		color: var(--sandbox-text);
+		background: var(--sandbox-bar-bg);
 		padding: 0.1rem 0.4rem;
 		border-radius: 4px;
 		white-space: nowrap;
@@ -136,11 +136,11 @@
 		flex-shrink: 0;
 	}
 
-	.arrow { color: #6c7086; font-size: 0.7rem; flex-shrink: 0; }
+	.arrow { color: var(--sandbox-text-dim); font-size: 0.7rem; flex-shrink: 0; }
 
 	.explain {
 		font-size: 0.72rem;
-		color: #a6adc8;
+		color: var(--sandbox-text-muted);
 		flex: 1;
 		line-height: 1.45;
 	}
@@ -150,12 +150,12 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding-top: 0.15rem;
-		border-top: 1px solid #1e1e2e;
+		border-top: 1px solid var(--sandbox-border);
 	}
 
 	.next-lbl {
 		font-size: 0.58rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		flex-shrink: 0;
@@ -164,7 +164,7 @@
 	.next-code {
 		font-family: 'Fira Code', monospace;
 		font-size: 0.68rem;
-		color: #6c7086;
+		color: var(--sandbox-text-muted);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;

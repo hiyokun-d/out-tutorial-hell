@@ -1,18 +1,19 @@
-<script>
+﻿<script>
 	import { toasts } from '$lib/stores/toast.js';
+	import { Trophy, Zap } from '@lucide/svelte';
 </script>
 
 <div class="toast-stack" aria-live="polite">
 	{#each $toasts as toast (toast.id)}
 		<div class="toast" class:level-up={toast.levelUp}>
 			{#if toast.levelUp}
-				<span class="icon">🎉</span>
+				<Trophy size={20} class="level-up-icon" />
 				<div class="text">
 					<strong>Level {toast.level}!</strong>
 					<span>+{toast.xp} XP earned</span>
 				</div>
 			{:else}
-				<span class="icon">⚡</span>
+				<Zap size={20} class="xp-icon" />
 				<div class="text">
 					<strong>+{toast.xp} XP</strong>
 					<span>Lesson complete</span>
@@ -41,7 +42,7 @@
 		background: var(--surface-elevated);
 		border: 1px solid var(--border);
 		border-left: 3px solid var(--success);
-		border-radius: 10px;
+		border-radius: 20px;
 		padding: 0.7rem 1rem;
 		animation: slideIn 0.25s ease, fadeOut 0.3s ease 2.5s forwards;
 		min-width: 180px;
@@ -53,8 +54,13 @@
 		border-color: var(--accent);
 	}
 
-	.icon {
-		font-size: 1.1rem;
+	.level-up-icon {
+		color: var(--accent);
+		flex-shrink: 0;
+	}
+
+	.xp-icon {
+		color: var(--success);
 		flex-shrink: 0;
 	}
 
@@ -85,3 +91,4 @@
 		to   { opacity: 0; }
 	}
 </style>
+

@@ -1,7 +1,7 @@
 {
-  "title": "Web Development",
-  "description": "Learn HTML, CSS, and JavaScript by building real things. No fluff, no tutorials — just you and the code.",
-  "difficulty": "BEGINNER",
-  "order": 2,
-  "icon": "🌐"
+    "difficulty":  "BEGINNER",
+    "title":  "Web Development",
+    "description":  "Learn HTML, CSS, and JavaScript by building and testing real browser projects.",
+    "order":  2,
+    "icon":  "globe"
 }

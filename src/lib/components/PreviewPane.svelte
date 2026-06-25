@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	/** @type {{ code: string, language?: string }} */
 	let { code, language = 'html' } = $props();
 
@@ -21,7 +21,7 @@
 <style>
 	.preview-wrap {
 		height: 100%;
-		background: #fff;
+		background: #fff7ed;
 		overflow: hidden;
 	}
 
@@ -32,3 +32,4 @@
 		display: block;
 	}
 </style>
+

@@ -3,6 +3,7 @@ id: "variables"
 title: "Storing values"
 type: "PRACTICE"
 xpReward: 20
+module: "First Programs"
 ---
 
 # Storing values

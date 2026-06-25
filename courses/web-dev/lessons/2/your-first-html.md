@@ -3,6 +3,7 @@ id: "your-first-html"
 title: "Your First HTML"
 type: "PRACTICE"
 xpReward: 20
+module: "HTML Foundations"
 ---
 
 # Your First HTML

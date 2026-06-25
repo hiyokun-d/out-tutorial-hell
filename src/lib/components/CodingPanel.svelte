@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	import EditorToolbar from './EditorToolbar.svelte';
 	import CodeEditor from './CodeEditor.svelte';
 	import PreviewPane from './PreviewPane.svelte';
@@ -143,10 +143,10 @@
 <style>
 	.panel {
 		display: grid;
-		grid-template-rows: auto 1fr auto 1fr;
+		grid-template-rows: auto 1fr auto minmax(220px, 0.82fr);
 		height: 100%;
 		overflow: hidden;
-		background: #1e1e2e;
+		background: var(--sandbox-bg);
 	}
 
 	.panel.no-right {
@@ -155,7 +155,7 @@
 
 	.panel.with-piston {
 		grid-template-rows: auto 1fr;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
 	}
 
 	.panel.with-piston .editor-section {
@@ -170,34 +170,72 @@
 	.right-section {
 		grid-row: 2;
 		grid-column: 2;
-		border-left: 1px solid #272733;
+		border-left: 1px solid var(--sandbox-border);
 		overflow: hidden;
+		background: var(--sandbox-bg);
 	}
 
 	.preview-bar {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.35rem 0.75rem;
-		background: #17171f;
-		border-top: 2px solid #11111b;
-		border-bottom: 1px solid #272733;
+		min-height: 38px;
+		padding: 0.45rem 0.85rem;
+		background: var(--sandbox-bar-bg);
+		border-top: 1px solid var(--sandbox-border);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
 	.label {
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.07em;
-		color: #8888a8;
+		font-size: 0.7rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--sandbox-text);
 	}
 
 	.note {
-		font-size: 0.65rem;
-		color: #4e4e6a;
+		font-size: 0.68rem;
+		color: var(--sandbox-text-dim);
 	}
 
-	.editor-section { overflow: hidden; }
-	.preview-section { overflow: hidden; background: #fff; }
-	.console-section { overflow: hidden; background: #11111b; }
+	.editor-section {
+		overflow: hidden;
+		min-height: 0;
+	}
+
+	.preview-section {
+		overflow: hidden;
+		background: #fff7ed;
+	}
+
+	.console-section {
+		overflow: hidden;
+		background: var(--sandbox-bg);
+	}
+
+	@media (max-width: 920px) {
+		.panel,
+		.panel.with-piston {
+			display: flex;
+			min-height: 720px;
+		}
+
+		.panel.with-piston .editor-section,
+		.right-section {
+			grid-row: auto;
+			grid-column: auto;
+		}
+
+		.right-section {
+			min-height: 280px;
+			border-left: none;
+			border-top: 1px solid var(--sandbox-border);
+		}
+
+		.editor-section { min-height: 420px; }
+		.preview-section, .console-section { min-height: 300px; }
+	}
 </style>
+

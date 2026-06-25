@@ -3,6 +3,7 @@ id: "what-is-code"
 title: "What is Code?"
 type: "THEORY"
 xpReward: 10
+module: "Web Foundations"
 ---
 
 # What is Code?

@@ -3,6 +3,7 @@ id: "loops"
 title: "Loops — Repeating Things"
 type: "THEORY"
 xpReward: 15
+module: "Control Flow"
 ---
 
 # Loops — Repeating Things

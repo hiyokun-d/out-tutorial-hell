@@ -3,6 +3,7 @@ id: "hello-c"
 title: "Your First C Program"
 type: "PRACTICE"
 xpReward: 30
+module: "C Foundations"
 ---
 
 # Your First C Program

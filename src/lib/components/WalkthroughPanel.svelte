@@ -213,9 +213,9 @@
 
 	.why-box {
 		background: var(--accent-muted);
-		border: 1px solid rgba(99, 102, 241, 0.2);
+		border: 1px solid var(--accent-muted);
 		border-left: 3px solid var(--accent);
-		border-radius: 8px;
+		border-radius: 18px;
 		padding: 0.65rem 0.9rem;
 		margin-top: 0.25rem;
 	}
@@ -250,7 +250,7 @@
 	.nav-btn {
 		flex: 1;
 		padding: 0.55rem 0.75rem;
-		border-radius: 8px;
+		border-radius: 18px;
 		font-size: 0.875rem;
 		font-weight: 600;
 		cursor: pointer;
@@ -275,7 +275,7 @@
 
 	.nav-btn.next {
 		background: var(--accent);
-		color: #fff;
+		color: #160d14;
 		border-color: var(--accent);
 	}
 
@@ -289,3 +289,5 @@
 		padding-top: 1rem;
 	}
 </style>
+
+

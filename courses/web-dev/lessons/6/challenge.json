@@ -1,0 +1,16 @@
+{
+  "language": "html",
+  "instructions": "Add one link and one image. The link must point to `https://example.com`. The image must have a non-empty `alt` attribute.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Links and Images</title>\n  </head>\n  <body>\n    <h1>My resources</h1>\n  </body>\n</html>",
+  "hints": [
+    "A link looks like: <a href=\"https://example.com\">Example</a>",
+    "An image needs src and alt attributes.",
+    "Put both elements inside the body."
+  ],
+  "tests": [
+    { "id": 1, "description": "Has a link", "check": "has-tag", "value": "a" },
+    { "id": 2, "description": "Link points to example.com", "check": "attribute-value", "selector": "a", "attribute": "href", "value": "https://example.com" },
+    { "id": 3, "description": "Has an image", "check": "has-tag", "value": "img" },
+    { "id": 4, "description": "Image has alt text", "check": "attribute-not-empty", "selector": "img", "attribute": "alt" }
+  ]
+}

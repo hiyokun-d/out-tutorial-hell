@@ -1,0 +1,14 @@
+{
+  "instructions": "Create `int score = 75;`. If score is at least 70, print exactly `Passed`. Otherwise, print `Retry`.",
+  "starter": "#include <stdio.h>\n\nint main() {\n    int score = 75;\n\n    // Write your if/else here\n\n    return 0;\n}\n",
+  "hints": [
+    "Use if (score >= 70).",
+    "Remember braces around each branch.",
+    "With score 75, the program should print Passed."
+  ],
+  "tests": [
+    { "id": 1, "description": "Prints Passed", "check": "stdout-contains", "value": "Passed" },
+    { "id": 2, "description": "Uses if", "check": "code-contains", "value": "if" },
+    { "id": 3, "description": "Uses score comparison", "check": "code-contains", "value": "score >= 70" }
+  ]
+}

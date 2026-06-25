@@ -1,0 +1,14 @@
+{
+  "instructions": "Create an integer variable called `score` with the value `42`. Print exactly `Score: 42`.",
+  "starter": "#include <stdio.h>\n\nint main() {\n    // Create score and print it\n\n    return 0;\n}\n",
+  "hints": [
+    "Create the variable with: int score = 42;",
+    "Use %d to print an integer.",
+    "printf(\"Score: %d\\n\", score);"
+  ],
+  "tests": [
+    { "id": 1, "description": "Prints Score: 42", "check": "stdout-contains", "value": "Score: 42" },
+    { "id": 2, "description": "Uses an int variable", "check": "code-contains", "value": "int score" },
+    { "id": 3, "description": "Uses printf", "check": "code-contains", "value": "printf" }
+  ]
+}

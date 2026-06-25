@@ -3,6 +3,7 @@ id: "intro-to-c"
 title: "What is C?"
 type: "THEORY"
 xpReward: 15
+module: "C Foundations"
 ---
 
 # What is C?

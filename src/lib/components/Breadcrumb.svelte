@@ -18,15 +18,29 @@
 		align-items: center;
 		font-size: 0.78rem;
 		color: var(--text-dim);
+		white-space: nowrap;
+		flex-wrap: nowrap;
+		overflow: hidden;
 	}
 
 	a {
 		color: var(--text-muted);
 		text-decoration: none;
 		transition: color 0.15s;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 180px;
 	}
 
 	a:hover {
 		color: var(--accent);
+	}
+
+	span[aria-current="page"] {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 220px;
 	}
 </style>

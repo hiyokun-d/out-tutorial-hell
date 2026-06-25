@@ -8,7 +8,7 @@
 	let label = $derived(langLabel(language));
 </script>
 
-<div class="pane">
+<div class="pane" data-lenis-prevent>
 	<div class="bar">
 		<span class="label">Output</span>
 		{#if running}
@@ -69,8 +69,8 @@
 		align-items: center;
 		gap: 0.6rem;
 		padding: 0.3rem 0.75rem;
-		background: #17171f;
-		border-bottom: 1px solid #11111b;
+		background: var(--sandbox-bar-bg);
+		border-bottom: 1px solid var(--sandbox-border);
 		flex-shrink: 0;
 	}
 
@@ -78,7 +78,7 @@
 		font-size: 0.68rem;
 		font-weight: 700;
 		letter-spacing: 0.07em;
-		color: #8888a8;
+		color: var(--sandbox-text-muted);
 		text-transform: uppercase;
 	}
 
@@ -89,15 +89,15 @@
 		border-radius: 999px;
 	}
 
-	.status.ok      { background: rgba(16,185,129,.15); color: #10b981; }
-	.status.err     { background: rgba(239,68,68,.15);  color: #ef4444; }
-	.status.running { background: rgba(99,102,241,.15); color: #6366f1; }
+	.status.ok      { background: var(--success-muted); color: var(--success); }
+	.status.err     { background: var(--error-muted);  color: var(--error); }
+	.status.running { background: var(--accent-muted); color: var(--accent); }
 
 	.terminal {
 		flex: 1;
 		overflow-y: auto;
 		padding: 0.6rem 0.75rem;
-		background: #13131c;
+		background: var(--sandbox-bg);
 		min-height: 0;
 	}
 
@@ -108,19 +108,19 @@
 		word-break: break-word;
 	}
 
-	.line.stdout { color: #cdd6f4; }
-	.line.stderr { color: #f38ba8; }
+	.line.stdout { color: var(--sandbox-text); }
+	.line.stderr { color: var(--error); }
 
 	.sep {
 		font-size: 0.62rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		margin: 0.25rem 0;
 		letter-spacing: 0.06em;
 	}
 
 	.placeholder {
 		font-size: 0.78rem;
-		color: #4e4e6a;
+		color: var(--sandbox-text-dim);
 		font-style: italic;
 		padding: 0.5rem 0;
 	}
@@ -130,7 +130,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.78rem;
-		color: #8888a8;
+		color: var(--sandbox-text-muted);
 		padding: 0.5rem 0;
 	}
 

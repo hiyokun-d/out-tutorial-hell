@@ -3,6 +3,7 @@ id: "loops"
 title: "Repeating yourself"
 type: "PRACTICE"
 xpReward: 25
+module: "Control Flow"
 ---
 
 # Repeating yourself

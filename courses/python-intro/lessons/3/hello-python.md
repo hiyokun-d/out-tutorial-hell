@@ -3,6 +3,7 @@ id: "hello-python"
 title: "Hello, Python!"
 type: "PRACTICE"
 xpReward: 30
+module: "Python Foundations"
 ---
 
 # Hello, Python!

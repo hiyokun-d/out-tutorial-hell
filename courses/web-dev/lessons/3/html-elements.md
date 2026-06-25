@@ -3,6 +3,7 @@ id: "html-elements"
 title: "More HTML Elements"
 type: "PRACTICE"
 xpReward: 25
+module: "HTML Foundations"
 ---
 
 # More HTML Elements

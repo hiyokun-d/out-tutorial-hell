@@ -520,21 +520,21 @@
 					'&': { fontSize: '13.5px', fontFamily: "'Fira Code','Cascadia Code','JetBrains Mono',monospace" },
 					'.cm-scroller': { fontFamily: 'inherit' },
 					// Autocomplete dropdown
-					'.cm-tooltip-autocomplete': { borderRadius: '8px', border: '1px solid #313244', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' },
+					'.cm-tooltip-autocomplete': { borderRadius: '8px', border: '1px solid var(--sandbox-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.4)', background: 'var(--sandbox-bg)' },
 					'.cm-tooltip-autocomplete ul': { maxHeight: '220px' },
-					'.cm-tooltip-autocomplete ul li[aria-selected]': { background: '#45475a !important' },
-					'.cm-completionDetail': { color: '#a6e3a1', marginLeft: '0.5rem', fontSize: '0.8em' },
+					'.cm-tooltip-autocomplete ul li[aria-selected]': { background: 'var(--sandbox-scrollbar-thumb) !important' },
+					'.cm-completionDetail': { color: 'var(--syntax-str)', marginLeft: '0.5rem', fontSize: '0.8em' },
 					// Emmet expansion preview panel
-					'.cm-completionInfo': { background: '#181825', border: '1px solid #313244', borderRadius: '8px', padding: '0' },
+					'.cm-completionInfo': { background: 'var(--sandbox-bar-bg)', border: '1px solid var(--sandbox-border)', borderRadius: '8px', padding: '0' },
 					'.cm-emmet-info': { padding: '0.5rem 0.75rem' },
-					'.cm-emmet-info pre': { margin: '0', fontSize: '0.75rem', color: '#cdd6f4', fontFamily: "'Fira Code',monospace", whiteSpace: 'pre', lineHeight: '1.5' },
+					'.cm-emmet-info pre': { margin: '0', fontSize: '0.75rem', color: 'var(--sandbox-text)', fontFamily: "'Fira Code',monospace", whiteSpace: 'pre', lineHeight: '1.5' },
 					// Squiggles
-					'.cm-lintRange-error': { backgroundImage: 'none', borderBottom: '2px solid #f38ba8' },
-					'.cm-lintRange-warning': { backgroundImage: 'none', borderBottom: '2px dotted #fab387' },
+					'.cm-lintRange-error': { backgroundImage: 'none', borderBottom: '2px solid var(--error)' },
+					'.cm-lintRange-warning': { backgroundImage: 'none', borderBottom: '2px dotted var(--warning)' },
 					// JS beginner info panel
 					'.cm-js-info': { padding: '0.5rem 0.75rem', maxWidth: '280px' },
-					'.cm-js-info code': { display: 'block', fontSize: '0.78rem', color: '#cba6f7', fontFamily: "'Fira Code',monospace", marginBottom: '0.35rem', background: '#181825', padding: '0.25rem 0.4rem', borderRadius: '4px' },
-					'.cm-js-info p': { margin: '0', fontSize: '0.72rem', color: '#a6adc8', lineHeight: '1.5', whiteSpace: 'pre-line' }
+					'.cm-js-info code': { display: 'block', fontSize: '0.78rem', color: 'var(--accent)', fontFamily: "'Fira Code',monospace", marginBottom: '0.35rem', background: 'var(--sandbox-bar-bg)', padding: '0.25rem 0.4rem', borderRadius: '4px' },
+					'.cm-js-info p': { margin: '0', fontSize: '0.72rem', color: 'var(--sandbox-text-muted)', lineHeight: '1.5', whiteSpace: 'pre-line' }
 				}),
 				EditorView.updateListener.of((u) => {
 					if (u.docChanged) value = u.state.doc.toString();
@@ -590,7 +590,7 @@
 	});
 </script>
 
-<div class="wrap" bind:this={editorEl}></div>
+<div class="wrap" bind:this={editorEl} data-lenis-prevent></div>
 
 <style>
 	.wrap {
@@ -608,26 +608,26 @@
 
 	/* Error/warning panel (Ctrl-Shift-m) */
 	.wrap :global(.cm-panel.cm-panel-lint) {
-		border-top: 1px solid #313244;
-		background: #181825;
-		color: #cdd6f4;
+		border-top: 1px solid var(--sandbox-border);
+		background: var(--sandbox-bar-bg);
+		color: var(--sandbox-text);
 		font-size: 0.8rem;
 		max-height: 130px;
 		overflow-y: auto;
 	}
 
 	.wrap :global(.cm-diagnostic-error) {
-		border-left: 3px solid #f38ba8;
+		border-left: 3px solid var(--error);
 		padding-left: 6px;
 	}
 
 	.wrap :global(.cm-diagnostic-warning) {
-		border-left: 3px solid #fab387;
+		border-left: 3px solid var(--warning);
 		padding-left: 6px;
 	}
 
 	.wrap :global(.cm-diagnosticText) {
-		color: #cdd6f4;
+		color: var(--sandbox-text);
 	}
 
 	/* Walkthrough spotlight decorations */
@@ -636,9 +636,9 @@
 	}
 
 	.wrap :global(.cm-line.wt-spotlight) {
-		background: rgba(99, 102, 241, 0.12) !important;
+		background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
 		opacity: 1 !important;
-		border-left: 2px solid rgba(99, 102, 241, 0.6);
+		border-left: 2px solid var(--accent);
 	}
 
 	.wrap :global(.cm-line.wt-dim) {
@@ -651,6 +651,6 @@
 
 	@keyframes wtPulse {
 		0%, 100% { background: transparent; }
-		50% { background: rgba(99, 102, 241, 0.18); }
+		50% { background: color-mix(in srgb, var(--accent) 18%, transparent); }
 	}
 </style>

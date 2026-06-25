@@ -1,7 +1,7 @@
 {
-  "title": "Python",
-  "description": "Learn Python from scratch — variables, loops, functions, and real projects.",
-  "difficulty": "BEGINNER",
-  "order": 5,
-  "icon": "🐍"
+    "difficulty":  "BEGINNER",
+    "title":  "Python",
+    "description":  "Learn Python from scratch with runnable exercises, tracing, loops, and practical problem solving.",
+    "order":  3,
+    "icon":  "terminal"
 }

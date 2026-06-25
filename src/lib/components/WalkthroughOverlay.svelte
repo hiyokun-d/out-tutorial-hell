@@ -9,7 +9,6 @@
 	/** @type {{ code: string, language?: string, steps: any[], walkthroughStyle?: string, onClose: () => void }} */
 	let { code, language = 'html', steps, walkthroughStyle = 'spotlight', onClose } = $props();
 
-	// ── Step state ─────────────────────────────────────────────────────────────
 	let currentStep = $state(0);
 	/** @type {any} */
 	let editorApi = $state(null);
@@ -20,16 +19,15 @@
 	const highlightSpec = $derived(step?.highlight ?? null);
 	const resolved = $derived(resolveHighlightLines(highlightSpec, code));
 
-	/** Line indicator label — "L1" or "L3–5" */
+	/** Line indicator label ” "L1" or "L3“5" */
 	const lineLabel = $derived(
 		resolved
 			? resolved.fromLine === resolved.toLine
 				? `L${resolved.fromLine}`
-				: `L${resolved.fromLine}–${resolved.toLine}`
+				: `L${resolved.fromLine}“${resolved.toLine}`
 			: null
 	);
 
-	// ── Panel position & state ─────────────────────────────────────────────────
 	const PANEL_WIDTH = 320;
 
 	let panelX = $state(0);
@@ -73,7 +71,6 @@
 		document.addEventListener('pointerup', onUp);
 	}
 
-	// ── Navigation ─────────────────────────────────────────────────────────────
 	function goNext() {
 		if (currentStep < steps.length - 1) {
 			currentStep++;
@@ -86,7 +83,6 @@
 		if (currentStep > 0) currentStep--;
 	}
 
-	// ── Scroll editor to highlighted line when step changes ───────────────────
 	$effect(() => {
 		const r = resolved;
 		const api = editorApi;
@@ -94,7 +90,6 @@
 		api.scrollToLine(r.fromLine);
 	});
 
-	// ── Dot animation ──────────────────────────────────────────────────────────
 	/** @type {HTMLElement | null} */
 	let dotsEl = $state(null);
 	$effect(() => {
@@ -106,7 +101,6 @@
 		}
 	});
 
-	// ── Keyboard shortcuts ─────────────────────────────────────────────────────
 	/** @param {KeyboardEvent} e */
 	function handleKey(e) {
 		if (e.key === 'Escape') onClose();
@@ -134,7 +128,7 @@
 		<div class="ov-right">
 			<span class="ov-hint">← → navigate · M minimize · Esc exit</span>
 			<button class="ov-skip" onclick={onClose} aria-label="Exit walkthrough">
-				✕ Exit
+				✖ Exit
 			</button>
 		</div>
 	</div>
@@ -228,17 +222,15 @@
 </div>
 
 <style>
-	/* ── Overlay ─────────────────────────────────────────────────────────────── */
 	.overlay {
 		position: fixed;
 		inset: 0;
 		z-index: 1000;
-		background: var(--bg);
+		background: var(--bg-gradient);
 		display: flex;
 		flex-direction: column;
 	}
 
-	/* ── Top header bar ────────────────────────────────────────────────────────── */
 	.ov-header {
 		display: flex;
 		align-items: center;
@@ -321,7 +313,6 @@
 		border-color: var(--error);
 	}
 
-	/* ── Code area ─────────────────────────────────────────────────────────────── */
 	.ov-code-area {
 		flex: 1;
 		position: relative;
@@ -332,25 +323,23 @@
 		height: 100%;
 	}
 
-	/* ── Draggable panel ────────────────────────────────────────────────────────── */
 	.wt-panel {
 		position: absolute;
 		z-index: 20;
 		background: var(--surface-elevated);
 		border: 1px solid var(--border);
 		border-radius: 12px;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
+		box-shadow: var(--base-shadow);
 		overflow: hidden;
 		transition: box-shadow 0.15s;
 	}
 
 	.wt-panel.is-dragging {
-		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(99, 102, 241, 0.3);
+		box-shadow: var(--depth-shadow);
 		opacity: 0.97;
 		cursor: grabbing;
 	}
 
-	/* ── Panel header (drag handle) ─────────────────────────────────────────────── */
 	.panel-header {
 		display: flex;
 		align-items: center;
@@ -446,7 +435,6 @@
 		border-color: var(--accent);
 	}
 
-	/* ── Panel body ─────────────────────────────────────────────────────────────── */
 	.panel-body {
 		display: flex;
 		flex-direction: column;
@@ -491,7 +479,6 @@
 		line-height: 1.5;
 	}
 
-	/* ── Panel navigation ─────────────────────────────────────────────────────── */
 	.panel-nav {
 		display: flex;
 		align-items: center;
@@ -528,7 +515,7 @@
 
 	.pn-btn.next {
 		background: var(--accent);
-		color: #fff;
+		color: #160d14;
 		border-color: var(--accent);
 	}
 
@@ -556,3 +543,4 @@
 		transform: scale(1.3);
 	}
 </style>
+

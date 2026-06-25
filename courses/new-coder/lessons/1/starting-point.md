@@ -3,6 +3,7 @@ id: "intro"
 title: "What is programming?"
 type: "THEORY"
 xpReward: 10
+module: "Orientation"
 ---
 
 # What is programming?

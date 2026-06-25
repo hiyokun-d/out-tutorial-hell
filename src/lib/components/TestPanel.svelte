@@ -1,4 +1,4 @@
-<script>
+﻿<script>
 	import TestList from './TestList.svelte';
 	import HintPanel from './HintPanel.svelte';
 
@@ -22,7 +22,7 @@
 
 	async function fireConfetti() {
 		const { default: confetti } = await import('canvas-confetti');
-		confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#6366f1', '#8b5cf6', '#a78bfa', '#fbbf24'] });
+		confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FF9F1C', '#fbbf24', '#10b981', '#fcd34d'] });
 		setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { x: 0.1, y: 0.5 } }), 200);
 		setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { x: 0.9, y: 0.5 } }), 350);
 	}
@@ -42,11 +42,11 @@
 	<TestList results={testResults} />
 
 	<button class="run-btn" onclick={onRun} disabled={running}>
-		{running ? 'Running…' : 'Run Tests'}
+		{running ? 'Running...' : 'Run Tests'}
 	</button>
 
 	{#if allPassed}
-		<p class="success">All tests pass! Keep going 🚀</p>
+		<p class="success">All tests pass. Keep going.</p>
 	{/if}
 
 	<HintPanel {hints} />
@@ -56,12 +56,17 @@
 	.panel {
 		display: flex;
 		flex-direction: column;
-		gap: 0.65rem;
+		gap: 0.75rem;
+		padding: 0.95rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: color-mix(in srgb, var(--surface-elevated) 78%, transparent);
 	}
 
 	.header {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 0.5rem;
 	}
 
@@ -71,13 +76,13 @@
 		letter-spacing: 0.08em;
 		color: var(--text-muted);
 		margin: 0;
-		font-weight: 700;
+		font-weight: 800;
 	}
 
 	.progress {
 		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 0.15rem 0.45rem;
+		font-weight: 800;
+		padding: 0.18rem 0.5rem;
 		border-radius: 999px;
 		background: var(--error-muted);
 		color: var(--error);
@@ -91,31 +96,34 @@
 
 	.run-btn {
 		width: 100%;
-		padding: 0.55rem;
+		min-height: 42px;
+		padding: 0.65rem;
 		background: var(--accent);
-		color: #fff;
+		color: #160d14;
 		border: none;
-		border-radius: 8px;
-		font-size: 0.875rem;
-		font-weight: 600;
+		border-radius: 18px;
+		font-size: 0.88rem;
+		font-weight: 800;
 		cursor: pointer;
-		transition: background 0.15s;
+		transition: background 0.15s, transform 0.15s;
 	}
 
-	.run-btn:hover:not(:disabled) { background: var(--accent-hover); }
-	.run-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+	.run-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+	.run-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 	.success {
 		text-align: center;
-		font-size: 0.875rem;
-		font-weight: 600;
+		font-size: 0.86rem;
+		font-weight: 800;
 		color: var(--success);
 		margin: 0;
 		animation: pop 0.3s ease;
 	}
 
 	@keyframes pop {
-		from { transform: scale(0.9); opacity: 0; }
+		from { transform: scale(0.96); opacity: 0; }
 		to { transform: scale(1); opacity: 1; }
 	}
 </style>
+
+
