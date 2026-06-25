@@ -3,6 +3,7 @@ id: "sum-1-to-10"
 title: "Sum 1 to 10"
 type: "PRACTICE"
 xpReward: 40
+module: "Control Flow"
 ---
 
 # Sum 1 to 10

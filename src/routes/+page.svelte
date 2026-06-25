@@ -1,10 +1,9 @@
-﻿<script>
+<script>
 	// @ts-nocheck
 	import { onMount } from 'svelte';
-	import { ArrowRight, BookOpen, CheckCircle2, Code2, Download, GitBranch, Lock, Map, Play, Star, TerminalSquare, Trophy, Zap } from '@lucide/svelte';
+	import { ArrowRight, BookOpen, CheckCircle2, Code2, GitBranch, Lock, Map, Play, Star, TerminalSquare, Trophy, Zap } from '@lucide/svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { xp } from '$lib/stores/xp.js';
-	import { downloadLearningSnapshot } from '$lib/utils/local-data.js';
 
 	let { data } = $props();
 	const { courses, tracks, features, skillMatrix, stats } = data;
@@ -64,7 +63,6 @@
 			<div class="hero-actions">
 				<a class="primary-action" href={nextHref}><Play size={17} /> Continue learning</a>
 				<a class="secondary-action" href="/courses"><Map size={17} /> View roadmap</a>
-				<button class="secondary-action button-action" onclick={downloadLearningSnapshot}><Download size={17} /> Export progress</button>
 			</div>
 		</div>
 
@@ -99,7 +97,7 @@
 		<div class="focus-copy">
 			<span class="eyebrow"><CheckCircle2 size={15} /> Today</span>
 			<h2>Use this like a study desk, not a content feed.</h2>
-			<p>Pick one path, finish the next lesson, run the lab, and export your local progress when you want a backup.</p>
+			<p>Pick one path, finish the next lesson, and run the lab to build your local progress.</p>
 		</div>
 		<div class="focus-steps">
 			{#each studyPlan as item, index}

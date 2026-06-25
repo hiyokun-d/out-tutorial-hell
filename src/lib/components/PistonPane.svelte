@@ -8,7 +8,7 @@
 	let label = $derived(langLabel(language));
 </script>
 
-<div class="pane">
+<div class="pane" data-lenis-prevent>
 	<div class="bar">
 		<span class="label">Output</span>
 		{#if running}

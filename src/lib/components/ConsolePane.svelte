@@ -110,7 +110,7 @@ self.postMessage(__logs);
 	});
 </script>
 
-<div class="console-wrap">
+<div class="console-wrap" data-lenis-prevent>
 	<div class="output" aria-live="polite">
 		{#each lines as line}
 			<div class="line {line.type}">{line.text}</div>

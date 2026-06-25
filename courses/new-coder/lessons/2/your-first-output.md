@@ -3,6 +3,7 @@ id: "first-output"
 title: "Your first output"
 type: "PRACTICE"
 xpReward: 20
+module: "First Programs"
 ---
 
 # Your first output

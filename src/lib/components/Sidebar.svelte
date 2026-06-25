@@ -2,20 +2,10 @@
 	// @ts-nocheck
 	import { xp, xpProgress } from '$lib/stores/xp.js';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { BookOpen, Flame, Home, Map, Moon, Sun, Trophy, Zap } from '@lucide/svelte';
+	import { BookOpen, Flame, Home, Map, Trophy, Zap } from '@lucide/svelte';
 
-	let theme = $state('light');
-
-	onMount(() => {
-		theme = localStorage.getItem('theme') || 'light';
-		document.documentElement.setAttribute('data-theme', theme);
-	});
-
-	function toggleTheme() {
-		theme = theme === 'light' ? 'dark' : 'light';
-		document.documentElement.setAttribute('data-theme', theme);
-		localStorage.setItem('theme', theme);
+	function isRoadmapActive(pathname) {
+		return pathname === '/courses' || (pathname.startsWith('/courses/') && pathname !== '/courses/new-coder');
 	}
 </script>
 
@@ -31,7 +21,7 @@
 				<Home size={16} strokeWidth={2.2} />
 				<span>Dashboard</span>
 			</a>
-			<a href="/courses" class:active={$page.url.pathname.startsWith('/courses')}>
+			<a href="/courses" class:active={isRoadmapActive($page.url.pathname)}>
 				<Map size={16} strokeWidth={2.2} />
 				<span>Roadmap</span>
 			</a>
@@ -50,13 +40,6 @@
 			{#if $xp.streak > 1}
 				<div class="streak" title="Day streak"><Flame size={14} fill="currentColor" /> {$xp.streak}d</div>
 			{/if}
-			<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
-				{#if theme === 'light'}
-					<Moon size={16} strokeWidth={2.2} />
-				{:else}
-					<Sun size={16} strokeWidth={2.2} />
-				{/if}
-			</button>
 		</div>
 	</div>
 </header>
@@ -143,8 +126,7 @@
 	}
 
 	.xp-chip,
-	.streak,
-	.theme-toggle {
+	.streak {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -189,20 +171,6 @@
 		font-weight: 900;
 		color: var(--warning);
 	}
-
-	.theme-toggle {
-		width: 38px;
-		height: 38px;
-		border-radius: 999px;
-		cursor: pointer;
-		color: var(--text-muted);
-	}
-
-	.theme-toggle:hover {
-		color: var(--accent-strong);
-		border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
-	}
-
 	@media (max-width: 820px) {
 		.topbar { padding: 0.65rem 0.75rem; }
 		.topbar-inner {

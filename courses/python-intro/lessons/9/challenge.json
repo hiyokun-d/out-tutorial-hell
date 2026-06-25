@@ -1,0 +1,14 @@
+{
+  "instructions": "Given `numbers = [3, 4, 5]`, use a loop to calculate the total and print exactly `12`.",
+  "starter": "numbers = [3, 4, 5]\ntotal = 0\n\n# Add each number to total\n\nprint(total)\n",
+  "hints": [
+    "Loop with: for number in numbers:",
+    "Inside the loop, write total = total + number.",
+    "Print total after the loop, not inside it."
+  ],
+  "tests": [
+    { "id": 1, "description": "Prints 12", "check": "stdout-contains", "value": "12" },
+    { "id": 2, "description": "Uses a for loop", "check": "code-contains", "value": "for" },
+    { "id": 3, "description": "Uses total", "check": "code-contains", "value": "total" }
+  ]
+}

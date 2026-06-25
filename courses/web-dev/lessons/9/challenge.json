@@ -1,0 +1,17 @@
+{
+  "language": "html",
+  "instructions": "Build a section with an `h2`, a `p`, and a link to `https://developer.mozilla.org`.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Resource Section</title>\n  </head>\n  <body>\n  </body>\n</html>",
+  "hints": [
+    "Use a section element inside body.",
+    "Place h2, p, and a inside the section.",
+    "The MDN link should use href=\"https://developer.mozilla.org\"."
+  ],
+  "tests": [
+    { "id": 1, "description": "Has a section", "check": "has-tag", "value": "section" },
+    { "id": 2, "description": "Section has an h2", "check": "child-of", "parent": "section", "child": "h2" },
+    { "id": 3, "description": "Section has a paragraph", "check": "child-of", "parent": "section", "child": "p" },
+    { "id": 4, "description": "Section has a link", "check": "child-of", "parent": "section", "child": "a" },
+    { "id": 5, "description": "Link points to MDN", "check": "attribute-value", "selector": "a", "attribute": "href", "value": "https://developer.mozilla.org" }
+  ]
+}

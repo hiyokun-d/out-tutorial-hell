@@ -3,6 +3,7 @@ id: "if-else"
 title: "Making decisions"
 type: "PRACTICE"
 xpReward: 25
+module: "Control Flow"
 ---
 
 # Making decisions

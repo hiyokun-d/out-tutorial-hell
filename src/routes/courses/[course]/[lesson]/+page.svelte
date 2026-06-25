@@ -4,13 +4,19 @@
 	import WalkthroughLesson from '$lib/components/WalkthroughLesson.svelte';
 
 	let { data } = $props();
-	const { course, lesson, prev, next, config } = data;
+	let course = $derived(data.course);
+	let lesson = $derived(data.lesson);
+	let prev = $derived(data.prev);
+	let next = $derived(data.next);
+	let config = $derived(data.config);
 </script>
 
-{#if lesson.type === 'WALKTHROUGH'}
-	<WalkthroughLesson {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
-{:else if lesson.challenge}
-	<ChallengeEditor {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
-{:else}
-	<TheoryLesson {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
-{/if}
+{#key lesson.id}
+	{#if lesson.type === 'WALKTHROUGH'}
+		<WalkthroughLesson {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
+	{:else if lesson.challenge}
+		<ChallengeEditor {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
+	{:else}
+		<TheoryLesson {lesson} {course} {prev} {next} {config} courseSlug={course.id} lessonId={lesson.id} />
+	{/if}
+{/key}

@@ -1,4 +1,4 @@
-﻿<script>
+<script>
 	import { marked } from 'marked';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import TaskBox from './TaskBox.svelte';
@@ -28,7 +28,7 @@
 	let showNotes = $state(false);
 </script>
 
-<aside class="panel">
+<aside class="panel" data-lenis-prevent>
 	<div class="panel-top">
 		<Breadcrumb {course} {lesson} />
 		<button class="notes-toggle" onclick={() => (showNotes = !showNotes)}>

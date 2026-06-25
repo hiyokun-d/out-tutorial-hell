@@ -1,0 +1,16 @@
+{
+  "language": "html",
+  "instructions": "Create a `div` with the text `Profile card`. Give it inline styles for `border: 1px solid black` and `padding: 16px`.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Card</title>\n  </head>\n  <body>\n    <!-- Build your card here -->\n  </body>\n</html>",
+  "hints": [
+    "Use a div element.",
+    "Inline style syntax: style=\"border: 1px solid black; padding: 16px;\"",
+    "Put Profile card between the opening and closing div tags."
+  ],
+  "tests": [
+    { "id": 1, "description": "Has a div", "check": "has-tag", "value": "div" },
+    { "id": 2, "description": "Div text says Profile card", "check": "tag-text", "tag": "div", "value": "Profile card" },
+    { "id": 3, "description": "Div has border", "check": "css-property", "selector": "div", "property": "border", "value": "1px solid black" },
+    { "id": 4, "description": "Div has padding", "check": "css-property", "selector": "div", "property": "padding", "value": "16px" }
+  ]
+}

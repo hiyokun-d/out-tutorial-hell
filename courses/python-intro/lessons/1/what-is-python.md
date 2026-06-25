@@ -3,6 +3,7 @@ id: "what-is-python"
 title: "What is Python?"
 type: "THEORY"
 xpReward: 15
+module: "Python Foundations"
 ---
 
 # What is Python?

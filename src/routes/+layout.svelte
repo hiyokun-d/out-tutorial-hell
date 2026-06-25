@@ -5,10 +5,30 @@
 	import XpToast from '$lib/components/XpToast.svelte';
 	import { xp } from '$lib/stores/xp.js';
 	import { onMount } from 'svelte';
+	import Lenis from 'lenis';
 
 	let { children } = $props();
 
-	onMount(() => xp.init());
+	onMount(() => {
+		xp.init();
+
+		const lenis = new Lenis({
+			lerp: 0.08,
+			wheelMultiplier: 1.1,
+			smoothWheel: true
+		});
+
+		function raf(time) {
+			lenis.raf(time);
+			requestAnimationFrame(raf);
+		}
+
+		requestAnimationFrame(raf);
+
+		return () => {
+			lenis.destroy();
+		};
+	});
 </script>
 
 <svelte:head>

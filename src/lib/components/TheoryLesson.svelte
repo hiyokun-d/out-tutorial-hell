@@ -309,7 +309,7 @@
 	</main>
 
 	{#if sandboxOpen}
-		<aside class="sandbox-panel">
+		<aside class="sandbox-panel" data-lenis-prevent>
 			<!-- Header bar -->
 			<div class="panel-bar">
 				<span class="panel-label">Sandbox</span>

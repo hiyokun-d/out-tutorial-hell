@@ -590,7 +590,7 @@
 	});
 </script>
 
-<div class="wrap" bind:this={editorEl}></div>
+<div class="wrap" bind:this={editorEl} data-lenis-prevent></div>
 
 <style>
 	.wrap {

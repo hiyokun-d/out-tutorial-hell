@@ -1,6 +1,5 @@
-﻿<script>
+<script>
 	// @ts-nocheck
-	import { onMount } from 'svelte';
 	import { isComplete } from '$lib/utils/progress.js';
 	import { Check, FlaskConical, Lock, PlayCircle, ScrollText } from '@lucide/svelte';
 
@@ -13,7 +12,7 @@
 	let completed = $state(false);
 	let prevDone = $state(true);
 
-	onMount(() => {
+	$effect(() => {
 		completed = isComplete(courseId, lesson.id);
 		prevDone = prevLessonId === null || isComplete(courseId, prevLessonId);
 	});

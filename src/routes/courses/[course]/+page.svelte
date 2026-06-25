@@ -1,23 +1,64 @@
-﻿<script>
+<script>
 	// @ts-nocheck
 	import CourseHeader from '$lib/components/CourseHeader.svelte';
-	import LessonRow from '$lib/components/LessonRow.svelte';
-	import { onMount } from 'svelte';
-	import { ArrowLeft, CheckCircle2, Code2, ListChecks, Play, Route, Target } from '@lucide/svelte';
+	import { ArrowLeft, BookOpen, CheckCircle2, Code2, FlaskConical, Lock, Play, Route, ScrollText, Target } from '@lucide/svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 
 	let { data } = $props();
-	const { course, lessons } = data;
+	let course = $derived(data.course);
+	let lessons = $derived(data.lessons);
 
-	const challengeCount = lessons.filter((lesson) => lesson.challenge).length;
-	const totalXp = lessons.reduce((sum, lesson) => sum + (lesson.xpReward ?? 10), 0);
+	let challengeCount = $derived(lessons.filter((lesson) => lesson.challenge).length);
+	let totalXp = $derived(lessons.reduce((sum, lesson) => sum + (lesson.xpReward ?? 10), 0));
 	let completed = $state(new Set());
+	let lessonGroups = $derived(groupLessons(lessons, completed));
 
-	onMount(() => {
+	$effect(() => {
 		completed = getProgress(course.id);
 	});
 
 	let nextLesson = $derived(lessons.find((lesson) => !completed.has(lesson.id)) ?? lessons[0] ?? null);
+
+	function groupLessons(items, completedLessons = new Set()) {
+		const groups = [];
+		const byName = new Map();
+
+		for (const lesson of items) {
+			const name = lesson.module || 'Core path';
+			if (!byName.has(name)) {
+				const group = { name, lessons: [], labs: 0, xp: 0, completed: 0 };
+				byName.set(name, group);
+				groups.push(group);
+			}
+
+			const group = byName.get(name);
+			group.lessons.push(lesson);
+			group.labs += lesson.challenge ? 1 : 0;
+			group.xp += lesson.xpReward ?? 10;
+			group.completed += completedLessons.has(lesson.id) ? 1 : 0;
+		}
+
+		return groups;
+	}
+
+	function moduleSummary(group) {
+		const parts = [`${group.lessons.length} lessons`, `${group.xp} XP`];
+		if (group.labs > 0) parts.splice(1, 0, `${group.labs} labs`);
+		return parts.join(' / ');
+	}
+
+	function lessonIndex(lesson) {
+		return lessons.findIndex((item) => item.id === lesson.id);
+	}
+
+	function isLessonLocked(index) {
+		return index > 0 && !completed.has(lessons[index - 1].id);
+	}
+
+	function typeLabel(lesson) {
+		if (lesson.challenge) return 'Lab';
+		return lesson.type === 'PROJECT' ? 'Project' : lesson.type === 'WALKTHROUGH' ? 'Walkthrough' : 'Lesson';
+	}
 </script>
 
 <svelte:head><title>{course.title} | Out of Tutorial Hell</title></svelte:head>
@@ -46,21 +87,67 @@
 
 	<section class="path-section">
 		<div class="section-title">
-			<span><ListChecks size={16} /> Course path</span>
-			<p>Complete each node to unlock the next one locally in this browser.</p>
+			<span><Route size={16} /> Visual roadmap</span>
+			<p>Follow the connected path. Every node opens a lesson, lab, walkthrough, or project.</p>
 		</div>
-		<ol class="lesson-list">
-			{#each lessons as lesson, i}
-				<li>
-					<div class="lesson-index">{String(i + 1).padStart(2, '0')}</div>
-					<LessonRow
-						{lesson}
-						courseId={course.id}
-						prevLessonId={i > 0 ? lessons[i - 1].id : null}
-					/>
-				</li>
+		<div class="roadmap-board">
+			{#each lessonGroups as group, groupIndex}
+				{@const moduleNumber = String(groupIndex + 1).padStart(2, '0')}
+				{@const pct = Math.round((group.completed / group.lessons.length) * 100)}
+				<section class="module-track" aria-labelledby={`module-${groupIndex}`}>
+					<div class="module-card">
+						<div class="module-kicker">
+							<span class="module-number">Module {moduleNumber}</span>
+							<span class="module-state">{group.completed}/{group.lessons.length} done</span>
+						</div>
+						<div class="module-title-row">
+							<div>
+								<h3 id={`module-${groupIndex}`}>{group.name}</h3>
+								<p>{moduleSummary(group)}</p>
+							</div>
+							<div class="module-icons" aria-label={moduleSummary(group)}>
+								<span><BookOpen size={15} /> {group.lessons.length}</span>
+								<span><FlaskConical size={15} /> {group.labs}</span>
+							</div>
+						</div>
+						<div class="module-progress" aria-label={`Module ${groupIndex + 1} is ${pct}% complete`}>
+							<span style={`width: ${pct}%`}></span>
+						</div>
+					</div>
+
+					<div class="roadmap-nodes">
+						{#each group.lessons as lesson, localIndex}
+							{@const i = lessonIndex(lesson)}
+							{@const locked = isLessonLocked(i)}
+							{@const done = completed.has(lesson.id)}
+							<a
+								href={locked ? undefined : `/courses/${course.id}/${lesson.id}`}
+								class="roadmap-node"
+								class:branch-right={localIndex % 2 === 1}
+								class:completed={done}
+								class:locked
+								aria-disabled={locked}
+							>
+								<span class="node-number">{String(i + 1).padStart(2, '0')}</span>
+								<span class="node-copy">
+									<strong>{lesson.title}</strong>
+									<small>{typeLabel(lesson)} / +{lesson.xpReward ?? 10} XP</small>
+								</span>
+								<span class="node-status" aria-hidden="true">
+									{#if locked}
+										<Lock size={15} />
+									{:else if lesson.challenge}
+										<FlaskConical size={15} />
+									{:else}
+										<ScrollText size={15} />
+									{/if}
+								</span>
+							</a>
+						{/each}
+					</div>
+				</section>
 			{/each}
-		</ol>
+		</div>
 	</section>
 </main>
 
@@ -178,31 +265,243 @@
 		text-align: right;
 	}
 
-	.lesson-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-	}
-
-	.lesson-list li {
+	.roadmap-board {
+		position: relative;
 		display: grid;
-		grid-template-columns: 44px 1fr;
-		gap: 0.65rem;
-		align-items: stretch;
+		gap: 1.35rem;
+		padding: 0.4rem 0.2rem;
 	}
 
-	.lesson-index {
+	.module-track {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(220px, 280px) 1fr;
+		gap: 1.1rem;
+		align-items: start;
+	}
+
+	.module-track::before {
+		content: '';
+		position: absolute;
+		left: 280px;
+		top: 64px;
+		width: calc(100% - 280px);
+		height: 2px;
+		background: color-mix(in srgb, var(--border) 70%, transparent);
+	}
+
+	.module-track:not(:last-child)::after {
+		content: '';
+		position: absolute;
+		left: 138px;
+		top: calc(100% - 0.05rem);
+		width: 2px;
+		height: 1.4rem;
+		background: color-mix(in srgb, var(--border) 70%, transparent);
+	}
+
+	.module-card,
+	.roadmap-node {
+		position: relative;
+		z-index: 1;
 		border: 1px solid var(--border);
+		box-shadow: var(--base-shadow);
+	}
+
+	.module-card {
+		display: grid;
+		gap: 0.85rem;
+		padding: 1rem;
 		border-radius: 18px;
-		background: var(--surface-elevated);
-		color: var(--text-dim);
-		font-size: 0.75rem;
+		background:
+			linear-gradient(135deg, color-mix(in srgb, var(--accent-muted) 60%, transparent), transparent 64%),
+			var(--surface-elevated);
+	}
+
+	.module-kicker,
+	.module-title-row,
+	.module-icons,
+	.module-icons span,
+	.roadmap-node,
+	.node-status {
+		display: flex;
+		align-items: center;
+	}
+
+	.module-kicker,
+	.module-title-row {
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.module-number,
+	.module-state {
+		font-size: 0.68rem;
 		font-weight: 900;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.module-number { color: var(--accent-strong); }
+	.module-state { color: var(--text-dim); }
+
+	.module-card h3 {
+		margin: 0;
+		color: var(--text);
+		font-size: 1.25rem;
+		line-height: 1.2;
+	}
+
+	.module-card p {
+		margin: 0.3rem 0 0;
+		color: var(--text-muted);
+		font-size: 0.84rem;
+		font-weight: 750;
+	}
+
+	.module-icons {
+		gap: 0.45rem;
+		flex-shrink: 0;
+	}
+
+	.module-icons span {
+		gap: 0.35rem;
+		min-height: 34px;
+		padding: 0.35rem 0.55rem;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		background: var(--surface);
+		color: var(--text-muted);
+		font-size: 0.76rem;
+		font-weight: 900;
+	}
+
+	.module-progress {
+		height: 7px;
+		overflow: hidden;
+		border-radius: 999px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+	}
+
+	.module-progress span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: var(--accent);
+		transition: width 0.35s ease;
+	}
+
+	.roadmap-nodes {
+		position: relative;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(170px, 1fr));
+		gap: 0.75rem 1rem;
+		padding-top: 1.25rem;
+	}
+
+	.roadmap-nodes::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: color-mix(in srgb, var(--border) 70%, transparent);
+		transform: translateX(-50%);
+	}
+
+	.roadmap-node {
+		gap: 0.75rem;
+		min-height: 72px;
+		padding: 0.8rem;
+		border-radius: 16px;
+		background: var(--surface-elevated);
+		color: var(--text);
+		text-decoration: none;
+		transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+	}
+
+	.roadmap-node:nth-child(odd) { grid-column: 1; }
+	.roadmap-node:nth-child(even) { grid-column: 2; }
+
+	.roadmap-node::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		width: 1rem;
+		height: 2px;
+		background: color-mix(in srgb, var(--border) 70%, transparent);
+	}
+
+	.roadmap-node:nth-child(odd)::before { right: -1rem; }
+	.roadmap-node:nth-child(even)::before { left: -1rem; }
+
+	.roadmap-node:hover:not(.locked) {
+		transform: translateY(-2px);
+		border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+		box-shadow: var(--depth-shadow);
+	}
+
+	.roadmap-node.completed {
+		border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+		background: linear-gradient(90deg, var(--surface-elevated), color-mix(in srgb, var(--success) 5%, var(--surface-elevated)));
+	}
+
+	.roadmap-node.locked {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.node-number,
+	.node-status {
+		width: 34px;
+		height: 34px;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		flex-shrink: 0;
+	}
+
+	.node-number {
 		display: grid;
 		place-items: center;
+		background: var(--surface);
+		color: var(--text-dim);
+		font-size: 0.72rem;
+		font-weight: 900;
+	}
+
+	.node-copy {
+		display: grid;
+		gap: 0.22rem;
+		min-width: 0;
+		flex: 1;
+	}
+
+	.node-copy strong {
+		font-size: 0.9rem;
+		line-height: 1.25;
+		color: var(--text);
+	}
+
+	.node-copy small {
+		color: var(--text-muted);
+		font-size: 0.68rem;
+		font-weight: 850;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.node-status {
+		justify-content: center;
+		background: var(--accent-muted);
+		color: var(--accent-strong);
+	}
+
+	.roadmap-node.completed .node-status {
+		background: var(--success);
+		border-color: var(--success);
+		color: #fff;
 	}
 
 	@media (max-width: 720px) {
@@ -212,11 +511,28 @@
 		.course-command a { width: 100%; justify-content: center; }
 		.quick-stats { grid-template-columns: 1fr; padding: 0 1rem; }
 		.path-section { border-radius: 0; border-left: 0; border-right: 0; }
+		.module-track { grid-template-columns: 1fr; gap: 0.75rem; }
+		.module-track::before,
+		.module-track::after,
+		.roadmap-nodes::before,
+		.roadmap-node::before { display: none; }
+		.module-card { border-radius: 14px; }
+		.module-title-row { flex-direction: column; align-items: flex-start; }
+		.module-icons { width: 100%; }
+		.module-icons span { flex: 1; justify-content: center; }
 		.section-title { flex-direction: column; }
 		.section-title p { text-align: left; }
-		.lesson-list li { grid-template-columns: 1fr; }
-		.lesson-index { display: none; }
+		.roadmap-nodes { grid-template-columns: 1fr; padding-top: 0; }
+		.roadmap-node:nth-child(odd),
+		.roadmap-node:nth-child(even) { grid-column: 1; }
 	}
 </style>
+
+
+
+
+
+
+
 
 
