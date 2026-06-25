@@ -3,5 +3,9 @@
   "description": "What students will build in this course.",
   "difficulty": "BEGINNER",
   "order": 99,
-  "icon": "📚"
+  "icon": "📚",
+  "author": {
+    "name": "Your Name",
+    "link": "https://your-link.com"
+  }
 }

@@ -7,7 +7,7 @@
 	import NotesPanel from './NotesPanel.svelte';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 
-	/** @type {{ lesson: any, course: any, prev: any, next: any, testResults: any[], allPassed: boolean, running: boolean, onRun: () => void, features?: any, courseSlug?: string, lessonId?: string }} */
+	/** @type {{ lesson: any, course: any, prev: any, next: any, testResults: any[], allPassed: boolean, running: boolean, onRun: () => void, onNext?: () => void, features?: any, courseSlug?: string, lessonId?: string }} */
 	let {
 		lesson,
 		course,
@@ -17,6 +17,7 @@
 		allPassed,
 		running,
 		onRun,
+		onNext = undefined,
 		features = DEFAULT_CONFIG.features,
 		courseSlug = '',
 		lessonId = ''
@@ -52,7 +53,7 @@
 		{onRun}
 	/>
 
-	<LessonNav {course} {prev} {next} />
+	<LessonNav {course} {prev} {next} {onNext} />
 
 	{#if showNotes && courseSlug && lessonId}
 		<div class="notes-wrap">

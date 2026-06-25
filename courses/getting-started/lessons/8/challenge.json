@@ -1,0 +1,16 @@
+{
+  "language": "html",
+  "instructions": "Style the `.card` div using CSS inside the `<style>` block. Add a `background-color`, at least `1rem` of `padding`, and `border-radius` to round the corners.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>My Card</title>\n    <style>\n      body {\n        font-family: sans-serif;\n        background: #f5f5f5;\n        padding: 2rem;\n      }\n\n      /* Style your card here */\n      .card {\n\n      }\n    </style>\n  </head>\n  <body>\n    <div class=\"card\">\n      <h2>Hello, Coder!</h2>\n      <p>I styled this card with CSS.</p>\n    </div>\n  </body>\n</html>",
+  "hints": [
+    "Inside .card { }, add: background-color: white;",
+    "Add padding: 1.5rem; to create space inside the card",
+    "Add border-radius: 12px; to round the corners"
+  ],
+  "tests": [
+    { "id": 1, "description": "The .card selector is used", "check": "code-contains", "value": ".card" },
+    { "id": 2, "description": "Card has a background color", "check": "code-contains", "value": "background" },
+    { "id": 3, "description": "Card has padding", "check": "code-contains", "value": "padding" },
+    { "id": 4, "description": "Card has rounded corners", "check": "code-contains", "value": "border-radius" }
+  ]
+}

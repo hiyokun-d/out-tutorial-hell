@@ -1,0 +1,18 @@
+{
+  "language": "html",
+  "instructions": "Build a profile page with your name in an `<h1>`, a one-sentence `<p>` about yourself, and a `<ul>` list with at least **3 things you want to learn**.",
+  "starter": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>My Profile</title>\n  </head>\n  <body>\n    <!-- Write your profile page here -->\n\n  </body>\n</html>",
+  "hints": [
+    "Add <h1>Your Name</h1> inside the <body>",
+    "Add <p>One sentence about you.</p> below the heading",
+    "Add a <ul> with at least 3 <li> items inside it"
+  ],
+  "tests": [
+    { "id": 1, "description": "Has an h1 heading", "check": "has-tag", "value": "h1" },
+    { "id": 2, "description": "h1 is not empty", "check": "not-empty", "selector": "h1" },
+    { "id": 3, "description": "Has a paragraph", "check": "has-tag", "value": "p" },
+    { "id": 4, "description": "Paragraph is not empty", "check": "not-empty", "selector": "p" },
+    { "id": 5, "description": "Has an unordered list", "check": "has-tag", "value": "ul" },
+    { "id": 6, "description": "Has at least 3 list items", "check": "min-count", "selector": "li", "count": 3 }
+  ]
+}

@@ -30,7 +30,11 @@ This describes your course. Copy this template:
   "description": "One sentence describing what learners will build or learn.",
   "difficulty": "BEGINNER",
   "order": 2,
-  "icon": "🐍"
+  "icon": "🐍",
+  "author": {
+    "name": "Your Name",
+    "link": "https://your-link.com"
+  }
 }
 ```
 
@@ -42,6 +46,8 @@ This describes your course. Copy this template:
 | `difficulty` | `BEGINNER`, `INTERMEDIATE`, or `ADVANCED` |
 | `order` | Where it appears in the course list (1 = first) |
 | `icon` | Any emoji |
+| `author.name` | **Required.** Your name or handle — shown on the course card and course page. |
+| `author.link` | Optional. A URL (GitHub profile, website, etc.) — makes your name clickable. |
 
 ---
 

@@ -1,8 +1,9 @@
 <script>
 	// @ts-nocheck
 	import CourseHeader from '$lib/components/CourseHeader.svelte';
-	import { ArrowLeft, BookOpen, CheckCircle2, Code2, FlaskConical, Lock, Play, Route, ScrollText, Target } from '@lucide/svelte';
+	import { ArrowLeft, BookOpen, CheckCircle2, Code2, FlaskConical, Play, Route, ScrollText, Target } from '@lucide/svelte';
 	import { getProgress } from '$lib/utils/progress.js';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 	let course = $derived(data.course);
@@ -51,8 +52,23 @@
 		return lessons.findIndex((item) => item.id === lesson.id);
 	}
 
-	function isLessonLocked(index) {
-		return index > 0 && !completed.has(lessons[index - 1].id);
+	/** @type {{ lesson: any, skipped: number } | null} */
+	let skipDialog = $state(null);
+
+	/** @param {MouseEvent} e @param {any} lesson @param {number} i */
+	function handleNodeClick(e, lesson, i) {
+		const skippedCount = lessons.slice(0, i).filter((l) => !completed.has(l.id)).length;
+		if (skippedCount > 0) {
+			e.preventDefault();
+			skipDialog = { lesson, skipped: skippedCount };
+		}
+	}
+
+	function confirmSkip() {
+		if (!skipDialog) return;
+		const target = skipDialog.lesson;
+		skipDialog = null;
+		goto(`/courses/${course.id}/${target.id}`);
 	}
 
 	function typeLabel(lesson) {
@@ -118,15 +134,13 @@
 					<div class="roadmap-nodes">
 						{#each group.lessons as lesson, localIndex}
 							{@const i = lessonIndex(lesson)}
-							{@const locked = isLessonLocked(i)}
 							{@const done = completed.has(lesson.id)}
 							<a
-								href={locked ? undefined : `/courses/${course.id}/${lesson.id}`}
+								href="/courses/{course.id}/{lesson.id}"
 								class="roadmap-node"
 								class:branch-right={localIndex % 2 === 1}
 								class:completed={done}
-								class:locked
-								aria-disabled={locked}
+								onclick={(e) => handleNodeClick(e, lesson, i)}
 							>
 								<span class="node-number">{String(i + 1).padStart(2, '0')}</span>
 								<span class="node-copy">
@@ -134,9 +148,7 @@
 									<small>{typeLabel(lesson)} / +{lesson.xpReward ?? 10} XP</small>
 								</span>
 								<span class="node-status" aria-hidden="true">
-									{#if locked}
-										<Lock size={15} />
-									{:else if lesson.challenge}
+									{#if lesson.challenge}
 										<FlaskConical size={15} />
 									{:else}
 										<ScrollText size={15} />
@@ -150,6 +162,24 @@
 		</div>
 	</section>
 </main>
+
+{#if skipDialog}
+	<div class="skip-overlay" role="dialog" aria-modal="true" onclick={() => (skipDialog = null)}>
+		<div class="skip-dialog" onclick={(e) => e.stopPropagation()}>
+			<h3>Skip ahead?</h3>
+			<p>
+				{skipDialog.skipped === 1
+					? 'There is 1 uncompleted lesson'
+					: `There are ${skipDialog.skipped} uncompleted lessons`} before this one.
+				You can always come back to them — your progress is saved locally in your browser, nothing is sent anywhere.
+			</p>
+			<div class="skip-actions">
+				<button class="skip-cancel" onclick={() => (skipDialog = null)}>Stay here</button>
+				<button class="skip-confirm" onclick={confirmSkip}>Go anyway</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.course-page {
@@ -448,11 +478,6 @@
 		background: linear-gradient(90deg, var(--surface-elevated), color-mix(in srgb, var(--success) 5%, var(--surface-elevated)));
 	}
 
-	.roadmap-node.locked {
-		opacity: 0.55;
-		cursor: not-allowed;
-	}
-
 	.node-number,
 	.node-status {
 		width: 34px;
@@ -503,6 +528,74 @@
 		border-color: var(--success);
 		color: #fff;
 	}
+
+	.skip-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.45);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 100;
+		backdrop-filter: blur(3px);
+		padding: 1rem;
+	}
+
+	.skip-dialog {
+		background: var(--surface-elevated);
+		border: 1px solid var(--border);
+		border-radius: 20px;
+		padding: 1.75rem;
+		max-width: 400px;
+		width: 100%;
+		box-shadow: var(--depth-shadow);
+	}
+
+	.skip-dialog h3 {
+		margin: 0 0 0.75rem;
+		font-size: 1.15rem;
+		color: var(--text);
+	}
+
+	.skip-dialog p {
+		margin: 0 0 1.25rem;
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		line-height: 1.6;
+	}
+
+	.skip-actions {
+		display: flex;
+		gap: 0.6rem;
+		justify-content: flex-end;
+	}
+
+	.skip-cancel,
+	.skip-confirm {
+		padding: 0.55rem 1.1rem;
+		border-radius: 18px;
+		font-size: 0.84rem;
+		font-weight: 800;
+		cursor: pointer;
+		font-family: inherit;
+		transition: background 0.15s, border-color 0.15s;
+	}
+
+	.skip-cancel {
+		background: var(--surface);
+		border: 1px solid var(--border);
+		color: var(--text-muted);
+	}
+
+	.skip-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+
+	.skip-confirm {
+		background: var(--accent);
+		border: 1px solid var(--accent);
+		color: #160d14;
+	}
+
+	.skip-confirm:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
 	@media (max-width: 720px) {
 		.course-page { padding: 0 0 4rem; }

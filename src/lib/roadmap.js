@@ -1,40 +1,13 @@
 // @ts-nocheck
 export const ROADMAP_TRACKS = [
 	{
-		id: 'first-code',
-		title: 'First Code',
-		subtitle: 'Think like a programmer before picking a stack.',
-		courseIds: ['new-coder'],
-		skills: ['Mental models', 'Variables', 'Branches', 'Loops'],
-		outcome: 'Write small programs without copying a tutorial.',
+		id: 'getting-started',
+		title: 'Getting Started',
+		subtitle: 'Set up, learn how the web works, and ship your first page.',
+		courseIds: ['getting-started'],
+		skills: ['Dev setup', 'HTML', 'CSS', 'Web basics'],
+		outcome: 'Build and style your first web page from scratch.',
 		level: 'Start here'
-	},
-	{
-		id: 'frontend-builder',
-		title: 'Frontend Builder',
-		subtitle: 'Ship pages, interfaces, and browser projects.',
-		courseIds: ['web-dev'],
-		skills: ['HTML', 'CSS', 'JavaScript', 'DOM tests'],
-		outcome: 'Build and inspect real web pages in the browser.',
-		level: 'Beginner'
-	},
-	{
-		id: 'python-problem-solver',
-		title: 'Python Problem Solver',
-		subtitle: 'Use code for automation, data, and problem solving.',
-		courseIds: ['python-intro'],
-		skills: ['Python syntax', 'Loops', 'Input/output', 'Tracing'],
-		outcome: 'Solve small programming tasks with executable feedback.',
-		level: 'Beginner'
-	},
-	{
-		id: 'systems-foundation',
-		title: 'Systems Foundation',
-		subtitle: 'Understand memory, compiled code, and lower-level thinking.',
-		courseIds: ['c-intro'],
-		skills: ['C syntax', 'Compilation', 'Terminal output', 'Machine basics'],
-		outcome: 'Read and write basic C with a clearer mental model.',
-		level: 'Intermediate'
 	}
 ];
 
@@ -49,7 +22,7 @@ export const PLATFORM_FEATURES = [
 	},
 	{
 		title: 'Browser coding labs',
-		detail: 'HTML, JavaScript, Python, and C challenges run with instant feedback.'
+		detail: 'HTML and CSS challenges run directly in the browser with instant feedback.'
 	},
 	{
 		title: 'Step-by-step tracing',
@@ -58,14 +31,14 @@ export const PLATFORM_FEATURES = [
 ];
 
 export const SKILL_MATRIX = [
-	{ skill: 'Programming basics', courseId: 'new-coder', status: 'available' },
-	{ skill: 'Frontend UI', courseId: 'web-dev', status: 'available' },
-	{ skill: 'Python scripting', courseId: 'python-intro', status: 'available' },
-	{ skill: 'C and systems', courseId: 'c-intro', status: 'available' },
+	{ skill: 'Dev environment setup', courseId: 'getting-started', status: 'available' },
+	{ skill: 'HTML structure', courseId: 'getting-started', status: 'available' },
+	{ skill: 'CSS styling', courseId: 'getting-started', status: 'available' },
+	{ skill: 'How browsers work', courseId: 'getting-started', status: 'available' },
+	{ skill: 'JavaScript', courseId: null, status: 'planned' },
 	{ skill: 'Git and GitHub', courseId: null, status: 'planned' },
-	{ skill: 'APIs and backend', courseId: null, status: 'planned' },
-	{ skill: 'Databases', courseId: null, status: 'planned' },
-	{ skill: 'Deployment', courseId: null, status: 'planned' }
+	{ skill: 'React or Svelte', courseId: null, status: 'planned' },
+	{ skill: 'Backend and APIs', courseId: null, status: 'planned' }
 ];
 
 /**
@@ -84,4 +57,3 @@ export function buildRoadmapTracks(courses) {
 		};
 	});
 }
-

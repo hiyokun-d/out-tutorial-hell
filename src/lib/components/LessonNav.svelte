@@ -1,6 +1,6 @@
-﻿<script>
-	/** @type {{ course: any, prev: any, next: any }} */
-	let { course, prev, next } = $props();
+<script>
+	/** @type {{ course: any, prev: any, next: any, onNext?: () => void }} */
+	let { course, prev, next, onNext } = $props();
 </script>
 
 <nav class="lesson-nav">
@@ -11,7 +11,11 @@
 	{/if}
 
 	{#if next}
-		<a href="/courses/{course.id}/{next.id}" class="btn primary">Next: {next.title}</a>
+		{#if onNext}
+			<button class="btn primary" onclick={onNext}>Next: {next.title}</button>
+		{:else}
+			<a href="/courses/{course.id}/{next.id}" class="btn primary">Next: {next.title}</a>
+		{/if}
 	{:else}
 		<a href="/courses/{course.id}" class="btn primary">Back to course</a>
 	{/if}
@@ -40,6 +44,8 @@
 		max-width: 48%;
 		transition: border-color 0.15s, color 0.15s, background 0.15s;
 		background: var(--surface-elevated);
+		cursor: pointer;
+		font-family: inherit;
 	}
 
 	.btn:hover {
@@ -60,4 +66,3 @@
 		color: #160d14;
 	}
 </style>
-

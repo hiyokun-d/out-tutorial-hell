@@ -4,7 +4,7 @@
 	import { getProgress } from '$lib/utils/progress.js';
 	import { Compass, Cpu, Globe, Terminal } from '@lucide/svelte';
 
-	/** @type {{ course: { icon: string, title: string, description: string, difficulty?: string }, lessons?: any[], courseId?: string }} */
+	/** @type {{ course: { icon: string, title: string, description: string, difficulty?: string, author?: { name: string, link?: string } }, lessons?: any[], courseId?: string }} */
 	let { course, lessons = [], courseId = '' } = $props();
 
 	let completedCount = $state(0);
@@ -37,6 +37,14 @@
 			<span class="eyebrow">{course.difficulty ?? 'Roadmap path'}</span>
 			<h1>{course.title}</h1>
 			<p>{course.description}</p>
+			<p class="author-credit">
+				Course by
+				{#if course.author?.link}
+					<a href={course.author.link} target="_blank" rel="noopener noreferrer" class="author-link">{course.author.name}</a>
+				{:else}
+					<span class="author-name">{course.author?.name ?? 'Unknown'}</span>
+				{/if}
+			</p>
 		</div>
 	</div>
 
@@ -110,6 +118,30 @@
 		font-size: 1rem;
 		line-height: 1.65;
 		max-width: 680px;
+	}
+
+	.author-credit {
+		margin-top: 0.55rem;
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--text-dim);
+	}
+
+	.author-link {
+		color: var(--accent-strong);
+		text-decoration: none;
+		font-weight: 800;
+		border-bottom: 1px solid transparent;
+		transition: border-color 0.15s ease;
+	}
+
+	.author-link:hover {
+		border-color: var(--accent-strong);
+	}
+
+	.author-name {
+		color: var(--text-muted);
+		font-weight: 800;
 	}
 
 	.progress-wrap {

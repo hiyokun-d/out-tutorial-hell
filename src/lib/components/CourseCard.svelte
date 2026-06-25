@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import { ArrowRight, Compass, Cpu, Globe, Terminal } from '@lucide/svelte';
 
-	/** @type {{ course: { id: string, icon: string, title: string, description: string, difficulty: string, lessonCount?: number, challengeCount?: number, totalXp?: number }, completed?: number }} */
+	/** @type {{ course: { id: string, icon: string, title: string, description: string, difficulty: string, lessonCount?: number, challengeCount?: number, totalXp?: number, author?: { name: string, link?: string } }, completed?: number }} */
 	let { course, completed = 0 } = $props();
 
 	const ICON_MAP = /** @type {Record<string, any>} */ ({
@@ -32,6 +32,16 @@
 			<span>{completed}/{course.lessonCount ?? 0} complete</span>
 			<span>{course.challengeCount ?? 0} labs</span>
 			<span>{course.totalXp ?? 0} XP</span>
+		</div>
+		<div class="author-row">
+			<span class="by">by</span>
+			{#if course.author?.link}
+				<button class="author-btn" onclick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(course.author.link, '_blank', 'noopener noreferrer'); }}>
+					{course.author.name}
+				</button>
+			{:else}
+				<span class="author-name">{course.author?.name ?? 'Unknown'}</span>
+			{/if}
 		</div>
 	</div>
 
@@ -150,6 +160,41 @@
 		flex-shrink: 0;
 		color: var(--text-dim);
 		background: var(--surface);
+	}
+
+	.author-row {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin-top: 0.1rem;
+	}
+
+	.by {
+		font-size: 0.7rem;
+		color: var(--text-dim);
+		font-weight: 700;
+	}
+
+	.author-btn {
+		all: unset;
+		font-size: 0.7rem;
+		font-weight: 800;
+		color: var(--accent-strong);
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		text-decoration-color: transparent;
+		transition: text-decoration-color 0.15s ease;
+	}
+
+	.author-btn:hover {
+		text-decoration-color: var(--accent-strong);
+	}
+
+	.author-name {
+		font-size: 0.7rem;
+		font-weight: 800;
+		color: var(--text-muted);
 	}
 
 	.course-card:hover .arrow-wrap {

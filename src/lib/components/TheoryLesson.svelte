@@ -17,11 +17,12 @@
 	import { buildPythonTracerCode, parsePythonTrace } from '$lib/utils/python-tracer.js';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 
 	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any, courseSlug?: string, lessonId?: string }} */
 	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
 
-	const showSandbox = config.features?.theorySandbox === true;
+	const showSandbox = config.features?.theorySandbox === true && lesson.sandbox !== false;
 	const sandboxLang = config.language ?? 'javascript';
 	const sandboxIsPiston = isPistonLanguage(sandboxLang);
 	const sandboxIsPythonTraceable = sandboxLang === 'python' || sandboxLang === 'python3';
@@ -213,6 +214,12 @@
 		}
 	}
 
+	function handleNext() {
+		handleMarkRead();
+		if (next) goto(`/courses/${course.id}/${next.id}`);
+		else goto(`/courses/${course.id}`);
+	}
+
 	async function runSandbox() {
 		if (sandboxPistonRunning) return;
 		sandboxPistonRunning = true;
@@ -305,7 +312,7 @@
 			{/if}
 		</div>
 
-		<LessonNav {course} {prev} {next} />
+		<LessonNav {course} {prev} {next} onNext={handleNext} />
 	</main>
 
 	{#if sandboxOpen}
