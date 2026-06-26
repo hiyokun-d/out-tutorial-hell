@@ -1,0 +1,11 @@
+{
+    "difficulty": "BEGINNER",
+    "title": "Web Development",
+    "description": "Build real websites from scratch — HTML structure, CSS styling, JavaScript interactivity — then deploy your own site so anyone can visit it.",
+    "order": 2,
+    "icon": "globe",
+    "language": "HTML · CSS · JS",
+    "author": {
+        "name": "hiyo"
+    }
+}

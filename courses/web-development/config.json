@@ -1,0 +1,10 @@
+{
+  "language": "html",
+  "features": {
+    "theorySandbox": true,
+    "hints": true,
+    "livePreview": true,
+    "snippets": true,
+    "formatButton": true
+  }
+}

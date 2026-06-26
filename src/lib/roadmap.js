@@ -3,11 +3,20 @@ export const ROADMAP_TRACKS = [
 	{
 		id: 'getting-started',
 		title: 'Getting Started',
-		subtitle: 'Set up, learn how the web works, and ship your first page.',
+		subtitle: 'Understand how programming actually works — through C, the language that shows you what\'s really happening.',
 		courseIds: ['getting-started'],
-		skills: ['Dev setup', 'HTML', 'CSS', 'Web basics'],
-		outcome: 'Build and style your first web page from scratch.',
+		skills: ['How computers work', 'Data types', 'Variables', 'Conditions', 'Loops', 'Functions', 'Arrays', 'Structs'],
+		outcome: 'Think like a programmer. Understand what every language is doing under the hood.',
 		level: 'Start here'
+	},
+	{
+		id: 'web-development',
+		title: 'Web Development',
+		subtitle: 'Build real websites with HTML, CSS, and JavaScript — then deploy one so anyone can visit it.',
+		courseIds: ['web-development'],
+		skills: ['HTML', 'CSS', 'JavaScript', 'Flexbox', 'Responsive design', 'DOM manipulation', 'Deployment'],
+		outcome: 'Build and deploy your own portfolio website.',
+		level: 'Next step'
 	}
 ];
 
@@ -31,11 +40,13 @@ export const PLATFORM_FEATURES = [
 ];
 
 export const SKILL_MATRIX = [
-	{ skill: 'Dev environment setup', courseId: 'getting-started', status: 'available' },
-	{ skill: 'HTML structure', courseId: 'getting-started', status: 'available' },
-	{ skill: 'CSS styling', courseId: 'getting-started', status: 'available' },
-	{ skill: 'How browsers work', courseId: 'getting-started', status: 'available' },
-	{ skill: 'JavaScript', courseId: null, status: 'planned' },
+	{ skill: 'How computers work', courseId: 'getting-started', status: 'available' },
+	{ skill: 'Data types & memory', courseId: 'getting-started', status: 'available' },
+	{ skill: 'Conditions & loops', courseId: 'getting-started', status: 'available' },
+	{ skill: 'Functions & structs', courseId: 'getting-started', status: 'available' },
+	{ skill: 'HTML & CSS', courseId: 'web-development', status: 'available' },
+	{ skill: 'JavaScript', courseId: 'web-development', status: 'available' },
+	{ skill: 'Deploy a website', courseId: 'web-development', status: 'available' },
 	{ skill: 'Git and GitHub', courseId: null, status: 'planned' },
 	{ skill: 'React or Svelte', courseId: null, status: 'planned' },
 	{ skill: 'Backend and APIs', courseId: null, status: 'planned' }
