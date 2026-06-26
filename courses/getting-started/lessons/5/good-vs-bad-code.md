@@ -25,79 +25,81 @@ If code is hard to read, everything costs more: debugging takes longer, adding f
 
 ### Bad names
 
-```javascript
-// Bad
-let x = 86400;
-let d = x * 7;
-
-// Good
-let secondsPerDay = 86400;
-let secondsPerWeek = secondsPerDay * 7;
+```
+x = 86400
+d = x * 7
 ```
 
-`x` and `d` tell you nothing. `secondsPerDay` and `secondsPerWeek` are self-documenting. The good version doesn't need a comment to explain itself.
+```
+secondsPerDay = 86400
+secondsPerWeek = secondsPerDay * 7
+```
+
+`x` and `d` tell you nothing. `secondsPerDay` and `secondsPerWeek` are self-documenting. The second version doesn't need a comment to explain itself.
 
 ### Doing too many things at once
 
-```javascript
-// Bad — one blob of code that does everything
-function processOrder(order) {
-    // validate the order
-    if (!order.items || order.items.length === 0) { throw new Error("Empty order"); }
-    if (!order.customer) { throw new Error("No customer"); }
-    // calculate total
-    let total = 0;
-    for (let item of order.items) { total += item.price * item.quantity; }
-    // apply discount
-    if (order.customer.isPremium) { total *= 0.9; }
-    // save to database
-    db.save({ ...order, total });
-}
-
-// Good — each step is a named function
-function processOrder(order) {
-    validate(order);
-    const total = calculateTotal(order);
-    db.save({ ...order, total });
-}
+```
+function processOrder(order):
+    validate the order data
+    calculate the total price
+    apply any discount
+    save to database
+    send confirmation email
 ```
 
-The second version reads like English. You don't need to scroll through 20 lines to understand the flow.
+```
+function processOrder(order):
+    validate(order)
+    total = calculateTotal(order)
+    save(order, total)
+    sendConfirmation(order)
+```
+
+The second version reads like a summary. You understand the flow without scrolling through 50 lines of details.
 
 ### Repeating yourself (violating DRY)
 
 DRY stands for **Don't Repeat Yourself**. If you write the same logic in three places and need to change it, you have to change it in three places — and you'll probably miss one.
 
-```javascript
-// Bad — same logic duplicated
-if (user.role === 'admin') {
-    if (user.age >= 18) { showContent(); }
-}
-if (user.role === 'editor') {
-    if (user.age >= 18) { showContent(); }
-}
-
-// Good — single source of truth
-function isAdult(user) {
-    return user.age >= 18;
-}
-
-if (user.role === 'admin' && isAdult(user)) { showContent(); }
-if (user.role === 'editor' && isAdult(user)) { showContent(); }
 ```
+if user.role is "admin":
+    if user.age >= 18:
+        showContent()
+
+if user.role is "editor":
+    if user.age >= 18:
+        showContent()
+```
+
+```
+function isAdult(user):
+    return user.age >= 18
+
+if user.role is "admin" and isAdult(user):
+    showContent()
+
+if user.role is "editor" and isAdult(user):
+    showContent()
+```
+
+The age check is now written once. Change it in one place and it updates everywhere.
 
 ### Magic numbers
 
-```javascript
-// Bad
-if (user.score > 9000) { grantAccess(); }
-
-// Good
-const ADMIN_SCORE_THRESHOLD = 9000;
-if (user.score > ADMIN_SCORE_THRESHOLD) { grantAccess(); }
+```
+if user.score > 9000:
+    grantAccess()
 ```
 
-Where did `9000` come from? What does it mean? The constant makes the intent clear.
+```
+ADMIN_SCORE_THRESHOLD = 9000
+
+if user.score > ADMIN_SCORE_THRESHOLD:
+    grantAccess()
+```
+
+Where did `9000` come from? What does it mean? The named constant makes the intent clear — and gives you one place to change it if the threshold ever changes.
 
 ## The three rules
 

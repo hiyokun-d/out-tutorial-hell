@@ -9,81 +9,76 @@ sandbox: false
 
 # Why Learn C First?
 
-Most beginner courses start with Python or JavaScript. This course starts with C. Here's exactly why — and why it will make you a better programmer regardless of what language you eventually work in.
+If you've seen what C code looks like, your reaction was probably one of these:
+
+> "That's a lot of symbols for printing one line."
+
+> "Do I really have to learn this?"
+
+That's completely fair. C is not the most beginner-friendly language to look at. But there's a reason this course starts here — and it will pay off in every language you touch after.
+
+## One rule before we start
+
+The sandbox in this course compiles and runs your C code for you. You don't need to install anything, configure anything, or understand what "compilation" means yet. Just write code, hit Run, see what happens.
+
+You'll understand what's going on under the hood by the end of this module. For now: trust the sandbox.
 
 ## What is C?
 
-C is a programming language created in 1972 at Bell Labs by Dennis Ritchie. It was designed to write operating systems — and it worked. The Unix operating system was rewritten in C, which eventually led to Linux, macOS, iOS, and Android. All of them still run C code today.
+C is a programming language created in 1972 at Bell Labs by Dennis Ritchie. It was designed to write operating systems — and it worked so well that the Unix operating system was rewritten in C. Unix eventually became Linux, macOS, iOS, and Android. They all still run C code today.
 
 C is 50+ years old and still among the most used languages in the world. It runs in:
 - Operating system kernels (Linux, macOS, Windows internals)
-- Embedded systems (your car's engine, your microwave, medical devices)
+- Embedded systems (your car's engine, medical devices, microcontrollers)
 - Databases (SQLite, parts of PostgreSQL, MySQL)
-- Game engines, graphics drivers, compilers themselves
+- Game engines, graphics drivers, and the compilers that build other languages
 
-Why? Because C gives you direct control over hardware and memory with almost no overhead. Nothing is hidden from you.
+## C is the ancestor of most languages you'll use
 
-## C is the ancestor
+Here's the thing: almost every language you'll ever work with was influenced by C or written in C.
 
-Almost every modern language was influenced by C or written in C:
-
-| Language | Influenced by C |
-|----------|----------------|
-| C++ | C with objects |
+| Language | Relationship to C |
+|----------|------------------|
+| C++ | C with objects added |
 | Java | C-style syntax |
-| JavaScript | C-style syntax + more |
+| JavaScript | C-style syntax |
 | Python | Written in C |
 | Go | C-style, memory-safe |
-| Rust | C-level control, memory-safe |
+| Rust | C-level control, safe memory |
 | Swift | C-family |
-| PHP | C-style syntax |
 
-When you learn C, you're learning the common ancestor. Patterns you learn in C appear everywhere.
-
-## C is a compiled language
-
-C code does not run directly. It must be **compiled** first.
-
-```
-Source code (.c file) → Compiler (gcc/clang) → Machine code (.exe or binary)
-```
-
-Compilation translates your human-readable code into binary instructions the CPU can execute. This means:
-
-- The compiler checks your code before it runs — it catches errors you might miss
-- The compiled output runs fast — no interpreter layer
-- You must declare data types — the compiler needs to know exactly how much memory to allocate
-
-This last point is the most important for this course.
+When you learn C, patterns start clicking. You'll see the `{` `}` braces, the `;` semicolons, the `if`/`else`/`for`/`while` structure — everywhere. In JavaScript, Python, Go, Java. All of it traces back to here.
 
 ## Why C teaches you what other languages hide
 
-Python, JavaScript, and many modern languages are **dynamically typed**. You don't say what type a variable is — the language figures it out automatically. This is convenient, but it hides what's actually happening.
+Most modern languages are **dynamically typed** — you don't say what type a variable is, the language figures it out. This is convenient. It also hides what's really happening.
 
-C is **statically typed**. You must tell the compiler the type of every variable. When you write:
+C is **statically typed** — you must tell the compiler exactly what type every variable is. When you write:
 
 ```c
 int score = 100;
 ```
 
-You are explicitly saying: reserve 4 bytes of memory, interpret them as a whole number, and call it `score`.
+You're saying: *reserve 4 bytes of memory, interpret them as a whole number, call it `score`.*
 
-When you later learn JavaScript and write:
+When you later write JavaScript and see:
 
 ```javascript
 let score = 100;
 ```
 
-You'll know what JavaScript is doing under the hood — even though you're not saying it. That understanding changes how you think about your code.
+You'll already know what JavaScript is doing under the hood — even though it's not making you say it. That's the insight that C gives you. It explains the *why* behind everything else.
 
-## What you'll learn from C in this course
+## What to expect
 
-- **Data types and memory** — what they are and why they're not optional
-- **Variables** — what a variable actually is at the hardware level
-- **Conditions, loops, functions** — the universal building blocks of all programs
-- **The compiler's job** — why strict rules exist and what they protect you from
-- **Thinking precisely** — C doesn't tolerate vagueness
+The next few lessons will look like a lot at first. That's normal. You'll see syntax that doesn't feel intuitive yet. Give it a few lessons — the patterns will start to feel familiar.
 
-You don't need to become a C expert. You need to understand what C shows you, then carry that understanding into every language you use after.
+By the end of the C module, you'll understand:
+- Why data types exist (and why they're not optional)
+- What a variable actually is at the hardware level
+- How loops, conditions, and functions work — universally, not just in C
+- Why the rules feel strict — and what they're protecting you from
 
-The next lessons will do exactly that.
+Then you'll move to JavaScript, and you'll feel it all come together.
+
+One lesson at a time. Let's start.

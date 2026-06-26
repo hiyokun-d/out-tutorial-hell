@@ -107,7 +107,7 @@
 			} finally {
 				pistonRunning = false;
 			}
-		} else if (config.features?.consoleOutput) {
+		} else if (language === 'javascript' || config.features?.consoleOutput) {
 			if (!consolePaneApi) { if (!silent) running = false; return testResults; }
 			const logs = await consolePaneApi.runCode(src);
 			testResults = challenge.tests.map((test) => {

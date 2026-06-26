@@ -1,10 +1,10 @@
 {
     "difficulty": "BEGINNER",
     "title": "Getting Started",
-    "description": "Learn what programming actually is, how computers think, and build real intuition — through C, JavaScript, and HTML.",
+    "description": "Learn what programming actually is, how computers think, and why data types matter — through C, the language that shows you what's really happening.",
     "order": 1,
     "icon": "compass",
-    "language": "C · JS · HTML",
+    "language": "C",
     "author": {
         "name": "hiyo"
     }
