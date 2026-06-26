@@ -1,46 +1,46 @@
 {
   "language": "html",
-  "title": "JS Lab: Make It Interactive",
-  "description": "Add two interactive features to your page: a dark mode toggle (button that adds/removes a class on body), and a contact form that validates inputs and shows a success message on submit.",
-  "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <style>\n    :root {\n      --bg:   #ffffff;\n      --text: #1a1a2e;\n      --card: #f5f5f5;\n    }\n    body.dark {\n      --bg:   #1a1a2e;\n      --text: #f1faee;\n      --card: #2a2a4e;\n    }\n    body {\n      font-family: sans-serif;\n      background: var(--bg);\n      color: var(--text);\n      padding: 2rem;\n      transition: background 0.3s, color 0.3s;\n    }\n    button { padding: 0.5rem 1.2rem; cursor: pointer; }\n    form { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; }\n    input { padding: 0.5rem; font-size: 1rem; }\n    #success { display: none; color: green; font-weight: 700; }\n  </style>\n</head>\n<body>\n  <h1>My Portfolio</h1>\n\n  <!-- Task 1: clicking this button should toggle class \"dark\" on body -->\n  <button id=\"dark-toggle\">Toggle Dark Mode</button>\n\n  <!-- Task 2: submitting this form should validate inputs and show #success -->\n  <form id=\"contact\">\n    <input type=\"text\" id=\"name\" placeholder=\"Your name\" required>\n    <input type=\"email\" id=\"email\" placeholder=\"you@example.com\" required>\n    <button type=\"submit\">Send</button>\n  </form>\n\n  <p id=\"success\">Message sent!</p>\n\n  <script>\n    // Your JavaScript here\n  </script>\n</body>\n</html>",
+  "title": "JS Challenge: Todo List",
+  "description": "Build a todo list. The Add button creates a new list item from the input value. Clicking a list item toggles a 'done' class that adds a strikethrough.",
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <style>\n    body { font-family: sans-serif; padding: 2rem; max-width: 480px; }\n    h1 { margin-bottom: 1.5rem; }\n\n    .input-row {\n      display: flex;\n      gap: 0.5rem;\n      margin-bottom: 1.5rem;\n    }\n    input {\n      flex: 1;\n      padding: 0.5rem 0.75rem;\n      font-size: 1rem;\n      border: 1px solid #ccc;\n      border-radius: 6px;\n    }\n    button {\n      padding: 0.5rem 1.25rem;\n      background: #1a1a2e;\n      color: white;\n      border: none;\n      border-radius: 6px;\n      cursor: pointer;\n      font-size: 1rem;\n    }\n\n    #todo-list {\n      list-style: none;\n      padding: 0;\n    }\n    #todo-list li {\n      padding: 0.75rem 1rem;\n      border: 1px solid #eee;\n      border-radius: 8px;\n      margin-bottom: 0.5rem;\n      cursor: pointer;\n      transition: opacity 0.2s;\n    }\n    #todo-list li.done {\n      text-decoration: line-through;\n      opacity: 0.4;\n    }\n  </style>\n</head>\n<body>\n  <h1>Todo List</h1>\n\n  <div class=\"input-row\">\n    <input type=\"text\" id=\"task-input\" placeholder=\"What needs doing?\">\n    <button id=\"add-btn\">Add</button>\n  </div>\n\n  <ul id=\"todo-list\"></ul>\n\n  <script>\n    // Get references to the elements\n    const input   = document.getElementById('task-input');\n    const addBtn  = document.getElementById('add-btn');\n    const list    = document.getElementById('todo-list');\n\n    // TODO: When addBtn is clicked:\n    //   1. Read the value from input\n    //   2. If it's empty, do nothing\n    //   3. Create a new <li> element with that text\n    //   4. When the <li> is clicked, toggle class 'done' on it\n    //   5. Append the <li> to list\n    //   6. Clear the input\n\n  </script>\n</body>\n</html>",
   "hints": [
-    "Use document.getElementById('dark-toggle').addEventListener('click', ...) to wire up the toggle button",
-    "document.body.classList.toggle('dark') adds the class if missing, removes it if present",
-    "Wire up the form with document.getElementById('contact').addEventListener('submit', ...)",
-    "Always call event.preventDefault() first inside a submit handler to stop the page reloading",
-    "Read name with document.getElementById('name').value.trim() — check it's not empty before showing success",
-    "Set document.getElementById('success').style.display = 'block' to reveal the success message"
+    "addBtn.addEventListener('click', () => { ... }) wires up the button",
+    "input.value.trim() reads and cleans the input text — if it's empty (''), do nothing with an early return",
+    "const li = document.createElement('li') creates a new list item",
+    "li.textContent = input.value sets the text of the new item",
+    "li.addEventListener('click', () => li.classList.toggle('done')) adds the click-to-complete behaviour",
+    "list.appendChild(li) adds the item to the page, then set input.value = '' to clear the field"
   ],
   "tests": [
     {
       "type": "code-contains",
       "value": "addEventListener",
-      "message": "Use addEventListener to attach event handlers"
+      "message": "Use addEventListener to handle events"
+    },
+    {
+      "type": "code-contains",
+      "value": "createElement",
+      "message": "Use createElement to create new list items"
+    },
+    {
+      "type": "code-contains",
+      "value": "appendChild",
+      "message": "Use appendChild to add items to the list"
     },
     {
       "type": "code-contains",
       "value": "classList.toggle",
-      "message": "Use classList.toggle to switch the dark mode class"
+      "message": "Use classList.toggle to mark items as done"
     },
     {
       "type": "code-contains",
-      "value": "preventDefault",
-      "message": "Call event.preventDefault() in your submit handler"
+      "value": "textContent",
+      "message": "Set the text of each new li using textContent"
     },
     {
       "type": "code-contains",
-      "value": "submit",
-      "message": "Listen for the submit event on the form"
-    },
-    {
-      "type": "code-contains",
-      "value": ".value",
-      "message": "Read the input values using .value"
-    },
-    {
-      "type": "code-contains",
-      "value": "success",
-      "message": "Show the #success element when the form is valid"
+      "value": "input.value",
+      "message": "Read the input value before creating the list item"
     }
   ]
 }

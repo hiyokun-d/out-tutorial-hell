@@ -1,0 +1,45 @@
+{
+  "language": "html",
+  "title": "CSS Challenge: Flexbox Layout",
+  "description": "Build a page with: a nav bar that uses flexbox to put the logo on the left and links on the right, and a section below with at least 2 cards laid out in a row using flexbox.",
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <style>\n    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n    body { font-family: sans-serif; }\n\n    /* Style the nav to use flexbox */\n    nav {\n      background: #1a1a2e;\n      padding: 1rem 2rem;\n      color: white;\n      /* Add display: flex and justify-content here */\n    }\n\n    /* Style the card container */\n    .cards {\n      padding: 2rem;\n      /* Add display: flex and gap here */\n    }\n\n    /* Style the cards */\n    .card {\n      border: 1px solid #ddd;\n      border-radius: 8px;\n      padding: 1.5rem;\n      /* Make cards share space equally */\n    }\n  </style>\n</head>\n<body>\n\n  <nav>\n    <strong>My Site</strong>\n    <ul style=\"list-style:none; display:flex; gap:1.5rem;\">\n      <li><a href=\"#\" style=\"color:white\">About</a></li>\n      <li><a href=\"#\" style=\"color:white\">Work</a></li>\n      <li><a href=\"#\" style=\"color:white\">Contact</a></li>\n    </ul>\n  </nav>\n\n  <div class=\"cards\">\n    <div class=\"card\">\n      <h3>Card One</h3>\n      <p>First card content.</p>\n    </div>\n    <div class=\"card\">\n      <h3>Card Two</h3>\n      <p>Second card content.</p>\n    </div>\n    <div class=\"card\">\n      <h3>Card Three</h3>\n      <p>Third card content.</p>\n    </div>\n  </div>\n\n</body>\n</html>",
+  "hints": [
+    "Add display: flex to nav. Then justify-content: space-between pushes logo left and links right",
+    "Add display: flex and gap: 1.5rem to .cards to lay cards in a row",
+    "Add flex: 1 to .card so all three cards share the row equally",
+    "align-items: center on nav will vertically centre the logo and links"
+  ],
+  "tests": [
+    {
+      "type": "has-tag",
+      "value": "nav",
+      "message": "Page must have a nav element"
+    },
+    {
+      "type": "code-contains",
+      "value": "display: flex",
+      "message": "Use display: flex at least once"
+    },
+    {
+      "type": "code-contains",
+      "value": "justify-content",
+      "message": "Use justify-content on at least one flex container"
+    },
+    {
+      "type": "min-count",
+      "selector": ".card",
+      "count": 2,
+      "message": "Page must have at least 2 elements with class 'card'"
+    },
+    {
+      "type": "code-contains",
+      "value": "gap",
+      "message": "Use gap to space out flex items"
+    },
+    {
+      "type": "code-contains",
+      "value": "flex: 1",
+      "message": "Use flex: 1 on .card so cards share space equally"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "language": "html",
+  "title": "HTML Challenge: Resource Page",
+  "description": "Build a resource page that has: a main heading, an intro paragraph, an unordered list with at least 3 links, an image with alt text, and a footer.",
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Resources</title>\n</head>\n<body>\n  <!-- Build your resource page here -->\n  <!-- Requirements:\n    1. An h1 heading\n    2. A paragraph introducing the page\n    3. A ul with at least 3 li items, each containing an <a> link\n    4. An img with an alt attribute\n    5. A footer\n  -->\n</body>\n</html>",
+  "hints": [
+    "The h1 goes inside body — give it a title like 'Learning Resources' or 'Useful Links'",
+    "For the links, use href=\"#\" as a placeholder URL — the test just checks that <a> tags exist inside <li>",
+    "img needs both src and alt — use any image URL or src=\"photo.jpg\" with a descriptive alt",
+    "footer goes at the bottom of body, after the list and image"
+  ],
+  "tests": [
+    {
+      "type": "has-tag",
+      "value": "h1",
+      "message": "Page must have an h1 heading"
+    },
+    {
+      "type": "not-empty",
+      "selector": "h1",
+      "message": "h1 must not be empty"
+    },
+    {
+      "type": "has-tag",
+      "value": "p",
+      "message": "Page must have at least one paragraph"
+    },
+    {
+      "type": "has-tag",
+      "value": "ul",
+      "message": "Page must have an unordered list"
+    },
+    {
+      "type": "min-count",
+      "selector": "li",
+      "count": 3,
+      "message": "List must have at least 3 items"
+    },
+    {
+      "type": "child-of",
+      "parent": "li",
+      "child": "a",
+      "message": "Each list item must contain a link"
+    },
+    {
+      "type": "has-tag",
+      "value": "img",
+      "message": "Page must include an image"
+    },
+    {
+      "type": "code-contains",
+      "value": "alt=",
+      "message": "The image must have an alt attribute"
+    },
+    {
+      "type": "has-tag",
+      "value": "footer",
+      "message": "Page must have a footer"
+    }
+  ]
+}
