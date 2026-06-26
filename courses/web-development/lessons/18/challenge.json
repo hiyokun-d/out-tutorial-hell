@@ -1,0 +1,56 @@
+{
+  "language": "html",
+  "title": "CSS Lab: Style the Skeleton",
+  "description": "Take the HTML skeleton from the last lab and make it look real. Add CSS variables, flexbox nav, styled hero section, card grid, and a colour scheme.",
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>My Portfolio</title>\n  <style>\n    /* Add your CSS here */\n    :root {\n      /* Define at least 2 custom properties */\n    }\n  </style>\n</head>\n<body>\n  <header>\n    <nav>\n      <a href=\"#about\">About</a>\n      <a href=\"#projects\">Projects</a>\n      <a href=\"#contact\">Contact</a>\n    </nav>\n  </header>\n\n  <main>\n    <section id=\"hero\">\n      <h1>Hi, I'm [Your Name]</h1>\n      <p>I build things for the web.</p>\n    </section>\n\n    <section id=\"about\">\n      <p>I started learning to code and built this portfolio.</p>\n    </section>\n\n    <section id=\"projects\">\n      <div class=\"card\"><h3>Project 1</h3><p>Description here.</p></div>\n      <div class=\"card\"><h3>Project 2</h3><p>Description here.</p></div>\n    </section>\n  </main>\n\n  <footer>\n    <p>Built by me.</p>\n  </footer>\n</body>\n</html>",
+  "hints": [
+    "Define --primary and --accent in :root then use var() in your styles",
+    "Give nav display: flex and justify-content: space-between to spread logo and links",
+    "Add padding and a background-color to the hero section",
+    "Use display: flex and flex-wrap: wrap on #projects to lay out cards side by side",
+    "box-sizing: border-box on * prevents padding from breaking your widths"
+  ],
+  "tests": [
+    {
+      "type": "code-contains",
+      "value": "--",
+      "message": "Define at least one CSS variable using -- notation"
+    },
+    {
+      "type": "code-contains",
+      "value": "var(--",
+      "message": "Use var() to reference a CSS variable"
+    },
+    {
+      "type": "code-contains",
+      "value": "display: flex",
+      "message": "Use flexbox somewhere in your layout"
+    },
+    {
+      "type": "code-contains",
+      "value": "background",
+      "message": "Set a background colour on at least one element"
+    },
+    {
+      "type": "code-contains",
+      "value": "padding",
+      "message": "Add padding to at least one element"
+    },
+    {
+      "type": "has-tag",
+      "value": "nav",
+      "message": "Page must include a nav element"
+    },
+    {
+      "type": "has-tag",
+      "value": "footer",
+      "message": "Page must include a footer element"
+    },
+    {
+      "type": "child-of",
+      "parent": "#hero",
+      "child": "h1",
+      "message": "h1 must be inside #hero section"
+    }
+  ]
+}

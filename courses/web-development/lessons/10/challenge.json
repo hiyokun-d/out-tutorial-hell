@@ -1,0 +1,26 @@
+{
+  "language": "html",
+  "instructions": "Build a portfolio HTML skeleton with all the required sections.\n\nYour page must have:\n- A `<header>` with a `<nav>` containing at least **3 links**\n- A `<main>` element\n- A section with `id=\"hero\"` containing an `<h1>` with your name\n- A section with `id=\"about\"` containing a `<h2>` and a `<p>`\n- A section with `id=\"projects\"` containing a `<h2>`\n- A `<footer>` with some text\n\nDon't worry about making it look good — that's the next module. Focus on correct structure.",
+  "starter": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>My Portfolio</title>\n</head>\n<body>\n\n  <!-- Build your portfolio skeleton here -->\n  <!-- header > nav with links -->\n  <!-- main with: hero, about, projects sections -->\n  <!-- footer -->\n\n</body>\n</html>",
+  "hints": [
+    "Start with <header><nav>...</nav></header> at the top of <body>",
+    "Inside <nav>, add links: <a href=\"#hero\">Home</a> <a href=\"#about\">About</a> <a href=\"#projects\">Projects</a>",
+    "Add <main> after the header, then put your sections inside it",
+    "Each section needs an id: <section id=\"hero\">, <section id=\"about\">, <section id=\"projects\">",
+    "Close with <footer><p>Built by Your Name</p></footer>"
+  ],
+  "tests": [
+    { "id": 1, "description": "Has a <header>", "check": "has-tag", "value": "header" },
+    { "id": 2, "description": "Has a <nav> inside header", "check": "child-of", "parent": "header", "child": "nav" },
+    { "id": 3, "description": "Nav has at least 3 links", "check": "min-count", "selector": "nav a", "count": 3 },
+    { "id": 4, "description": "Has a <main>", "check": "has-tag", "value": "main" },
+    { "id": 5, "description": "Has a hero section", "check": "has-tag", "value": "#hero" },
+    { "id": 6, "description": "Hero has an h1", "check": "child-of", "parent": "#hero", "child": "h1" },
+    { "id": 7, "description": "h1 is not empty", "check": "not-empty", "selector": "#hero h1" },
+    { "id": 8, "description": "Has an about section", "check": "has-tag", "value": "#about" },
+    { "id": 9, "description": "About has a paragraph", "check": "child-of", "parent": "#about", "child": "p" },
+    { "id": 10, "description": "Has a projects section", "check": "has-tag", "value": "#projects" },
+    { "id": 11, "description": "Has a <footer>", "check": "has-tag", "value": "footer" },
+    { "id": 12, "description": "Footer is not empty", "check": "not-empty", "selector": "footer" }
+  ]
+}
