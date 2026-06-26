@@ -1,42 +1,92 @@
-# sv
+# Out of Tutorial Hell
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A gamified, project-driven coding course platform for complete beginners. No passive watching — every lesson ends with something you built.
 
-## Creating a project
+## Why this exists
 
-If you're seeing this, you've probably already done this step. Congrats!
+Most beginners get stuck in tutorial hell: they watch videos, feel like they're learning, then can't build anything on their own. This app breaks that loop with short focused lessons, real in-browser coding challenges, and XP + streaks to keep momentum.
 
-```sh
-# create a new project
-npx sv create my-app
+## Courses
+
+| Course | What you build |
+|--------|---------------|
+| Getting Started | Programming fundamentals — C |
+| Web Development | Websites with HTML, CSS, and JavaScript |
+
+More courses planned: Python, and beyond.
+
+## Stack
+
+| Layer | Tech |
+|-------|------|
+| Frontend | SvelteKit 2 + Svelte 5, Bun, Tailwind v4 |
+| Backend | NestJS, Prisma 7, Supabase (PostgreSQL) |
+| Types | JSDoc — no `.ts` files |
+
+## Running locally
+
+**Prerequisites:** [Bun](https://bun.sh), Node 20+
+
+### Frontend
+
+```bash
+bun install
+bun run dev        # → http://localhost:5173
 ```
 
-To recreate this project with the same configuration:
+### Backend (optional — needed for auth and progress sync)
 
-```sh
-# recreate this project
-bun x sv@0.15.3 create --template minimal --types jsdoc --install bun .
+```bash
+cd backend
+cp .env.example .env    # fill in Supabase URLs
+bun install
+bun run start:dev       # → http://localhost:3001
 ```
 
-## Developing
+The frontend proxies `/api` to `:3001`, so you can run either separately.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Contributing
 
-```sh
-npm run dev
+The best way to contribute is to **add or improve a course** — no coding required, just Markdown and JSON files.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+To contribute code:
+
+1. Fork the repo
+2. Create a branch: `git checkout -b my-feature`
+3. Make your changes
+4. Open a PR against `main`
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete course-creation guide and [docs.md](docs.md) for the full reference (all config options, test types, feature flags).
+
+## Adding a course
+
+Courses live in `courses/`. Each course is a folder with:
+
+```
+courses/
+  my-course/
+    meta.json          ← course title, description, author
+    config.json        ← optional feature flags
+    lessons/
+      1/               ← folder number = lesson order
+        lesson.md      ← theory or practice lesson
+        challenge.json ← optional coding challenge
+      2/
+        lesson.md
 ```
 
-## Building
+No code changes needed. The app picks up new courses automatically. Full walkthrough in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-To create a production version of your app:
+## Project structure
 
-```sh
-npm run build
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+src/
+  routes/          SvelteKit pages
+  lib/
+    components/    UI components
+    courses.js     Course loader (reads courses/ folder)
+    checker.js     In-browser test runner
+    utils/         Progress, notes, tracer, walkthrough
+courses/           All course content lives here
+backend/           NestJS API
+```
