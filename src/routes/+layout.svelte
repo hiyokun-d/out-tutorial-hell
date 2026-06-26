@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import XpToast from '$lib/components/XpToast.svelte';
+	import FloatingNotes from '$lib/components/FloatingNotes.svelte';
 	import { xp } from '$lib/stores/xp.js';
 	import { onMount } from 'svelte';
 	import Lenis from 'lenis';
@@ -43,6 +44,7 @@
 </div>
 
 <XpToast />
+<FloatingNotes />
 
 <style>
 	.app-layout {

@@ -1,0 +1,21 @@
+{
+  "language": "c",
+  "instructions": "Write a function `letterGrade(int score)` that returns the letter grade as a `char`: `'A'` for ≥ 90, `'B'` for ≥ 80, `'C'` for ≥ 70, and `'F'` otherwise.\n\nThen use a loop to print the grade for each score in this array: `{95, 82, 73, 60, 88}`\n\nExpected output (one line per score):\n```\n95: A\n82: B\n73: C\n60: F\n88: B\n```",
+  "starter": "#include <stdio.h>\n\n// Write your letterGrade function here\n// It takes an int score and returns a char ('A', 'B', 'C', or 'F')\n\n\nint main() {\n    int scores[5] = {95, 82, 73, 60, 88};\n\n    // Loop over scores and print: \"<score>: <grade>\"\n    // Use printf(\"%d: %c\\n\", score, letterGrade(score));\n\n    return 0;\n}\n",
+  "hints": [
+    "Define the function before main: `char letterGrade(int score) { ... }`",
+    "Use chained if/else if: check >= 90 first, then >= 80, then >= 70, else return 'F'",
+    "In main, use a for loop: `for (int i = 0; i < 5; i++)`",
+    "Inside the loop: `printf(\"%d: %c\\n\", scores[i], letterGrade(scores[i]));`"
+  ],
+  "tests": [
+    { "id": 1, "description": "Program compiles and runs", "check": "exit-code-zero" },
+    { "id": 2, "description": "No compile or runtime errors", "check": "stderr-empty" },
+    { "id": 3, "description": "First line: 95: A", "check": "stdout-line", "line": 0, "value": "95: A" },
+    { "id": 4, "description": "Second line: 82: B", "check": "stdout-line", "line": 1, "value": "82: B" },
+    { "id": 5, "description": "Third line: 73: C", "check": "stdout-line", "line": 2, "value": "73: C" },
+    { "id": 6, "description": "Fourth line: 60: F", "check": "stdout-line", "line": 3, "value": "60: F" },
+    { "id": 7, "description": "Fifth line: 88: B", "check": "stdout-line", "line": 4, "value": "88: B" },
+    { "id": 8, "description": "Uses a letterGrade function", "check": "code-contains", "value": "letterGrade" }
+  ]
+}

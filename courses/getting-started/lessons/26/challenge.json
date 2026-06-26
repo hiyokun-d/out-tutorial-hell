@@ -1,0 +1,19 @@
+{
+  "language": "html",
+  "instructions": "Build a styled card. It must have: a `<div>` with class `card`, a heading inside the card, a paragraph inside the card, and CSS that gives the card a `background-color`, `padding`, and `border-radius`.",
+  "starter": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <title>Card</title>\n    <style>\n      body {\n        font-family: sans-serif;\n        padding: 2rem;\n        background-color: #f0f2f5;\n      }\n\n      /* Style your card here */\n      .card {\n\n      }\n    </style>\n  </head>\n  <body>\n\n    <!-- Build your card here -->\n\n  </body>\n</html>",
+  "hints": [
+    "Create a <div class=\"card\"> in the body",
+    "Add a heading (<h2> or <h3>) and a <p> inside the card div",
+    "In the CSS, give .card a background-color (try white or #fff)",
+    "Add padding: 1.5rem; to give the card breathing room",
+    "Add border-radius: 12px; to round the corners"
+  ],
+  "tests": [
+    { "id": 1, "description": "Has a div with class 'card' in the code", "check": "code-contains", "value": "class=\"card\"" },
+    { "id": 2, "description": "Card has a heading inside it", "check": "child-of", "parent": ".card", "child": "h1, h2, h3" },
+    { "id": 3, "description": "Card has a paragraph inside it", "check": "child-of", "parent": ".card", "child": "p" },
+    { "id": 4, "description": "Card heading is not empty", "check": "not-empty", "selector": ".card h1, .card h2, .card h3" },
+    { "id": 5, "description": "Card paragraph is not empty", "check": "not-empty", "selector": ".card p" }
+  ]
+}

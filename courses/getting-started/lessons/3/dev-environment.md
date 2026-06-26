@@ -2,57 +2,62 @@
 id: "dev-environment"
 title: "Your Dev Environment"
 type: "THEORY"
-xpReward: 10
-module: "Foundations"
+xpReward: 5
+module: "Before You Code"
 sandbox: false
 ---
 
 # Your Dev Environment
 
-Before writing real code, you need one thing: a proper code editor. Notepad and TextEdit won't cut it — they don't understand code.
+Before you can write code, you need somewhere to write it and a way to run it. This is called your **development environment**.
 
-## Install VS Code
+## The editor: VS Code
 
-**Visual Studio Code** is the most popular code editor in the world. Free, fast, runs on Mac, Windows, and Linux. Used by beginners and engineers at top companies alike.
+VS Code (Visual Studio Code) is a free text editor made by Microsoft. It's not the only option, but it's the most popular among beginners and professionals alike.
 
-**Steps:**
+Download it at [code.visualstudio.com](https://code.visualstudio.com).
 
-1. Go to **code.visualstudio.com**
-2. Click the download button for your operating system
-3. Run the installer — accept the defaults
-4. Open VS Code when it's done
+It's a text editor — like Notepad, but with features that make coding easier:
+- Syntax highlighting (different colours for different parts of code)
+- Auto-completion (suggests what you might be typing)
+- Error underlining (catches common mistakes as you type)
+- Built-in terminal (run commands without leaving the editor)
 
-## The interface
+## The terminal
 
-| Area | What it is |
-|------|-----------|
-| Explorer (left sidebar) | Your project files and folders |
-| Editor (center) | Where you write code |
-| Terminal (bottom panel) | A command line built into VS Code |
-| Extensions (sidebar icon) | Add-ons that extend what VS Code can do |
+The terminal (also called command line or shell) is a text interface to your computer. Instead of clicking icons, you type commands.
 
-## Three extensions to install right now
+Why use it? Because most programming tools — compilers, package managers, servers — are designed to be run from the terminal. Clicking isn't expressive enough; typing commands is.
 
-Open Extensions with `Ctrl+Shift+X` (Windows) or `Cmd+Shift+X` (Mac). Search and install:
+**Open the terminal:**
+- macOS: `Cmd + Space`, type "Terminal"
+- Windows: Start menu → "Windows Terminal" or "PowerShell"
+- Linux: Usually `Ctrl + Alt + T`
 
-| Extension | Why |
-|-----------|-----|
-| **Prettier** | Auto-formats your code so it stays clean and readable |
-| **Live Server** | Opens your HTML file in the browser and refreshes it every time you save |
-| **Auto Rename Tag** | Edits the closing HTML tag automatically when you edit the opening one |
+**Essential commands:**
 
-## Keyboard shortcuts you'll use constantly
+```bash
+pwd        # Print working directory — where am I?
+ls         # List files in current directory
+cd folder  # Change directory — move into a folder
+cd ..      # Go up one level
+mkdir name # Make a new directory
+```
 
-| Action | Windows / Linux | Mac |
-|--------|----------------|-----|
-| Save | `Ctrl + S` | `Cmd + S` |
-| Open terminal | Ctrl + `` ` `` | Cmd + `` ` `` |
-| Format code | `Shift + Alt + F` | `Shift + Option + F` |
-| Find in file | `Ctrl + F` | `Cmd + F` |
-| Open command palette | `Ctrl + Shift + P` | `Cmd + Shift + P` |
+Practice these. You'll use them every day.
 
-Don't memorize these now. They'll become muscle memory after a few hours of use.
+## The browser console
 
-## You're set up
+For JavaScript and HTML, you already have an environment: your browser.
 
-That's it. No complex installs, no paid software, no accounts. In the next lesson, you'll create your first project folder and start writing HTML.
+Open it with `F12` (or right-click → Inspect → Console tab). You can run JavaScript here directly and see HTML/CSS instantly in the browser.
+
+## What you'll need for this course
+
+For the **C lessons**: The sandbox in this app will compile and run your C code — you don't need to set up a C compiler right now. (When you're ready to go further, you'll want `gcc` — it comes with Xcode on Mac or MinGW on Windows.)
+
+For the **JavaScript lessons**: The sandbox runs it in the browser — no setup needed.
+
+For the **HTML/CSS lessons**: The sandbox renders it live — no setup needed.
+
+Your real-world setup will come naturally as you progress. For now, the goal is learning the concepts. The tools follow.

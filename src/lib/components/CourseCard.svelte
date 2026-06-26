@@ -29,6 +29,9 @@
 		<p>{course.description}</p>
 		<div class="meter" aria-hidden="true"><span style={`width:${pct}%`}></span></div>
 		<div class="meta-row">
+			{#if course.language}
+				<span class="lang-tag">{course.language}</span>
+			{/if}
 			<span>{completed}/{course.lessonCount ?? 0} complete</span>
 			<span>{course.challengeCount ?? 0} labs</span>
 			<span>{course.totalXp ?? 0} XP</span>
@@ -135,6 +138,7 @@
 	}
 
 	.badge { text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+	.lang-tag { color: var(--accent-strong); background: var(--accent-muted); border-color: color-mix(in srgb, var(--accent) 28%, transparent); font-family: 'Fira Code', 'Cascadia Code', monospace; letter-spacing: 0; }
 	.badge.beginner { color: var(--success); background: var(--success-muted); }
 	.badge.intermediate { color: var(--warning); background: var(--warning-muted); }
 	.badge.advanced { color: var(--error); background: var(--error-muted); }

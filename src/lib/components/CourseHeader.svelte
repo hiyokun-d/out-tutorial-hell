@@ -34,7 +34,12 @@
 			<IconComponent size={32} strokeWidth={2.1} class="course-icon" />
 		</div>
 		<div class="info">
-			<span class="eyebrow">{course.difficulty ?? 'Roadmap path'}</span>
+			<div class="eyebrow-row">
+				<span class="eyebrow">{course.difficulty ?? 'Roadmap path'}</span>
+				{#if course.language}
+					<span class="lang-tag">{course.language}</span>
+				{/if}
+			</div>
 			<h1>{course.title}</h1>
 			<p>{course.description}</p>
 			<p class="author-credit">
@@ -95,12 +100,31 @@
 
 	.info { flex: 1; min-width: 0; }
 
+	.eyebrow-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+
 	.eyebrow {
 		color: var(--accent-strong);
 		font-size: 0.72rem;
 		font-weight: 900;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
+	}
+
+	.lang-tag {
+		font-size: 0.7rem;
+		font-weight: 800;
+		padding: 0.18rem 0.55rem;
+		border-radius: 999px;
+		border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+		background: var(--accent-muted);
+		color: var(--accent-strong);
+		font-family: 'Fira Code', 'Cascadia Code', monospace;
+		letter-spacing: 0;
 	}
 
 	h1 {

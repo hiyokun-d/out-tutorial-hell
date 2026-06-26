@@ -1,0 +1,20 @@
+{
+  "language": "html",
+  "instructions": "Build a profile page with: your name in an `<h1>`, a short bio in a `<p>`, a `<ul>` list of at least **3 things you're learning**, and at least one `<a>` link somewhere on the page.",
+  "starter": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <title>My Profile</title>\n  </head>\n  <body>\n    <!-- Your profile page goes here -->\n\n  </body>\n</html>",
+  "hints": [
+    "Put <h1>Your Name</h1> inside the <body>",
+    "Add <p>A sentence about yourself.</p> below the heading",
+    "Add a <ul> with at least 3 <li> items — things you're learning or interested in",
+    "Add an <a href=\"...\">Link text</a> somewhere — to your favourite site or resource"
+  ],
+  "tests": [
+    { "id": 1, "description": "Has an h1 heading", "check": "has-tag", "value": "h1" },
+    { "id": 2, "description": "h1 is not empty", "check": "not-empty", "selector": "h1" },
+    { "id": 3, "description": "Has a paragraph", "check": "has-tag", "value": "p" },
+    { "id": 4, "description": "Paragraph is not empty", "check": "not-empty", "selector": "p" },
+    { "id": 5, "description": "Has an unordered list", "check": "has-tag", "value": "ul" },
+    { "id": 6, "description": "Has at least 3 list items", "check": "min-count", "selector": "li", "count": 3 },
+    { "id": 7, "description": "Has a link", "check": "has-tag", "value": "a" }
+  ]
+}

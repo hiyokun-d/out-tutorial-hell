@@ -25,7 +25,7 @@
 				<Map size={16} strokeWidth={2.2} />
 				<span>Roadmap</span>
 			</a>
-			<a href="/courses/new-coder" class:active={$page.url.pathname === '/courses/new-coder'}>
+			<a href="/courses/getting-started" class:active={$page.url.pathname === '/courses/getting-started'}>
 				<BookOpen size={16} strokeWidth={2.2} />
 				<span>Start Here</span>
 			</a>

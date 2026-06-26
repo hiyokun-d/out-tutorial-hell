@@ -1,9 +1,10 @@
 {
     "difficulty": "BEGINNER",
     "title": "Getting Started",
-    "description": "Set up your environment, understand how the web works, and build your first real web page from scratch.",
+    "description": "Learn what programming actually is, how computers think, and build real intuition — through C, JavaScript, and HTML.",
     "order": 1,
     "icon": "compass",
+    "language": "C · JS · HTML",
     "author": {
         "name": "hiyo"
     }

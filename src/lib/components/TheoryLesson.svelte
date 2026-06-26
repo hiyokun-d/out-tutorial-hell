@@ -13,6 +13,7 @@
 	import TracerStep from './TracerStep.svelte';
 	import TracerVars from './TracerVars.svelte';
 	import PistonPane from './PistonPane.svelte';
+	import PreviewPane from './PreviewPane.svelte';
 	import { isPistonLanguage, pistonRun, langLabel } from '$lib/utils/piston.js';
 	import { buildPythonTracerCode, parsePythonTrace } from '$lib/utils/python-tracer.js';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
@@ -23,11 +24,15 @@
 	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
 
 	const showSandbox = config.features?.theorySandbox === true && lesson.sandbox !== false;
-	const sandboxLang = config.language ?? 'javascript';
+	const sandboxLang = lesson.sandbox_language ?? config.language ?? 'javascript';
 	const sandboxIsPiston = isPistonLanguage(sandboxLang);
 	const sandboxIsPythonTraceable = sandboxLang === 'python' || sandboxLang === 'python3';
+	const sandboxIsHtmlLike = sandboxLang === 'html' || sandboxLang === 'css';
 
 	const SANDBOX_STARTERS = /** @type {Record<string,string>} */ ({
+		html:    '<!DOCTYPE html>\n<html>\n  <head>\n    <title>Sandbox</title>\n  </head>\n  <body>\n    <h1>Hello!</h1>\n    <p>Edit me and see it render live.</p>\n  </body>\n</html>\n',
+		css:     'body {\n  font-family: sans-serif;\n  padding: 1.5rem;\n}\n\nh1 {\n  color: steelblue;\n}\n',
+		javascript: 'let x = 5;\nlet y = 3;\n\nconsole.log(x + y); // 8\n',
 		c:       '#include <stdio.h>\n\nint main() {\n    // Write your C code here\n    \n    return 0;\n}\n',
 		cpp:     '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ code here\n    \n    return 0;\n}\n',
 		'c++':   '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ code here\n    \n    return 0;\n}\n',
@@ -320,12 +325,23 @@
 			<!-- Header bar -->
 			<div class="panel-bar">
 				<span class="panel-label">Sandbox</span>
-				{#if sandboxIsPiston && !sandboxIsPythonTraceable}
+				{#if traceMode}
+					<div class="trace-header-info">
+						<span class="trace-step-badge" style="background:{currentStepColor}22; color:{currentStepColor}; border-color:{currentStepColor}44">
+							{currentStepType}
+						</span>
+						<span class="trace-keyboard-hint"> to navigate· Esc to exit</span>
+					</div>
+					<button class="exit-trace-btn" onclick={exitTrace}>✖ Exit</button>
+				{:else if sandboxIsHtmlLike}
+					<span class="lang-badge">{langLabel(sandboxLang)}</span>
+					<span class="panel-hint">updates as you type</span>
+				{:else if sandboxIsPiston && !sandboxIsPythonTraceable}
 					<span class="lang-badge">{langLabel(sandboxLang)}</span>
 					<button class="trace-btn" onclick={runSandbox} disabled={sandboxPistonRunning}>
 						{sandboxPistonRunning ? 'Running' : 'Run'}
 					</button>
-				{:else if !traceMode}
+				{:else}
 					{#if sandboxIsPythonTraceable}
 						<span class="lang-badge">{langLabel(sandboxLang)}</span>
 					{/if}
@@ -337,14 +353,6 @@
 					>
 						{tracing ? 'Running' : 'Step Through'}
 					</button>
-				{:else}
-					<div class="trace-header-info">
-						<span class="trace-step-badge" style="background:{currentStepColor}22; color:{currentStepColor}; border-color:{currentStepColor}44">
-							{currentStepType}
-						</span>
-						<span class="trace-keyboard-hint"> to navigate· Esc to exit</span>
-					</div>
-					<button class="exit-trace-btn" onclick={exitTrace}>✖ Exit</button>
 				{/if}
 				<button class="close-btn" onclick={() => (sandboxOpen = false)} aria-label="Close sandbox">✖</button>
 			</div>
@@ -448,6 +456,10 @@
 						<span class="trace-prompt-icon">▶</span>
 						Press <strong>Step Through</strong> to trace your code line by line
 					</div>
+				</div>
+			{:else if sandboxIsHtmlLike}
+				<div class="sandbox-lower preview-lower">
+					<PreviewPane code={sandboxCode} language={sandboxLang} />
 				</div>
 			{:else}
 				<div class="sandbox-lower">
@@ -676,6 +688,7 @@
 	}
 
 	.console-wrap { flex: 1; overflow: hidden; min-height: 0; }
+	.preview-lower { flex: 1; min-height: 0; overflow: hidden; }
 
 	.trace-console {
 		flex: 1;

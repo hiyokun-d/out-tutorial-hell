@@ -4,6 +4,7 @@
   "difficulty": "BEGINNER",
   "order": 99,
   "icon": "📚",
+  "language": "Python",
   "author": {
     "name": "Your Name",
     "link": "https://your-link.com"
