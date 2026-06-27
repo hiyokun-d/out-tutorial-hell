@@ -37,7 +37,9 @@
 </svelte:head>
 
 <div class="app-layout">
-	<Sidebar />
+	<!-- remind me to uncomment this shit -->
+	<!-- <Sidebar /> -->
+
 	<main class="main-content">
 		{@render children()}
 	</main>
@@ -64,5 +66,3 @@
 		}
 	}
 </style>
-
-
