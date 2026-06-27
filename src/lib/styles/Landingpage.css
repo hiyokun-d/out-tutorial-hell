@@ -1,1 +1,12 @@
+.cards-stats {
+	font-size: 25px;
+	background-color: var(--color-gray-800);
+	width: 130px;
+	padding: 5px;
+	border-radius: 10px;
+	border: 2px solid #fff;
+}
 
+.cards-stats :nth-child(2) {
+	margin-top: -10px;
+}
