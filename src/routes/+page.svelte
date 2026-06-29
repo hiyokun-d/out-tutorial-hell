@@ -9,6 +9,7 @@
 	import { getLearningSnapshot } from '$lib/utils/local-data.js';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { xpProgress } from '$lib/stores/xp.js';
+	import TextMarquee from '$lib/components/TextMarquee.svelte';
 
 	let { data } = $props();
 	const { courses, stats } = data;
@@ -424,10 +425,22 @@
 	</div>
 </section>
 
+<!-- Marquee transition: tech stack -->
+<div
+	class="border-y border-white/5 py-5 backdrop-blur-sm bg-gradient-to-b from-gray-900/20 to-[#060712]/10"
+>
+	<TextMarquee
+		text="Happy Learning ✦ Keep coding ✦ i don't know what to type anymore ✦ do something ✦ just do it ✦"
+		baseVelocity={-4}
+		scrollDependent={true}
+		class="jersey-15-regular text-[2vw] text-white/40 tracking-widest uppercase"
+	/>
+</div>
+
 <!-- Section 2 -->
 <section class="min-h-screen"></section>
 
 <!-- Section 3 -->
-<section class="min-h-screen"></section>
+<!-- <section class="min-h-screen"></section> -->
 
 <!-- last section should be having a lanyard effect -->
