@@ -120,7 +120,77 @@
 
 		if (trackListEl) io.observe(trackListEl);
 
-		return () => io.disconnect();
+		// ── Random glitch engine ──────────────────────────────────────
+		/** @param {number} min @param {number} max @returns {number} */
+		const rnd = (min, max) => Math.random() * (max - min) + min;
+
+		/** @param {HTMLElement} el @param {number} [intensity] @param {string} [baseFilter] */
+		const glitchBurst = (el, intensity = 1, baseFilter = '') => {
+			const count = 3 + Math.floor(rnd(0, 4));
+			let step = 0;
+			const fire = () => {
+				if (step < count) {
+					const x = rnd(-8, 8) * intensity;
+					const y = rnd(-5, 5) * intensity;
+					const skew = rnd(-6, 6) * intensity;
+					const br = rnd(0.25, 2.3);
+					const hue = rnd(-90, 90);
+					const sat = rnd(1, 5);
+					el.style.transform = `translate(${x}px,${y}px) skewX(${skew}deg)`;
+					el.style.filter = `${baseFilter}brightness(${br}) hue-rotate(${hue}deg) saturate(${sat})`;
+					step++;
+					setTimeout(fire, 28 + rnd(0, 32));
+				} else {
+					el.style.transform = '';
+					el.style.filter = baseFilter || '';
+				}
+			};
+			fire();
+		};
+
+		/** @param {HTMLElement} el @param {number} baseMs @param {number} intensity @param {string} [baseFilter] @returns {() => void} */
+		const scheduleGlitch = (el, baseMs, intensity, baseFilter = '') => {
+			/** @type {ReturnType<typeof setTimeout>} */
+			let timer;
+			const loop = () => {
+				glitchBurst(el, intensity, baseFilter);
+				timer = setTimeout(loop, baseMs + rnd(-600, 1400));
+			};
+			timer = setTimeout(loop, rnd(100, baseMs * 0.6));
+			return () => clearTimeout(timer);
+		};
+
+		/** @type {Array<() => void>} */
+		const glitchCleanups = [];
+		const cardGlitchVariants = ['a', 'b', 'c', 'd'];
+		const CARD_DURS = [4.8, 6.2, 3.6];
+		const CARD_DELAYS = [0, 2.1, 1.1];
+
+		// Start after stagger completes
+		const initTimer = setTimeout(() => {
+			// Card-level: assign a random directional CSS variant
+			document.querySelectorAll('.locked-card').forEach((card, idx) => {
+				const c = /** @type {HTMLElement} */ (card);
+				const variant = cardGlitchVariants[Math.floor(Math.random() * cardGlitchVariants.length)];
+				c.style.animation = `brutal-glitch-${variant} ${CARD_DURS[idx] ?? 5}s infinite ${CARD_DELAYS[idx] ?? 0}s`;
+			});
+
+			// Subtitle: JS-driven random glitch
+			document.querySelectorAll('.locked-subtitle').forEach((el, idx) => {
+				glitchCleanups.push(scheduleGlitch(/** @type {HTMLElement} */ (el), 4200 + idx * 650, 0.65, 'blur(0.5px) '));
+			});
+
+			// Chips: JS-driven random glitch, each offset
+			document.querySelectorAll('.locked-chip').forEach((el, idx) => {
+				glitchCleanups.push(scheduleGlitch(/** @type {HTMLElement} */ (el), 2800 + (idx % 5) * 380, 0.45, 'blur(0.8px) '));
+			});
+		}, 1400);
+
+		return () => {
+			io.disconnect();
+			clearTimeout(initTimer);
+			glitchCleanups.forEach((fn) => fn());
+		};
 	});
 
 	const RING_R = 100;
@@ -579,7 +649,7 @@
 						{track.locked
 						? 'border-white/8 bg-[#070810]/90 backdrop-blur-xl'
 						: 'border-white/12 bg-[#0f1330]/88 backdrop-blur-xl hover:border-white/22'}"
-					style={`opacity: 0; ${track.locked ? `animation: brutal-glitch ${([4.8, 6.2, 3.6])[i - 2] ?? 5}s infinite ${([0, 2.1, 1.1])[i - 2] ?? 0}s;` : ''}`}
+					style="opacity: 0;"
 					onmousemove={(e) => {
 						if (track.locked) return;
 						const r = e.currentTarget.getBoundingClientRect();
@@ -697,8 +767,8 @@
 						<!-- Subtitle -->
 						{#if track.locked}
 							<p
-								class="jersey-15-regular text-sm leading-relaxed text-white/18"
-								style={`filter: blur(0.5px); animation: subtitle-glitch ${([5.4, 7.2, 4.6])[i - 2] ?? 5.8}s infinite ${([0.4, 1.7, 2.9])[i - 2] ?? 1}s;`}
+								class="locked-subtitle jersey-15-regular text-sm leading-relaxed text-white/18"
+								style="filter: blur(0.5px);"
 							>
 								{(track.subtitle.split('—')[0] ?? track.subtitle).trim()}
 							</p>
@@ -712,12 +782,10 @@
 						<div class="flex flex-wrap gap-1.5 mt-3 flex-1 content-start">
 							{#each (i === 0 ? track.skills : track.skills.slice(0, i === 1 ? 5 : 3)) as skill, si}
 								<span
-									class="jersey-15-regular text-[10px] tracking-wide px-2 py-0.5 rounded-full border {track.locked
+									class="{track.locked ? 'locked-chip ' : ''}jersey-15-regular text-[10px] tracking-wide px-2 py-0.5 rounded-full border {track.locked
 										? 'bg-white/3 border-white/8 text-white/20'
 										: 'bg-white/5 border-white/12 text-white/55 hover:border-orange-400/30 hover:text-white/75 transition-all duration-150'}"
-									style={track.locked
-										? `filter: blur(0.8px); animation: chip-glitch ${3.8 + si * 0.65 + (i - 2) * 0.55}s infinite ${si * 0.45 + (i - 2) * 0.75}s;`
-										: ''}
+									style={track.locked ? 'filter: blur(0.8px);' : ''}
 								>
 									{track.locked ? skill.replace(/[aeiou]/gi, (c) => Math.random() > 0.5 ? '?' : c) : skill}
 								</span>
@@ -792,119 +860,53 @@
 <!-- last section should be having a lanyard effect -->
 
 <style>
-	@keyframes brutal-glitch {
-		0%,
-		86%,
-		100% {
-			transform: none;
-			filter: none;
-		}
-		87% {
-			transform: translate(-6px, 2px) skewX(-6deg);
-			filter: brightness(1.6) hue-rotate(40deg) saturate(3);
-		}
-		88% {
-			transform: translate(9px, -3px) skewX(5deg);
-			filter: brightness(0.4) hue-rotate(-30deg);
-		}
-		89% {
-			transform: translate(-4px, 5px) skewX(-2deg);
-			filter: brightness(1.3) saturate(2.5);
-		}
-		90% {
-			transform: translate(10px, 0) skewX(-4deg);
-			filter: brightness(2) saturate(4) hue-rotate(20deg);
-		}
-		91% {
-			transform: translate(-8px, -2px) skewX(3deg);
-			filter: brightness(0.3) hue-rotate(-50deg);
-		}
-		92% {
-			transform: translate(5px, 3px);
-			filter: brightness(1.5) saturate(2);
-		}
-		93% {
-			transform: translate(-3px, -4px) skewX(2deg);
-			filter: brightness(0.6) hue-rotate(15deg);
-		}
-		94% {
-			transform: translate(7px, 1px) skewX(-1deg);
-			filter: brightness(1.8) hue-rotate(-20deg);
-		}
-		95% {
-			transform: none;
-			filter: none;
-		}
+	/* variant-a: right-dominant + diagonal */
+	@keyframes brutal-glitch-a {
+		0%, 86%, 100% { transform: translateY(0); filter: none; }
+		87% { transform: translate(9px, -3px) skewX(-5deg); filter: brightness(1.8) hue-rotate(50deg) saturate(3.5); }
+		88% { transform: translate(-5px, 2px) skewX(3deg); filter: brightness(0.35) hue-rotate(-35deg); }
+		89% { transform: translate(12px, -1px) skewX(-4deg); filter: brightness(2.2) hue-rotate(-20deg) saturate(5); }
+		90% { transform: translate(-8px, 4px) skewX(2deg); filter: brightness(0.25) hue-rotate(60deg); }
+		91% { transform: translate(6px, -2px); filter: brightness(1.6) saturate(2.5); }
+		92% { transform: translate(-3px, 1px) skewX(-1deg); filter: brightness(0.55); }
+		93% { transform: translateY(0); filter: none; }
 	}
 
-	@keyframes subtitle-glitch {
-		0%,
-		91%,
-		100% {
-			transform: none;
-			opacity: 1;
-			text-shadow: none;
-		}
-		92% {
-			transform: translateX(-3px);
-			text-shadow:
-				3px 0 rgba(255, 50, 100, 0.55),
-				-3px 0 rgba(0, 200, 255, 0.45);
-		}
-		93% {
-			transform: translateX(5px);
-			opacity: 0.25;
-			text-shadow: none;
-		}
-		94% {
-			transform: translateX(-2px);
-			text-shadow: -3px 0 rgba(180, 0, 255, 0.45);
-		}
-		95% {
-			transform: translateX(1px);
-			opacity: 0.6;
-			text-shadow: 2px 0 rgba(255, 200, 0, 0.35);
-		}
-		96% {
-			transform: none;
-			opacity: 1;
-			text-shadow: none;
-		}
+	/* variant-b: left-dominant + vertical mix */
+	@keyframes brutal-glitch-b {
+		0%, 87%, 100% { transform: translateY(0); filter: none; }
+		88% { transform: translate(-11px, 3px) skewX(7deg); filter: brightness(1.9) hue-rotate(-55deg) saturate(4); }
+		89% { transform: translate(5px, -6px) skewX(-3deg); filter: brightness(0.3) hue-rotate(40deg); }
+		90% { transform: translate(-13px, 2px) skewX(6deg); filter: brightness(2.4) hue-rotate(70deg) saturate(6); }
+		91% { transform: translate(7px, -4px) skewX(-4deg); filter: brightness(0.2); }
+		92% { transform: translate(-5px, 5px) skewX(2deg); filter: brightness(1.5) hue-rotate(-25deg); }
+		93% { transform: translate(3px, -2px); filter: brightness(0.65) saturate(1.8); }
+		94% { transform: translateY(0); filter: none; }
 	}
 
-	@keyframes chip-glitch {
-		0%,
-		92%,
-		100% {
-			opacity: 1;
-			text-shadow: none;
-			filter: blur(0.8px);
-		}
-		93% {
-			opacity: 0.55;
-			text-shadow: 2px 0 rgba(255, 80, 80, 0.65);
-			filter: blur(0.8px) hue-rotate(80deg);
-		}
-		94% {
-			opacity: 0.05;
-			text-shadow: none;
-			filter: blur(2.5px);
-		}
-		95% {
-			opacity: 0.45;
-			text-shadow: -2px 0 rgba(80, 200, 255, 0.55);
-			filter: blur(0.8px) hue-rotate(-55deg);
-		}
-		96% {
-			opacity: 0.7;
-			text-shadow: 1px 0 rgba(255, 255, 0, 0.4);
-			filter: blur(0.8px) hue-rotate(30deg);
-		}
-		97% {
-			opacity: 1;
-			text-shadow: none;
-			filter: blur(0.8px);
-		}
+	/* variant-c: vertical-dominant + Y-axis slam */
+	@keyframes brutal-glitch-c {
+		0%, 88%, 100% { transform: translateY(0); filter: none; }
+		89% { transform: translate(3px, -10px) skewX(-3deg); filter: brightness(2) hue-rotate(80deg) saturate(4.5); }
+		90% { transform: translate(-2px, 12px) skewX(2deg); filter: brightness(0.28) hue-rotate(-45deg); }
+		91% { transform: translate(5px, -7px) skewX(-5deg); filter: brightness(2.5) saturate(6) hue-rotate(25deg); }
+		92% { transform: translate(-4px, 8px) skewX(4deg); filter: brightness(0.35) hue-rotate(55deg); }
+		93% { transform: translate(1px, -4px); filter: brightness(1.7); }
+		94% { transform: translateY(0); filter: none; }
+	}
+
+	/* variant-d: full chaos, max magnitude */
+	@keyframes brutal-glitch-d {
+		0%, 85%, 100% { transform: translateY(0); filter: none; }
+		86% { transform: translate(-12px, 7px) skewX(8deg); filter: brightness(2.2) hue-rotate(100deg) saturate(7); }
+		87% { transform: translate(14px, -9px) skewX(-7deg); filter: brightness(0.18) hue-rotate(-90deg); }
+		88% { transform: translate(-9px, 11px) skewX(5deg); filter: brightness(2.8) saturate(8) hue-rotate(50deg); }
+		89% { transform: translate(11px, -7px) skewX(-6deg); filter: brightness(0.12); }
+		90% { transform: translate(-6px, 5px) skewX(4deg); filter: brightness(2) hue-rotate(-70deg) saturate(4); }
+		91% { transform: translate(7px, -4px) skewX(-3deg); filter: brightness(0.45) hue-rotate(40deg); }
+		92% { transform: translate(-4px, 6px); filter: brightness(1.4); }
+		93% { transform: translate(5px, -3px); filter: brightness(0.6) saturate(2.5); }
+		94% { transform: translateY(0); filter: none; }
 	}
 
 	.bento-glow {
