@@ -613,18 +613,58 @@
 					<div class="relative z-[1] flex flex-col flex-1 {i === 0 ? 'p-6' : 'p-5'}">
 						<!-- Number + badge row -->
 						<div class="flex items-start justify-between mb-3">
-							<span
-								class="jersey-15-regular leading-none tabular-nums select-none {i === 0 ? 'text-6xl' : 'text-5xl'} {track.locked ? 'text-white/8' : 'text-orange-400/35'}"
-							>
-								{String(track.order).padStart(2, '0')}
-							</span>
+							{#if track.locked}
+								<FuzzyText
+									text={String(track.order).padStart(2, '0')}
+									fontSize={48}
+									color="rgba(255,255,255,0.08)"
+									baseIntensity={0.44}
+									hoverIntensity={0.78}
+									enableHover={true}
+									fuzzRange={42}
+									fps={35}
+									direction="horizontal"
+									transitionDuration={0}
+									clickEffect={false}
+									glitchMode={true}
+									glitchInterval={([1900, 2700, 1550])[i - 2] ?? 2100}
+									glitchDuration={([420, 310, 490])[i - 2] ?? 410}
+								/>
+							{:else}
+								<span
+									class="jersey-15-regular leading-none tabular-nums select-none {i === 0
+										? 'text-6xl'
+										: 'text-5xl'} text-orange-400/35"
+								>
+									{String(track.order).padStart(2, '0')}
+								</span>
+							{/if}
 							{#if !track.locked}
-								<span class="jersey-15-regular text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-orange-400/15 text-orange-300 border border-orange-400/25">
+								<span
+									class="jersey-15-regular text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-orange-400/15 text-orange-300 border border-orange-400/25"
+								>
 									{track.level}
 								</span>
 							{:else}
-								<span class="jersey-15-regular text-[10px] tracking-widest uppercase px-2 py-0.5 rounded bg-red-950/60 text-red-400/70 border border-red-500/25">
-									CORRUPTED
+								<span
+									class="jersey-15-regular inline-flex items-center text-[10px] tracking-widest uppercase px-2 py-0.5 rounded bg-red-950/60 border border-red-500/25"
+								>
+									<FuzzyText
+										text="CORRUPTED"
+										fontSize={10}
+										color="rgba(248,113,113,0.7)"
+										baseIntensity={0.32}
+										hoverIntensity={0.68}
+										enableHover={true}
+										fuzzRange={12}
+										fps={25}
+										direction="vertical"
+										transitionDuration={0}
+										clickEffect={false}
+										glitchMode={true}
+										glitchInterval={([730, 980, 840])[i - 2] ?? 850}
+										glitchDuration={([270, 350, 210])[i - 2] ?? 280}
+									/>
 								</span>
 							{/if}
 						</div>
@@ -655,22 +695,29 @@
 						</div>
 
 						<!-- Subtitle -->
-						<p
-							class="jersey-15-regular text-sm leading-relaxed {track.locked ? 'text-white/18' : 'text-white/55'}"
-							style:filter={track.locked ? 'blur(0.7px)' : 'none'}
-						>
-							{i === 0 ? track.subtitle : (track.subtitle.split('—')[0] ?? track.subtitle).trim()}
-						</p>
+						{#if track.locked}
+							<p
+								class="jersey-15-regular text-sm leading-relaxed text-white/18"
+								style={`filter: blur(0.5px); animation: subtitle-glitch ${([5.4, 7.2, 4.6])[i - 2] ?? 5.8}s infinite ${([0.4, 1.7, 2.9])[i - 2] ?? 1}s;`}
+							>
+								{(track.subtitle.split('—')[0] ?? track.subtitle).trim()}
+							</p>
+						{:else}
+							<p class="jersey-15-regular text-sm leading-relaxed text-white/55">
+								{i === 0 ? track.subtitle : (track.subtitle.split('—')[0] ?? track.subtitle).trim()}
+							</p>
+						{/if}
 
 						<!-- Skills chips -->
 						<div class="flex flex-wrap gap-1.5 mt-3 flex-1 content-start">
-							{#each (i === 0 ? track.skills : track.skills.slice(0, i === 1 ? 5 : 3)) as skill}
+							{#each (i === 0 ? track.skills : track.skills.slice(0, i === 1 ? 5 : 3)) as skill, si}
 								<span
-									class="jersey-15-regular text-[10px] tracking-wide px-2 py-0.5 rounded-full border transition-all duration-150
-										{track.locked
+									class="jersey-15-regular text-[10px] tracking-wide px-2 py-0.5 rounded-full border {track.locked
 										? 'bg-white/3 border-white/8 text-white/20'
-										: 'bg-white/5 border-white/12 text-white/55 hover:border-orange-400/30 hover:text-white/75'}"
-									style:filter={track.locked ? 'blur(0.9px)' : 'none'}
+										: 'bg-white/5 border-white/12 text-white/55 hover:border-orange-400/30 hover:text-white/75 transition-all duration-150'}"
+									style={track.locked
+										? `filter: blur(0.8px); animation: chip-glitch ${3.8 + si * 0.65 + (i - 2) * 0.55}s infinite ${si * 0.45 + (i - 2) * 0.75}s;`
+										: ''}
 								>
 									{track.locked ? skill.replace(/[aeiou]/gi, (c) => Math.random() > 0.5 ? '?' : c) : skill}
 								</span>
@@ -787,6 +834,76 @@
 		95% {
 			transform: none;
 			filter: none;
+		}
+	}
+
+	@keyframes subtitle-glitch {
+		0%,
+		91%,
+		100% {
+			transform: none;
+			opacity: 1;
+			text-shadow: none;
+		}
+		92% {
+			transform: translateX(-3px);
+			text-shadow:
+				3px 0 rgba(255, 50, 100, 0.55),
+				-3px 0 rgba(0, 200, 255, 0.45);
+		}
+		93% {
+			transform: translateX(5px);
+			opacity: 0.25;
+			text-shadow: none;
+		}
+		94% {
+			transform: translateX(-2px);
+			text-shadow: -3px 0 rgba(180, 0, 255, 0.45);
+		}
+		95% {
+			transform: translateX(1px);
+			opacity: 0.6;
+			text-shadow: 2px 0 rgba(255, 200, 0, 0.35);
+		}
+		96% {
+			transform: none;
+			opacity: 1;
+			text-shadow: none;
+		}
+	}
+
+	@keyframes chip-glitch {
+		0%,
+		92%,
+		100% {
+			opacity: 1;
+			text-shadow: none;
+			filter: blur(0.8px);
+		}
+		93% {
+			opacity: 0.55;
+			text-shadow: 2px 0 rgba(255, 80, 80, 0.65);
+			filter: blur(0.8px) hue-rotate(80deg);
+		}
+		94% {
+			opacity: 0.05;
+			text-shadow: none;
+			filter: blur(2.5px);
+		}
+		95% {
+			opacity: 0.45;
+			text-shadow: -2px 0 rgba(80, 200, 255, 0.55);
+			filter: blur(0.8px) hue-rotate(-55deg);
+		}
+		96% {
+			opacity: 0.7;
+			text-shadow: 1px 0 rgba(255, 255, 0, 0.4);
+			filter: blur(0.8px) hue-rotate(30deg);
+		}
+		97% {
+			opacity: 1;
+			text-shadow: none;
+			filter: blur(0.8px);
 		}
 	}
 
