@@ -5,14 +5,21 @@
 	import { onMount } from 'svelte';
 	import FaultyTerminal from '$lib/components/FaultyTerminal.svelte';
 	import FuzzyText from '$lib/components/FuzzyText.svelte';
-	import { ArrowBigRightDashIcon, BookOpenIcon } from '@lucide/svelte';
+	import {
+		ArrowBigRightDashIcon,
+		BookOpenIcon,
+		CheckCircle,
+		CheckCircle2,
+		CheckCircle2Icon,
+		CheckLineIcon
+	} from '@lucide/svelte';
 	import { getLearningSnapshot } from '$lib/utils/local-data.js';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { xpProgress } from '$lib/stores/xp.js';
 	import TextMarquee from '$lib/components/TextMarquee.svelte';
 
 	let { data } = $props();
-	const { courses, stats } = data;
+	const { courses, features, stats } = data;
 
 	const FIRST_LESSON = '/courses/getting-started/1';
 
@@ -438,7 +445,17 @@
 </div>
 
 <!-- Section 2 -->
-<section class="min-h-screen"></section>
+<section class="min-h-screen">
+	{#each features as feature}
+		<article>
+			<CheckLineIcon size={18} />
+			<div>
+				<h2>{feature.title}</h2>
+				<p>{feature.detail}</p>
+			</div>
+		</article>
+	{/each}
+</section>
 
 <!-- Section 3 -->
 <!-- <section class="min-h-screen"></section> -->
