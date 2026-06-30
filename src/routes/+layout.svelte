@@ -38,6 +38,7 @@
 
 <div class="app-layout">
 	<Sidebar />
+
 	<main class="main-content">
 		{@render children()}
 	</main>
@@ -64,5 +65,3 @@
 		}
 	}
 </style>
-
-

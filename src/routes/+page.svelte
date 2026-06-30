@@ -1,542 +1,923 @@
 <script>
+	import '$lib/styles/Landingpage.css';
+
 	// @ts-nocheck
 	import { onMount } from 'svelte';
-	import { ArrowRight, BookOpen, CheckCircle2, Code2, GitBranch, Lock, Map, Play, Star, TerminalSquare, Trophy, Zap } from '@lucide/svelte';
+	import { animate, stagger } from 'animejs';
+	import FaultyTerminal from '$lib/components/FaultyTerminal.svelte';
+	import FuzzyText from '$lib/components/FuzzyText.svelte';
+	import {
+		ArrowBigRightDashIcon,
+		ArrowRight,
+		BookOpenIcon,
+		CheckCircle,
+		CheckCircle2,
+		CheckCircle2Icon,
+		CheckLineIcon,
+		FileTerminal,
+		Lock,
+		Star
+	} from '@lucide/svelte';
+	import { getLearningSnapshot } from '$lib/utils/local-data.js';
 	import { getProgress } from '$lib/utils/progress.js';
-	import { xp } from '$lib/stores/xp.js';
+	import { xpProgress } from '$lib/stores/xp.js';
+	import TextMarquee from '$lib/components/TextMarquee.svelte';
 
 	let { data } = $props();
-	const { courses, tracks, features, skillMatrix, stats } = data;
+	const { tracks, courses, features, stats } = data;
 
-	let completedByCourse = $state({});
-	let totalCompleted = $state(0);
-	let nextCourse = $state(courses[0] ?? null);
-	let studyPlan = $state([]);
+	const FIRST_LESSON = '/courses/getting-started/1';
+
+	let hasStarted = $state(false);
+	let continuehref = $state(FIRST_LESSON);
+	let completedLessons = $state(0);
+	let userXp = $state(0);
+	let progressPercent = $state(0);
+
+	/** @type {string | null} */
+	let hoveredTrack = $state(null);
+	/** @type {HTMLDivElement | null} */
+	let trackListEl = null;
+
+	const COMING_SOON_TRACKS = [
+		{
+			id: 'python',
+			title: 'Python',
+			subtitle: 'Learn Python from scratch — scripting, automation, and data basics.',
+			skills: ['Variables', 'Loops', 'Functions', 'Files', 'Modules', 'OOP'],
+			outcome: 'Automate tasks and write real Python programs.',
+			level: 'Coming Soon',
+			order: 3,
+			locked: true,
+			courses: [],
+			lessonCount: 0,
+			totalXp: 0
+		},
+		{
+			id: 'react-svelte',
+			title: 'React / Svelte',
+			subtitle: 'Build interactive UIs with a modern component framework.',
+			skills: ['Components', 'State', 'Props', 'Effects', 'Routing', 'API calls'],
+			outcome: 'Build a real app with a frontend framework.',
+			level: 'Coming Soon',
+			order: 4,
+			locked: true,
+			courses: [],
+			lessonCount: 0,
+			totalXp: 0
+		},
+		{
+			id: 'backend-apis',
+			title: 'Backend & APIs',
+			subtitle: 'Build servers, REST APIs, and connect to databases.',
+			skills: ['HTTP', 'REST', 'Databases', 'Auth', 'Deployment'],
+			outcome: 'Ship a full-stack app with a real backend.',
+			level: 'Coming Soon',
+			order: 5,
+			locked: true,
+			courses: [],
+			lessonCount: 0,
+			totalXp: 0
+		}
+	];
+
+	const allTracks = [...tracks.map((t) => ({ ...t, locked: false })), ...COMING_SOON_TRACKS];
 
 	onMount(() => {
-		const nextCompletedByCourse = {};
-		let completed = 0;
-		let firstOpen = null;
+		const snapshot = getLearningSnapshot();
+		hasStarted = (snapshot?.summary?.completedLessons ?? 0) > 0;
+		completedLessons = snapshot?.summary?.completedLessons ?? 0;
+		userXp = snapshot?.xp?.xp ?? 0;
+		progressPercent = stats.lessons > 0 ? Math.round((completedLessons / stats.lessons) * 100) : 0;
 
-		for (const course of courses) {
-			const done = getProgress(course.id).size;
-			nextCompletedByCourse[course.id] = done;
-			completed += done;
-			if (!firstOpen && done < course.lessonCount) firstOpen = course;
+		if (hasStarted) {
+			let firstOpen = null;
+			for (const course of courses) {
+				const done = getProgress(course.id).size;
+				if (done > 0 && done < course.lessonCount) {
+					firstOpen = course;
+					break;
+				}
+			}
+			continuehref = firstOpen ? `/courses/${firstOpen.id}` : '/courses';
 		}
 
-		completedByCourse = nextCompletedByCourse;
-		totalCompleted = completed;
-		nextCourse = firstOpen ?? courses[0] ?? null;
-		studyPlan = courses.slice(0, 3).map((course) => {
-			const done = nextCompletedByCourse[course.id] ?? 0;
-			return {
-				...course,
-				done,
-				label: done === 0 ? 'Start' : done >= course.lessonCount ? 'Review' : 'Continue'
-			};
-		});
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					animate('.track-item', {
+						translateY: [40, 0],
+						opacity: [0, 1],
+						duration: 650,
+						delay: stagger(110),
+						easing: 'outExpo'
+					});
+					io.disconnect();
+				}
+			},
+			{ threshold: 0.05 }
+		);
+
+		if (trackListEl) io.observe(trackListEl);
+
+		return () => io.disconnect();
 	});
 
-	let completionPercent = $derived(stats.lessons ? Math.round((totalCompleted / stats.lessons) * 100) : 0);
-	let nextHref = $derived(nextCourse ? `/courses/${nextCourse.id}` : '/courses');
-
-	function trackProgress(track) {
-		const complete = track.courses.reduce((sum, course) => sum + (completedByCourse[course.id] ?? 0), 0);
-		return track.lessonCount ? Math.round((complete / track.lessonCount) * 100) : 0;
-	}
+	const RING_R = 100;
+	const RING_CIRC = 2 * Math.PI * RING_R;
+	const ringOffset = $derived(RING_CIRC * (1 - progressPercent / 100));
 </script>
 
 <svelte:head>
-	<title>Out of Tutorial Hell | Roadmaps with no login</title>
-	<meta name="description" content="A no-login coding roadmap with lessons, browser labs, XP, notes, and instant feedback." />
+	<style>
+		/* remove layout padding on landing page */
+		.main-content {
+			padding: 0 !important;
+		}
+	</style>
+
+	<title>Out of Tutorial HELL</title>
+	<meta
+		name="description"
+		content="A no-login coding roadmap with lessons, browser labs, XP, notes, and instant feedback."
+	/>
 </svelte:head>
 
-<main class="home-shell">
-	<section class="hero-band">
-		<div class="hero-copy">
-			<span class="eyebrow"><Zap size={15} /> No login required</span>
-			<h1>Out of Tutorial Hell</h1>
-			<p>
-				A no-login coding roadmap that turns beginner courses into a working path: learn a concept, run code, trace what happens, take notes, and keep local progress.
+<!-- Section 1: Hero with FaultyTerminal background -->
+<section class="relative h-screen overflow-hidden bg-gray-900">
+	<div class="pointer-events-none absolute inset-0">
+		<FaultyTerminal
+			scale={1.2}
+			digitSize={1.4}
+			timeScale={0.4}
+			scanlineIntensity={0.6}
+			curvature={0.18}
+			tint="#002e7a"
+			mouseReact={true}
+			mouseStrength={0.7}
+			globalMouse={true}
+			pageLoadAnimation={true}
+			noiseAmp={1}
+			brightness={0.6}
+		/>
+	</div>
+
+	<!-- Hero content -->
+	<div class="relative z-10 flex h-full items-center justify-between px-9 gap-8">
+		<!-- Left: text + CTAs -->
+		<div class="flex flex-col items-start gap-6">
+			<h1 class="flex flex-col items-start">
+				<span class="jersey-15-regular text-7xl leading-none">Out of</span>
+				<FuzzyText
+					class="-ml-[50px]"
+					text="Tutorial Hell"
+					baseIntensity={0.2}
+					hoverIntensity={0.5}
+					enableHover={true}
+					fuzzRange={30}
+					fps={60}
+					direction="horizontal"
+					transitionDuration={0}
+					clickEffect={false}
+					glitchMode={false}
+					glitchInterval={2000}
+					glitchDuration={200}
+					letterSpacing={0}
+					fontSize={90}
+				/>
+			</h1>
+			<p class="jersey-15-regular max-w-lg text-xl leading-relaxed text-white/70">
+				you've watched 47 tutorials. you still can't build anything. we get it.<br />
+				stop watching. start breaking things.<br />
+				<span class="text-white/40 text-base"
+					>free. no login. your data stays in your browser (we genuinely don't want it).</span
+				>
 			</p>
-			<div class="hero-actions">
-				<a class="primary-action" href={nextHref}><Play size={17} /> Continue learning</a>
-				<a class="secondary-action" href="/courses"><Map size={17} /> View roadmap</a>
+
+			<div class="flex items-center gap-4">
+				<a
+					href={continuehref}
+					class="jersey-15-regular group flex items-center gap-2 bg-orange-400 px-7 py-3 text-xl text-black transition-all duration-100 hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
+					style="box-shadow: 4px 4px 0px #c2410c;"
+					onmouseenter={(e) => (e.currentTarget.style.boxShadow = '2px 2px 0px #c2410c')}
+					onmouseleave={(e) => (e.currentTarget.style.boxShadow = '4px 4px 0px #c2410c')}
+					onmousedown={(e) => (e.currentTarget.style.boxShadow = 'none')}
+					onmouseup={(e) => (e.currentTarget.style.boxShadow = '2px 2px 0px #c2410c')}
+				>
+					<ArrowBigRightDashIcon size={18} />
+					{hasStarted ? 'Continue Learning' : 'Start Learning'}
+				</a>
+				<a
+					href="/courses"
+					class="jersey-15-regular flex items-center gap-2 border-2 border-white/10 px-7 py-3 text-xl text-white/70 transition-all duration-100 hover:border-white/20 hover:text-white bg-black/40 backdrop-blur-md"
+				>
+					<BookOpenIcon size={18} />
+					Browse Courses
+				</a>
 			</div>
 		</div>
 
-		<aside class="command-center" aria-label="Learning dashboard">
-			<div class="panel-topline">
-				<span>Local dashboard</span>
-				<span>{$xp.xp} XP</span>
-			</div>
-			<div class="progress-ring" style={`--pct:${completionPercent}%`}>
-				<div>
-					<strong>{completionPercent}%</strong>
-					<span>complete</span>
+		{#if hasStarted}
+			<!-- ── STARTED: clean progress card ── -->
+			<div
+				class="bg-black/50 backdrop-blur-md jersey-15-regular p-5 rounded-2xl border-2 border-gray-300 border-double w-96 mr-24 min-h-[480px] flex flex-col items-center gap-5"
+			>
+				<div class="flex justify-between w-full items-center">
+					<span class="text-2xl">Your progress</span>
+					<span class="text-2xl">{userXp} Xp</span>
+				</div>
+
+				<!-- Donut ring -->
+				<div class="relative flex justify-center items-center">
+					<svg width="240" height="240" viewBox="0 0 240 240">
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="rgba(255,255,255,0.07)"
+							stroke-width="14"
+						/>
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="#fff"
+							stroke-width="14"
+							stroke-linecap="square"
+							stroke-dasharray={RING_CIRC}
+							stroke-dashoffset={ringOffset}
+							transform="rotate(-90 120 120)"
+							style="transition: stroke-dashoffset 0.8s ease"
+						/>
+					</svg>
+					<div
+						class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1"
+					>
+						<span class="text-6xl">{progressPercent}%</span>
+						<span class="text-2xl text-gray-500 -mt-3">COMPLETED</span>
+					</div>
+				</div>
+
+				<!-- Stats -->
+				<div class="cards-stats-container flex gap-4 w-full justify-center">
+					<div class="cards-stats flex flex-col items-center gap-1">
+						<span>{completedLessons}</span>
+						<span>Lessons</span>
+					</div>
+					<div class="cards-stats flex flex-col items-center gap-1">
+						<span>{courses.length}</span>
+						<span>paths</span>
+					</div>
+					<div class="cards-stats flex flex-col items-center gap-1">
+						<span>{stats.challenges}</span>
+						<span>Challenges</span>
+					</div>
 				</div>
 			</div>
-			<div class="dashboard-grid">
-				<div><strong>{stats.courses}</strong><span>paths</span></div>
-				<div><strong>{stats.lessons}</strong><span>lessons</span></div>
-				<div><strong>{stats.challenges}</strong><span>labs</span></div>
-				<div><strong>{stats.totalXp}</strong><span>XP</span></div>
-			</div>
-			{#if nextCourse}
-				<a class="next-card" href={nextHref}>
-					<span>Next path</span>
-					<strong>{nextCourse.title}</strong>
-					<ArrowRight size={18} />
-				</a>
-			{/if}
-		</aside>
-	</section>
+		{:else}
+			<!-- ── NOT STARTED: glitchy card ── -->
+			<div
+				class="bg-black/50 backdrop-blur-md jersey-15-regular p-5 rounded-2xl border-2 border-gray-300 border-dashed w-96 mr-24"
+			>
+				<!-- Header -->
+				<div class="flex justify-between w-full items-center">
+					<FuzzyText
+						text="DASHBOARD ERROR"
+						fontSize={18}
+						baseIntensity={0.08}
+						hoverIntensity={0.3}
+						enableHover={true}
+						fuzzRange={14}
+						fps={30}
+						direction="horizontal"
+						transitionDuration={0}
+						clickEffect={false}
+						glitchMode={false}
+					/>
+					<FuzzyText
+						text={`404 NOT FOUND`}
+						fontSize={19}
+						baseIntensity={0.18}
+						hoverIntensity={0.45}
+						enableHover={true}
+						fuzzRange={20}
+						fps={45}
+						direction="vertical"
+						transitionDuration={0}
+						clickEffect={true}
+						glitchMode={false}
+					/>
+				</div>
 
-	<section class="focus-board" aria-label="Today learning plan">
-		<div class="focus-copy">
-			<span class="eyebrow"><CheckCircle2 size={15} /> Today</span>
-			<h2>Use this like a study desk, not a content feed.</h2>
-			<p>Pick one path, finish the next lesson, and run the lab to build your local progress.</p>
-		</div>
-		<div class="focus-steps">
-			{#each studyPlan as item, index}
-				<a href="/courses/{item.id}" class="focus-step">
-					<span>{String(index + 1).padStart(2, '0')}</span>
-					<div>
-						<strong>{item.label}: {item.title}</strong>
-						<small>{item.done}/{item.lessonCount} lessons complete</small>
+				<!-- Donut ring with glitch -->
+				<div class="relative flex justify-center items-center ring-glitch">
+					<svg
+						class="ghost-orange absolute"
+						width="240"
+						height="240"
+						viewBox="0 0 240 240"
+						style="left:5px;top:-2px;"
+						aria-hidden="true"
+					>
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="#f97316"
+							stroke-width="14"
+							stroke-linecap="square"
+							stroke-dasharray={RING_CIRC}
+							stroke-dashoffset={ringOffset}
+							transform="rotate(-90 120 120)"
+						/>
+					</svg>
+					<svg
+						class="ghost-purple absolute"
+						width="240"
+						height="240"
+						viewBox="0 0 240 240"
+						style="left:-5px;top:2px;"
+						aria-hidden="true"
+					>
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="#818cf8"
+							stroke-width="14"
+							stroke-linecap="square"
+							stroke-dasharray={RING_CIRC}
+							stroke-dashoffset={ringOffset}
+							transform="rotate(-90 120 120)"
+						/>
+					</svg>
+					<svg width="240" height="240" viewBox="0 0 240 240">
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="rgba(255,255,255,0.07)"
+							stroke-width="14"
+						/>
+						<circle
+							cx="120"
+							cy="120"
+							r={RING_R}
+							fill="none"
+							stroke="#fff"
+							stroke-width="14"
+							stroke-linecap="square"
+							stroke-dasharray={RING_CIRC}
+							stroke-dashoffset={ringOffset}
+							transform="rotate(-90 120 120)"
+							style="transition: stroke-dashoffset 0.8s ease"
+						/>
+					</svg>
+					<div
+						class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1"
+					>
+						<FuzzyText
+							text={`404`}
+							fontSize={52}
+							baseIntensity={0.25}
+							hoverIntensity={0.6}
+							enableHover={true}
+							fuzzRange={32}
+							fps={60}
+							direction="horizontal"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={true}
+							glitchInterval={3000}
+							glitchDuration={180}
+						/>
+						<FuzzyText
+							text="START NOW"
+							fontSize={23}
+							baseIntensity={0.05}
+							hoverIntensity={0.2}
+							enableHover={true}
+							fuzzRange={10}
+							fps={20}
+							direction="vertical"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={false}
+						/>
 					</div>
-					<ArrowRight size={17} />
-				</a>
-			{/each}
-		</div>
-	</section>
+				</div>
 
-	<section class="feature-strip" aria-label="Platform features">
+				<!-- Stats -->
+				<div class="flex gap-4 w-full justify-center">
+					<div class="flex flex-col items-center gap-1">
+						<FuzzyText
+							text={'0000'}
+							fontSize={28}
+							baseIntensity={0.2}
+							hoverIntensity={0.5}
+							enableHover={true}
+							fuzzRange={24}
+							fps={40}
+							direction="vertical"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={false}
+						/>
+						<FuzzyText
+							text="lessons"
+							fontSize={22}
+							baseIntensity={0.06}
+							hoverIntensity={0.25}
+							enableHover={true}
+							fuzzRange={8}
+							fps={20}
+							direction="horizontal"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={false}
+						/>
+					</div>
+					<div class="flex flex-col items-center gap-1">
+						<FuzzyText
+							text={String(courses.length)}
+							fontSize={28}
+							baseIntensity={0.3}
+							hoverIntensity={0.55}
+							enableHover={true}
+							fuzzRange={28}
+							fps={50}
+							direction="horizontal"
+							transitionDuration={0}
+							clickEffect={true}
+							glitchMode={false}
+						/>
+						<FuzzyText
+							text="LESSONS"
+							fontSize={22}
+							baseIntensity={0.04}
+							hoverIntensity={0.2}
+							enableHover={true}
+							fuzzRange={8}
+							fps={20}
+							direction="vertical"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={false}
+						/>
+					</div>
+					<div class="flex flex-col items-center gap-1">
+						<FuzzyText
+							text={'404'}
+							fontSize={28}
+							baseIntensity={0.22}
+							hoverIntensity={0.5}
+							enableHover={true}
+							fuzzRange={26}
+							fps={35}
+							direction="vertical"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={true}
+							glitchInterval={4000}
+							glitchDuration={150}
+						/>
+						<FuzzyText
+							text="no progress"
+							fontSize={12}
+							baseIntensity={0.1}
+							hoverIntensity={0.35}
+							enableHover={true}
+							fuzzRange={12}
+							fps={25}
+							direction="horizontal"
+							transitionDuration={0}
+							clickEffect={false}
+							glitchMode={false}
+						/>
+					</div>
+				</div>
+			</div>
+		{/if}
+	</div>
+</section>
+
+<!-- Marquee transition: tech stack -->
+<div
+	class="border-y border-white/5 py-5 backdrop-blur-sm bg-gradient-to-b from-gray-900/20 to-[#060712]/10"
+>
+	<TextMarquee
+		text="Happy Learning ✦ Keep coding ✦ i don't know what to type anymore ✦ do something ✦ just do it ✦"
+		baseVelocity={-4}
+		scrollDependent={true}
+		class="jersey-15-regular text-[2vw] text-white/40 tracking-widest uppercase"
+	/>
+</div>
+
+<!-- Section 2 -->
+<section class="py-5 px-2">
+	<!-- Cards -->
+	<div class="flex justify-center gap-3 max-w-6xl mx-auto">
 		{#each features as feature}
-			<article>
-				<CheckCircle2 size={18} />
-				<div>
-					<h2>{feature.title}</h2>
-					<p>{feature.detail}</p>
+			<article
+				class="relative flex-1 bg-blue-950/65 border border-white/10 rounded-2xl p-6 flex flex-col gap-3 backdrop-blur-sm"
+			>
+				<div class="pr-6">
+					<FuzzyText
+						text={feature.title}
+						fontSize={20}
+						baseIntensity={0.07}
+						hoverIntensity={0.28}
+						enableHover={true}
+						fuzzRange={12}
+						fps={25}
+						direction="horizontal"
+						transitionDuration={0}
+						clickEffect={false}
+						glitchMode={false}
+					/>
 				</div>
+				<p class="jersey-15-regular text-sm text-white/50 leading-relaxed">{feature.detail}</p>
 			</article>
 		{/each}
-	</section>
+	</div>
+</section>
 
-	<section class="section-head">
-		<div>
-			<span class="eyebrow"><GitBranch size={15} /> Roadmap tracks</span>
-			<h2>Pick a path and keep moving.</h2>
+
+<!-- Section 3: Courses -->
+<section class="relative py-24 px-6 overflow-hidden">
+	<!-- Ambient blobs -->
+	<div class="pointer-events-none absolute inset-0">
+		<div class="absolute top-1/3 -left-20 w-[700px] h-[700px] rounded-full bg-blue-700/8 blur-[130px]" />
+		<div class="absolute bottom-1/4 right-0 w-[500px] h-[500px] rounded-full bg-orange-500/6 blur-[110px]" />
+	</div>
+
+	<div class="relative z-10 max-w-5xl mx-auto">
+		<!-- Header -->
+		<div class="mb-12">
+			<span class="jersey-15-regular text-orange-400 text-sm tracking-[0.3em] uppercase">
+				// courses
+			</span>
+			<h2 class="jersey-15-regular text-5xl text-white mt-2 leading-tight">
+				Start With What<br />You Want to Learn
+			</h2>
+			<p class="jersey-15-regular text-white/40 text-lg mt-3 max-w-xl">
+				Pick a path. Follow it. Ship something real at the end. No fluff — just code.
+			</p>
 		</div>
-		<a href="/courses">Open full roadmap <ArrowRight size={16} /></a>
-	</section>
 
-	<section class="roadmap-stack">
-		{#each tracks as track}
-			<article class="track-card">
-				<div class="track-marker">
-					<span>{track.order}</span>
-				</div>
-				<div class="track-body">
-					<div class="track-heading">
-						<div>
-							<span class="track-level">{track.level}</span>
-							<h3>{track.title}</h3>
-							<p>{track.subtitle}</p>
+		<!-- Bento grid -->
+		<div class="grid grid-cols-3 gap-4" bind:this={trackListEl}>
+			{#each allTracks.slice(0, 5) as track, i}
+				<article
+					class="bento-card track-item relative rounded-2xl border overflow-hidden flex flex-col transition-all duration-300
+						{i === 0 ? 'col-span-2 min-h-[300px]' : i === 1 ? 'col-span-1 min-h-[300px]' : 'col-span-1 min-h-[210px]'}
+						{track.locked
+						? 'border-white/8 bg-[#070810]/90 backdrop-blur-xl'
+						: 'border-white/12 bg-[#0f1330]/88 backdrop-blur-xl hover:border-white/22'}"
+					style={`opacity: 0; ${track.locked ? `animation: brutal-glitch ${([4.8, 6.2, 3.6])[i - 2] ?? 5}s infinite ${([0, 2.1, 1.1])[i - 2] ?? 0}s;` : ''}`}
+					onmousemove={(e) => {
+						if (track.locked) return;
+						const r = e.currentTarget.getBoundingClientRect();
+						e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+						e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+					}}
+					onmouseenter={() => !track.locked && (hoveredTrack = track.id)}
+					onmouseleave={() => (hoveredTrack = null)}
+				>
+					<!-- Spotlight glow -->
+					{#if !track.locked}
+						<div class="bento-glow absolute inset-0 pointer-events-none z-0" />
+					{/if}
+
+					<!-- Scanlines on locked cards -->
+					{#if track.locked}
+						<div
+							class="absolute inset-0 pointer-events-none z-10 opacity-60"
+							style="background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px);"
+						/>
+					{/if}
+
+					<!-- Top accent stripe -->
+					<div
+						class="h-[2px] w-full shrink-0 {track.locked
+							? 'bg-white/8'
+							: 'bg-gradient-to-r from-orange-500 via-orange-300 to-transparent'}"
+					/>
+
+					<!-- Content -->
+					<div class="relative z-[1] flex flex-col flex-1 {i === 0 ? 'p-6' : 'p-5'}">
+						<!-- Number + badge row -->
+						<div class="flex items-start justify-between mb-3">
+							{#if track.locked}
+								<FuzzyText
+									text={String(track.order).padStart(2, '0')}
+									fontSize={48}
+									color="rgba(255,255,255,0.08)"
+									baseIntensity={0.44}
+									hoverIntensity={0.78}
+									enableHover={true}
+									fuzzRange={42}
+									fps={35}
+									direction="horizontal"
+									transitionDuration={0}
+									clickEffect={false}
+									glitchMode={true}
+									glitchInterval={([1900, 2700, 1550])[i - 2] ?? 2100}
+									glitchDuration={([420, 310, 490])[i - 2] ?? 410}
+								/>
+							{:else}
+								<span
+									class="jersey-15-regular leading-none tabular-nums select-none {i === 0
+										? 'text-6xl'
+										: 'text-5xl'} text-orange-400/35"
+								>
+									{String(track.order).padStart(2, '0')}
+								</span>
+							{/if}
+							{#if !track.locked}
+								<span
+									class="jersey-15-regular text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-orange-400/15 text-orange-300 border border-orange-400/25"
+								>
+									{track.level}
+								</span>
+							{:else}
+								<span
+									class="jersey-15-regular inline-flex items-center text-[10px] tracking-widest uppercase px-2 py-0.5 rounded bg-red-950/60 border border-red-500/25"
+								>
+									<FuzzyText
+										text="CORRUPTED"
+										fontSize={10}
+										color="rgba(248,113,113,0.7)"
+										baseIntensity={0.32}
+										hoverIntensity={0.68}
+										enableHover={true}
+										fuzzRange={12}
+										fps={25}
+										direction="vertical"
+										transitionDuration={0}
+										clickEffect={false}
+										glitchMode={true}
+										glitchInterval={([730, 980, 840])[i - 2] ?? 850}
+										glitchDuration={([270, 350, 210])[i - 2] ?? 280}
+									/>
+								</span>
+							{/if}
 						</div>
-						<strong>{trackProgress(track)}%</strong>
-					</div>
-					<div class="track-progress"><span style={`width:${trackProgress(track)}%`}></span></div>
-					<div class="skill-row">
-						{#each track.skills as skill}<span>{skill}</span>{/each}
-					</div>
-					<div class="track-bottom">
-						<span>{track.lessonCount} lessons</span>
-						<span>{track.totalXp} XP</span>
-						<span>{track.outcome}</span>
-					</div>
-				</div>
-				{#if track.courses[0]}
-					<a class="track-action" href="/courses/{track.courses[0].id}" aria-label="Open {track.title}"><ArrowRight size={18} /></a>
-				{/if}
-			</article>
-		{/each}
-	</section>
 
-	<section class="matrix-section">
-		<div class="section-head compact">
-			<div>
-				<span class="eyebrow"><Trophy size={15} /> Skill map</span>
-				<h2>Roadmap coverage without the account wall.</h2>
-			</div>
-		</div>
-		<div class="skill-matrix">
-			{#each skillMatrix as item}
-				{#if item.courseId}
-					<a href="/courses/{item.courseId}" class="skill-cell available">
-						<Code2 size={17} />
-						<span>{item.skill}</span>
-						<strong>Ready</strong>
-					</a>
-				{:else}
-					<div class="skill-cell planned">
-						<Lock size={17} />
-						<span>{item.skill}</span>
-						<strong>Planned</strong>
+						<!-- Title -->
+						<div class="mb-1.5">
+							{#if track.locked}
+								<FuzzyText
+									text={track.title}
+									fontSize={i === 0 ? 26 : 20}
+									baseIntensity={0.52}
+									hoverIntensity={0.95}
+									enableHover={true}
+									fuzzRange={52}
+									fps={45}
+									direction="horizontal"
+									transitionDuration={0}
+									clickEffect={true}
+									glitchMode={true}
+									glitchInterval={([520, 780, 610])[i - 2] ?? 650}
+									glitchDuration={([500, 370, 560])[i - 2] ?? 460}
+								/>
+							{:else}
+								<h3 class="jersey-15-regular text-white leading-tight {i === 0 ? 'text-2xl' : 'text-xl'}">
+									{track.title}
+								</h3>
+							{/if}
+						</div>
+
+						<!-- Subtitle -->
+						{#if track.locked}
+							<p
+								class="jersey-15-regular text-sm leading-relaxed text-white/18"
+								style={`filter: blur(0.5px); animation: subtitle-glitch ${([5.4, 7.2, 4.6])[i - 2] ?? 5.8}s infinite ${([0.4, 1.7, 2.9])[i - 2] ?? 1}s;`}
+							>
+								{(track.subtitle.split('—')[0] ?? track.subtitle).trim()}
+							</p>
+						{:else}
+							<p class="jersey-15-regular text-sm leading-relaxed text-white/55">
+								{i === 0 ? track.subtitle : (track.subtitle.split('—')[0] ?? track.subtitle).trim()}
+							</p>
+						{/if}
+
+						<!-- Skills chips -->
+						<div class="flex flex-wrap gap-1.5 mt-3 flex-1 content-start">
+							{#each (i === 0 ? track.skills : track.skills.slice(0, i === 1 ? 5 : 3)) as skill, si}
+								<span
+									class="jersey-15-regular text-[10px] tracking-wide px-2 py-0.5 rounded-full border {track.locked
+										? 'bg-white/3 border-white/8 text-white/20'
+										: 'bg-white/5 border-white/12 text-white/55 hover:border-orange-400/30 hover:text-white/75 transition-all duration-150'}"
+									style={track.locked
+										? `filter: blur(0.8px); animation: chip-glitch ${3.8 + si * 0.65 + (i - 2) * 0.55}s infinite ${si * 0.45 + (i - 2) * 0.75}s;`
+										: ''}
+								>
+									{track.locked ? skill.replace(/[aeiou]/gi, (c) => Math.random() > 0.5 ? '?' : c) : skill}
+								</span>
+							{/each}
+						</div>
+
+						<!-- Footer -->
+						{#if !track.locked}
+							<div class="flex items-center justify-between mt-4 pt-3 border-t border-white/8">
+								<div class="jersey-15-regular text-sm space-x-3">
+									<span class="text-white/35">{track.lessonCount} lessons</span>
+									<span class="text-orange-400/55">{track.totalXp} XP</span>
+								</div>
+								{#if track.courses[0]}
+									<a
+										href="/courses/{track.courses[0].id}"
+										class="jersey-15-regular inline-flex items-center gap-1.5 bg-orange-400 hover:bg-orange-300 text-black px-4 py-1.5 rounded-lg text-sm transition-all duration-100 hover:scale-105 active:scale-95"
+										style="box-shadow: 2px 2px 0 #c2410c;"
+										onmouseenter={(e) => (e.currentTarget.style.boxShadow = '1px 1px 0 #c2410c')}
+										onmouseleave={(e) => (e.currentTarget.style.boxShadow = '2px 2px 0 #c2410c')}
+										onmousedown={(e) => (e.currentTarget.style.boxShadow = 'none')}
+										onmouseup={(e) => (e.currentTarget.style.boxShadow = '1px 1px 0 #c2410c')}
+										aria-label="Open {track.title}"
+									>
+										Start <ArrowRight size={13} />
+									</a>
+								{/if}
+							</div>
+						{:else}
+							<div class="mt-4 pt-3 border-t border-red-500/10">
+								<FuzzyText
+									text="— ACCESS DENIED —"
+									fontSize={10}
+									baseIntensity={0.38}
+									hoverIntensity={0.75}
+									enableHover={true}
+									fuzzRange={18}
+									fps={30}
+									direction="horizontal"
+									transitionDuration={0}
+									clickEffect={false}
+									glitchMode={true}
+									glitchInterval={([850, 620, 1050])[i - 2] ?? 800}
+									glitchDuration={([320, 480, 280])[i - 2] ?? 370}
+								/>
+							</div>
+						{/if}
 					</div>
-				{/if}
+				</article>
 			{/each}
 		</div>
-	</section>
 
-	<section class="course-shelf">
-		<div class="section-head compact">
-			<div>
-				<span class="eyebrow"><BookOpen size={15} /> Courses</span>
-				<h2>Start with the work in front of you.</h2>
-			</div>
+		<!-- See full roadmap button -->
+		<div class="mt-10 flex justify-center">
+			<a
+				href="/courses"
+				class="jersey-15-regular group relative inline-flex items-center gap-3 border border-white/10 hover:border-white/25 px-8 py-3.5 text-xl text-white/50 hover:text-white/80 transition-all duration-200 rounded-xl backdrop-blur-sm overflow-hidden"
+			>
+				<div
+					class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/[0.03] to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-500"
+				/>
+				<span class="relative">See full roadmap</span>
+				<ArrowRight
+					size={18}
+					class="relative transition-transform duration-200 group-hover:translate-x-1"
+				/>
+			</a>
 		</div>
-		<div class="course-grid">
-			{#each courses as course}
-				<a href="/courses/{course.id}" class="course-mini">
-					<TerminalSquare size={20} />
-					<div>
-						<h3>{course.title}</h3>
-						<p>{course.lessonCount} lessons, {course.challengeCount} labs</p>
-					</div>
-					<Star size={17} />
-				</a>
-			{/each}
-		</div>
-	</section>
-</main>
+	</div>
+</section>
+
+<!-- last section should be having a lanyard effect -->
 
 <style>
-	.home-shell {
-		max-width: 1180px;
-		margin: 0 auto;
-		padding: 1rem 1rem 5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 2rem;
+	@keyframes brutal-glitch {
+		0%,
+		86%,
+		100% {
+			transform: none;
+			filter: none;
+		}
+		87% {
+			transform: translate(-6px, 2px) skewX(-6deg);
+			filter: brightness(1.6) hue-rotate(40deg) saturate(3);
+		}
+		88% {
+			transform: translate(9px, -3px) skewX(5deg);
+			filter: brightness(0.4) hue-rotate(-30deg);
+		}
+		89% {
+			transform: translate(-4px, 5px) skewX(-2deg);
+			filter: brightness(1.3) saturate(2.5);
+		}
+		90% {
+			transform: translate(10px, 0) skewX(-4deg);
+			filter: brightness(2) saturate(4) hue-rotate(20deg);
+		}
+		91% {
+			transform: translate(-8px, -2px) skewX(3deg);
+			filter: brightness(0.3) hue-rotate(-50deg);
+		}
+		92% {
+			transform: translate(5px, 3px);
+			filter: brightness(1.5) saturate(2);
+		}
+		93% {
+			transform: translate(-3px, -4px) skewX(2deg);
+			filter: brightness(0.6) hue-rotate(15deg);
+		}
+		94% {
+			transform: translate(7px, 1px) skewX(-1deg);
+			filter: brightness(1.8) hue-rotate(-20deg);
+		}
+		95% {
+			transform: none;
+			filter: none;
+		}
 	}
 
-	.hero-band {
-		min-height: 520px;
-		display: grid;
-		grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
-		align-items: center;
-		gap: 2rem;
-		padding: clamp(2rem, 5vw, 4rem);
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background:
-			linear-gradient(135deg, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface-elevated) 88%, transparent)),
-			var(--bg-gradient);
-		box-shadow: var(--depth-shadow);
-		overflow: hidden;
+	@keyframes subtitle-glitch {
+		0%,
+		91%,
+		100% {
+			transform: none;
+			opacity: 1;
+			text-shadow: none;
+		}
+		92% {
+			transform: translateX(-3px);
+			text-shadow:
+				3px 0 rgba(255, 50, 100, 0.55),
+				-3px 0 rgba(0, 200, 255, 0.45);
+		}
+		93% {
+			transform: translateX(5px);
+			opacity: 0.25;
+			text-shadow: none;
+		}
+		94% {
+			transform: translateX(-2px);
+			text-shadow: -3px 0 rgba(180, 0, 255, 0.45);
+		}
+		95% {
+			transform: translateX(1px);
+			opacity: 0.6;
+			text-shadow: 2px 0 rgba(255, 200, 0, 0.35);
+		}
+		96% {
+			transform: none;
+			opacity: 1;
+			text-shadow: none;
+		}
 	}
 
-	.eyebrow {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-		color: var(--accent-strong);
-		font-size: 0.76rem;
-		font-weight: 800;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+	@keyframes chip-glitch {
+		0%,
+		92%,
+		100% {
+			opacity: 1;
+			text-shadow: none;
+			filter: blur(0.8px);
+		}
+		93% {
+			opacity: 0.55;
+			text-shadow: 2px 0 rgba(255, 80, 80, 0.65);
+			filter: blur(0.8px) hue-rotate(80deg);
+		}
+		94% {
+			opacity: 0.05;
+			text-shadow: none;
+			filter: blur(2.5px);
+		}
+		95% {
+			opacity: 0.45;
+			text-shadow: -2px 0 rgba(80, 200, 255, 0.55);
+			filter: blur(0.8px) hue-rotate(-55deg);
+		}
+		96% {
+			opacity: 0.7;
+			text-shadow: 1px 0 rgba(255, 255, 0, 0.4);
+			filter: blur(0.8px) hue-rotate(30deg);
+		}
+		97% {
+			opacity: 1;
+			text-shadow: none;
+			filter: blur(0.8px);
+		}
 	}
 
-	.hero-copy h1 {
-		max-width: 760px;
-		margin: 1rem 0;
-		font-size: clamp(3.4rem, 7vw, 6.2rem);
-		line-height: 0.96;
-		letter-spacing: 0;
-		color: var(--text);
+	.bento-glow {
+		background: radial-gradient(
+			300px circle at var(--mx, 50%) var(--my, 50%),
+			rgba(251, 146, 60, 0.09),
+			transparent 70%
+		);
+		opacity: 0;
+		transition: opacity 0.35s;
 	}
 
-	.hero-copy p {
-		max-width: 660px;
-		margin: 0;
-		color: var(--text-muted);
-		font-size: 1.12rem;
-		line-height: 1.75;
-	}
-
-	.hero-actions,
-	.section-head,
-	.track-bottom,
-	.skill-row {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	.hero-actions { margin-top: 2rem; }
-
-	.primary-action,
-	.secondary-action,
-	.section-head a {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		min-height: 44px;
-		padding: 0.75rem 1rem;
-		border-radius: 18px;
-		font-weight: 800;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.primary-action { background: var(--accent); color: #160d14; border: 1px solid var(--accent); }
-	.secondary-action, .section-head a { border: 1px solid var(--border); color: var(--text); background: var(--surface-elevated); }
-	.button-action { font: inherit; }
-
-	.command-center,
-	.focus-board,
-	.track-card,
-	.matrix-section,
-	.course-shelf {
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background: var(--surface);
-		box-shadow: var(--base-shadow);
-	}
-
-	.command-center {
-		padding: 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.panel-topline,
-	.track-heading,
-	.next-card,
-	.course-mini,
-	.skill-cell {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-	}
-
-	.panel-topline { color: var(--text-muted); font-size: 0.82rem; font-weight: 800; }
-
-	.progress-ring {
-		width: min(240px, 75vw);
-		aspect-ratio: 1;
-		margin: 0.5rem auto;
-		border-radius: 50%;
-		background: conic-gradient(var(--accent) var(--pct), var(--surface-elevated) 0);
-		display: grid;
-		place-items: center;
-	}
-
-	.progress-ring div {
-		width: 72%;
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: var(--surface);
-		display: grid;
-		place-items: center;
-		align-content: center;
-	}
-
-	.progress-ring strong { font-size: 2.4rem; color: var(--text); }
-	.progress-ring span, .dashboard-grid span { color: var(--text-muted); font-size: 0.78rem; font-weight: 700; }
-
-	.dashboard-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 0.5rem;
-	}
-
-	.dashboard-grid div {
-		padding: 0.85rem 0.5rem;
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background: var(--surface-elevated);
-		text-align: center;
-	}
-
-	.dashboard-grid strong { display: block; color: var(--text); font-size: 1.15rem; }
-
-	.next-card {
-		padding: 1rem;
-		border-radius: 18px;
-		background: var(--accent);
-		color: #160d14;
-		text-decoration: none;
-	}
-
-	.next-card span { display: block; font-size: 0.72rem; color: rgba(17, 24, 39, 0.72); }
-	.next-card strong { display: block; margin-top: 0.2rem; }
-
-	.focus-board {
-		display: grid;
-		grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1.2fr);
-		gap: 1rem;
-		padding: 1.25rem;
-	}
-
-	.focus-copy h2 {
-		margin: 0.35rem 0;
-		font-size: clamp(1.5rem, 3vw, 2.2rem);
-		color: var(--text);
-	}
-
-	.focus-copy p { margin: 0; color: var(--text-muted); line-height: 1.65; }
-	.focus-steps { display: grid; gap: 0.65rem; }
-	.focus-step {
-		display: grid;
-		grid-template-columns: auto 1fr auto;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.9rem;
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background: var(--surface-elevated);
-		color: var(--text);
-		text-decoration: none;
-	}
-	.focus-step > span {
-		width: 34px;
-		height: 34px;
-		display: grid;
-		place-items: center;
-		border-radius: 18px;
-		background: var(--accent-muted);
-		color: var(--accent-strong);
-		font-weight: 900;
-		font-size: 0.75rem;
-	}
-	.focus-step strong { display: block; font-size: 0.94rem; }
-	.focus-step small { display: block; color: var(--text-muted); margin-top: 0.2rem; font-weight: 700; }
-
-	.feature-strip {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 0.75rem;
-	}
-
-	.feature-strip article {
-		display: flex;
-		gap: 0.75rem;
-		padding: 1rem;
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background: var(--surface);
-		box-shadow: var(--base-shadow);
-	}
-
-	.feature-strip svg { color: var(--success); flex-shrink: 0; }
-	.feature-strip h2, .course-mini h3 { margin: 0 0 0.25rem; font-size: 0.95rem; color: var(--text); }
-	.feature-strip p, .course-mini p, .track-heading p { margin: 0; color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; }
-
-	.section-head { justify-content: space-between; margin-top: 1rem; }
-	.section-head.compact { margin: 0 0 1rem; }
-	.section-head h2 { margin: 0.35rem 0 0; color: var(--text); font-size: clamp(1.7rem, 3vw, 2.4rem); }
-
-	.roadmap-stack { display: flex; flex-direction: column; gap: 0.85rem; }
-
-	.track-card {
-		display: grid;
-		grid-template-columns: 54px 1fr 44px;
-		gap: 1rem;
-		padding: 1rem;
-		align-items: center;
-	}
-
-	.track-marker {
-		width: 44px;
-		height: 44px;
-		border-radius: 18px;
-		background: var(--accent-muted);
-		color: var(--accent-strong);
-		display: grid;
-		place-items: center;
-		font-weight: 900;
-	}
-
-	.track-heading h3 { margin: 0.2rem 0; color: var(--text); font-size: 1.25rem; }
-	.track-heading strong { color: var(--accent-strong); font-size: 1.3rem; }
-	.track-level { color: var(--text-dim); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
-
-	.track-progress { height: 8px; margin: 1rem 0; border-radius: 999px; overflow: hidden; background: var(--surface-elevated); border: 1px solid var(--border); }
-	.track-progress span { display: block; height: 100%; background: var(--accent); }
-
-	.skill-row span, .track-bottom span {
-		padding: 0.28rem 0.55rem;
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		background: var(--surface-elevated);
-		color: var(--text-muted);
-		font-size: 0.74rem;
-		font-weight: 700;
-	}
-
-	.track-bottom { margin-top: 0.8rem; }
-	.track-action {
-		width: 40px;
-		height: 40px;
-		border-radius: 18px;
-		background: var(--accent);
-		color: #160d14;
-		display: grid;
-		place-items: center;
-	}
-
-	.matrix-section,
-	.course-shelf { padding: 1.25rem; }
-
-	.skill-matrix,
-	.course-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 0.7rem;
-	}
-
-	.skill-cell,
-	.course-mini {
-		min-height: 72px;
-		padding: 0.9rem;
-		border: 1px solid var(--border);
-		border-radius: 18px;
-		background: var(--surface-elevated);
-		color: var(--text);
-		text-decoration: none;
-	}
-
-	.skill-cell span { flex: 1; font-weight: 800; font-size: 0.88rem; }
-	.skill-cell strong { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
-	.skill-cell.available svg { color: var(--success); }
-	.skill-cell.planned { opacity: 0.72; }
-
-	.course-mini { justify-content: flex-start; }
-	.course-mini > svg:first-child { color: var(--accent-strong); flex-shrink: 0; }
-	.course-mini > svg:last-child { margin-left: auto; color: var(--text-dim); }
-
-	@media (max-width: 1020px) {
-		.hero-band { grid-template-columns: 1fr; }
-		.focus-board { grid-template-columns: 1fr; }
-		.feature-strip, .skill-matrix, .course-grid { grid-template-columns: repeat(2, 1fr); }
-	}
-
-	@media (max-width: 680px) {
-		.home-shell { padding: 0 0 4rem; }
-		.hero-band, .command-center, .focus-board, .track-card, .matrix-section, .course-shelf { border-radius: 0; }
-		.hero-band { padding: 2rem 1rem; min-height: auto; }
-		.feature-strip, .skill-matrix, .course-grid { grid-template-columns: 1fr; }
-		.track-card { grid-template-columns: 44px 1fr; }
-		.track-action { grid-column: 2; width: 100%; }
-		.dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+	.bento-card:hover .bento-glow {
+		opacity: 1;
 	}
 </style>
-
-
