@@ -2,7 +2,6 @@
 	import { marked } from 'marked';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import LessonNav from './LessonNav.svelte';
-	import NotesPanel from './NotesPanel.svelte';
 	import CodeEditor from './CodeEditor.svelte';
 	import ConsolePane from './ConsolePane.svelte';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
@@ -45,8 +44,27 @@
 
 	let sandboxCode = $state(SANDBOX_STARTERS[sandboxLang] ?? '// Try it out!\n');
 	let sandboxOpen = $state(false);
-	let showNotes = $state(false);
 	let completed = $state(false);
+
+	let leftPct = $state(50);
+	let dragging = $state(false);
+
+	/** @param {MouseEvent} e */
+	function startResize(e) {
+		e.preventDefault();
+		dragging = true;
+		function onMove(e) {
+			const pct = (e.clientX / window.innerWidth) * 100;
+			leftPct = Math.max(28, Math.min(72, pct));
+		}
+		function onUp() {
+			dragging = false;
+			document.removeEventListener('mousemove', onMove);
+			document.removeEventListener('mouseup', onUp);
+		}
+		document.addEventListener('mousemove', onMove);
+		document.addEventListener('mouseup', onUp);
+	}
 
 	let sandboxPistonStdout = $state('');
 	let sandboxPistonStderr = $state('');
@@ -147,13 +165,7 @@
 
 	function toggleSandbox() {
 		sandboxOpen = !sandboxOpen;
-		if (sandboxOpen) showNotes = false;
 		if (!sandboxOpen) exitTrace();
-	}
-
-	function toggleNotes() {
-		showNotes = !showNotes;
-		if (showNotes) { sandboxOpen = false; exitTrace(); }
 	}
 
 	function exitTrace() {
@@ -279,10 +291,15 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onmouseup={() => (dragging = false)} />
 
-<div class="page" class:has-notes={showNotes} class:has-sandbox={sandboxOpen}>
-	<main class:sandbox-active={sandboxOpen}>
+<div
+	class="page"
+	class:has-sandbox={sandboxOpen}
+	class:dragging
+	style={sandboxOpen ? `grid-template-columns: ${leftPct}fr 4px ${100 - leftPct}fr` : undefined}
+>
+	<main class:sandbox-active={sandboxOpen} data-lenis-prevent={sandboxOpen || undefined}>
 		<div class="top-bar">
 			<Breadcrumb {course} {lesson} />
 			<div class="top-actions">
@@ -291,9 +308,6 @@
 						{sandboxOpen ? 'Close Sandbox' : 'Sandbox'}
 					</button>
 				{/if}
-				<button class="action-btn" class:active={showNotes} onclick={toggleNotes}>
-					{showNotes ? 'Hide Notes' : 'Notes'}
-				</button>
 			</div>
 		</div>
 
@@ -321,6 +335,13 @@
 	</main>
 
 	{#if sandboxOpen}
+		<div
+			class="resize-handle"
+			role="separator"
+			aria-orientation="vertical"
+			aria-label="Resize panels"
+			onmousedown={startResize}
+		></div>
 		<aside class="sandbox-panel" data-lenis-prevent>
 			<!-- Header bar -->
 			<div class="panel-bar">
@@ -475,13 +496,6 @@
 		</aside>
 	{/if}
 
-	{#if showNotes}
-		<aside class="notes-sidebar">
-			<div class="notes-inner">
-				<NotesPanel {courseSlug} {lessonId} />
-			</div>
-		</aside>
-	{/if}
 </div>
 
 <style>
@@ -491,14 +505,52 @@
 		min-height: 100vh;
 	}
 
-	@media (min-width: 1080px) {
-		.page.has-notes { grid-template-columns: 1fr 300px; }
+	.page.has-sandbox {
+		height: calc(100dvh - 7rem);
+		overflow: hidden;
+		border-radius: 18px;
+		border: 1px solid var(--border);
+		box-shadow: var(--depth-shadow);
 	}
 
-	.page.has-sandbox {
-		grid-template-columns: 1fr 1fr;
-		height: 100vh;
-		overflow: hidden;
+	.page.dragging :global(iframe) {
+		pointer-events: none;
+	}
+
+	.resize-handle {
+		background: color-mix(in srgb, var(--border) 72%, transparent);
+		cursor: col-resize;
+		transition: background 0.15s;
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.resize-handle::before {
+		content: '';
+		position: absolute;
+		inset: 0 -5px;
+	}
+
+	.resize-handle::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 2px;
+		height: 44px;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--text-dim) 42%, transparent);
+		transform: translate(-50%, -50%);
+	}
+
+	.resize-handle:hover,
+	.page.dragging .resize-handle {
+		background: color-mix(in srgb, var(--accent) 34%, transparent);
+	}
+
+	.resize-handle:hover::after,
+	.page.dragging .resize-handle::after {
+		background: var(--accent-strong);
 	}
 
 	main {
@@ -516,6 +568,12 @@
 		max-width: none;
 		margin: 0;
 		padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+		overflow-y: auto;
+		height: 100%;
+		min-width: 0;
+		border-radius: 0;
+		box-shadow: none;
+		border: none;
 	}
 
 	.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
@@ -573,14 +631,13 @@
 	.sandbox-panel {
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 4rem);
-		border: 1px solid var(--sandbox-border);
-		border-radius: 24px;
+		height: 100%;
+		border: none;
+		border-left: 1px solid var(--sandbox-border);
+		border-radius: 0;
 		background: var(--sandbox-bg);
 		overflow: hidden;
-		flex: 1;
-		max-width: 600px;
-		box-shadow: var(--depth-shadow);
+		min-width: 0;
 	}
 
 	.panel-bar {
@@ -763,8 +820,6 @@
 	.trace-prompt strong { color: var(--sandbox-text-muted); font-weight: 600; }
 	.trace-prompt-icon { font-size: 1rem; color: var(--accent); opacity: 0.6; }
 
-	.notes-sidebar { border-left: 1px solid var(--border); background: var(--surface); }
-	.notes-inner { padding: 2.5rem 1.25rem; position: sticky; top: 0; }
 </style>
 
 

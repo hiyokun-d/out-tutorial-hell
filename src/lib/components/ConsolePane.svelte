@@ -47,10 +47,32 @@ self.postMessage(__logs);
 `;
 	}
 
+	/**
+	 * Detect loops that are structurally infinite (empty body, no break possible).
+	 * Only matches patterns like `while(true){}` or `for(;;){}` — not loops
+	 * that have content (which might have a break) to avoid false positives.
+	 * @param {string} src
+	 */
+	function looksInfinite(src) {
+		const stripped = src
+			.replace(/\/\/[^\n]*/g, '')
+			.replace(/\/\*[\s\S]*?\*\//g, '')
+			.replace(/`[^`]*`|"[^"]*"|'[^']*'/g, '""');
+		return /\bwhile\s*\(\s*(true|1|!0)\s*\)\s*\{[\s]*\}/.test(stripped)
+			|| /\bfor\s*\(\s*;\s*;\s*\)\s*\{[\s]*\}/.test(stripped);
+	}
+
 	/** @param {string} src @returns {Promise<{type:string,text:string}[]>} */
 	function runCode(src) {
 		// Kill any previous worker that might still be running
 		if (activeWorker) { activeWorker.terminate(); activeWorker = null; }
+
+		if (looksInfinite(src)) {
+			const warn = [{ type: 'warn', text: '⚠️ Infinite loop — while(true) or for(;;) with no exit condition. Add a break statement.' }];
+			lines = warn;
+			running = false;
+			return Promise.resolve(warn);
+		}
 
 		lines = [];
 		running = true;

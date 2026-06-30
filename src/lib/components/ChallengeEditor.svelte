@@ -197,6 +197,7 @@
 <style>
 	.layout {
 		display: grid;
+		grid-template-rows: minmax(0, 1fr);
 		height: clamp(42rem, calc(100dvh - 8.5rem), 50rem);
 		min-height: 0;
 		overflow: hidden;

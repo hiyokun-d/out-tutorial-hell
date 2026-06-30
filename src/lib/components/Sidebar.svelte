@@ -113,7 +113,7 @@
 	}
 
 	.nav-pill a.active {
-		color: var(--text);
+		color: #160d14;
 		background: var(--accent);
 		box-shadow: 0 8px 18px -14px var(--accent-strong);
 	}

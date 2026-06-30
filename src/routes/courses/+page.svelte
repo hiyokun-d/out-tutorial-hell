@@ -182,9 +182,9 @@
 		min-height: 42px;
 		padding: 0.7rem 0.95rem;
 		border-radius: 18px;
-		border: 1px solid var(--border);
+		border: 1px solid var(--accent-strong);
 		background: var(--surface-elevated);
-		color: var(--text);
+		color: var(--accent-strong);
 		font: inherit;
 		font-weight: 800;
 		text-decoration: none;
@@ -223,7 +223,7 @@
 		top: 44px;
 		bottom: -1rem;
 		width: 2px;
-		background: var(--border);
+		background: var(--accent-strong);
 	}
 
 	.timeline-item:last-child .rail::before { display: none; }
