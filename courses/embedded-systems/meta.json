@@ -1,0 +1,12 @@
+{
+    "difficulty": "INTERMEDIATE",
+    "title": "Embedded Systems",
+    "description": "Write C for tiny chips with no OS and no screen — loops, interrupts, and peripherals that have to keep running forever.",
+    "order": 6,
+    "icon": "circuit-board",
+    "language": "C",
+    "cover": "embedded-systems.svg",
+    "author": {
+        "name": "hiyo"
+    }
+}

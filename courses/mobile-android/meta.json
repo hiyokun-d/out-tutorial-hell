@@ -1,0 +1,12 @@
+{
+    "difficulty": "INTERMEDIATE",
+    "title": "Android with Kotlin",
+    "description": "Understand how Android is put together, then build real app screens in Kotlin instead of copying snippets you don't understand.",
+    "order": 7,
+    "icon": "smartphone",
+    "language": "Kotlin",
+    "cover": "mobile-android.svg",
+    "author": {
+        "name": "hiyo"
+    }
+}

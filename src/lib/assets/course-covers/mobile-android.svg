@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225" role="img" aria-label="Phone outline beside a four-layer platform stack">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0d1c"/>
+      <stop offset="1" stop-color="#181a2d"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="399" height="224" rx="18" fill="url(#bg)" stroke="#ffb15f" stroke-opacity="0.18"/>
+
+  <!-- phone frame -->
+  <rect x="44" y="22" width="94" height="181" rx="18" fill="#181a2d" stroke="#d8c8b8" stroke-width="2"/>
+  <rect x="52" y="38" width="78" height="149" rx="8" fill="#0b0d1c" stroke="#ffb15f" stroke-opacity="0.18"/>
+  <rect x="79" y="29" width="24" height="4" rx="2" fill="#9f948d"/>
+  <rect x="75" y="193" width="32" height="3" rx="1.5" fill="#9f948d"/>
+
+  <!-- screen content -->
+  <rect x="58" y="44" width="66" height="16" rx="4" fill="#ffb15f" fill-opacity="0.85"/>
+  <rect x="58" y="66" width="66" height="30" rx="5" fill="#d8c8b8" fill-opacity="0.12"/>
+  <rect x="63" y="72" width="36" height="5" rx="2.5" fill="#fff7ed" fill-opacity="0.7"/>
+  <rect x="63" y="82" width="50" height="4" rx="2" fill="#9f948d"/>
+  <rect x="58" y="102" width="66" height="30" rx="5" fill="#d8c8b8" fill-opacity="0.12"/>
+  <rect x="63" y="108" width="42" height="5" rx="2.5" fill="#fff7ed" fill-opacity="0.7"/>
+  <rect x="63" y="118" width="30" height="4" rx="2" fill="#9f948d"/>
+  <rect x="58" y="138" width="66" height="30" rx="5" fill="#d8c8b8" fill-opacity="0.12"/>
+  <rect x="63" y="144" width="28" height="5" rx="2.5" fill="#fff7ed" fill-opacity="0.7"/>
+  <rect x="63" y="154" width="46" height="4" rx="2" fill="#9f948d"/>
+  <circle cx="114" cy="175" r="8" fill="#69d19d"/>
+  <path d="M110.5 175 H117.5 M114 171.5 V178.5" stroke="#0b0d1c" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- connector: app sits on top of the stack -->
+  <path d="M138 50 H164" stroke="#ffb15f" stroke-width="1.6" stroke-dasharray="4 4" stroke-linecap="round"/>
+
+  <!-- layer stack, opacity decreasing downward -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700">
+    <g opacity="1">
+      <rect x="168" y="32" width="204" height="36" rx="10" fill="#ffb15f" fill-opacity="0.22" stroke="#ffb15f"/>
+      <text x="182" y="54" fill="#fff7ed">System apps</text>
+      <text x="360" y="54" fill="#ffb15f" text-anchor="end">4</text>
+    </g>
+    <g opacity="0.8">
+      <rect x="168" y="76" width="204" height="36" rx="10" fill="#ffb15f" fill-opacity="0.16" stroke="#ffb15f"/>
+      <text x="182" y="98" fill="#fff7ed">App framework</text>
+      <text x="360" y="98" fill="#ffb15f" text-anchor="end">3</text>
+    </g>
+    <g opacity="0.62">
+      <rect x="168" y="120" width="204" height="36" rx="10" fill="#ffb15f" fill-opacity="0.12" stroke="#ffb15f"/>
+      <text x="182" y="142" fill="#fff7ed">Native libs · ART</text>
+      <text x="360" y="142" fill="#ffb15f" text-anchor="end">2</text>
+    </g>
+    <g opacity="0.45">
+      <rect x="168" y="164" width="204" height="36" rx="10" fill="#ffb15f" fill-opacity="0.1" stroke="#ffb15f"/>
+      <text x="182" y="186" fill="#fff7ed">Linux kernel</text>
+      <text x="360" y="186" fill="#ffb15f" text-anchor="end">1</text>
+    </g>
+  </g>
+</svg>

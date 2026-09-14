@@ -1,0 +1,12 @@
+{
+    "difficulty": "INTERMEDIATE",
+    "title": "Compilation Techniques",
+    "description": "Take source code apart the way a compiler does — tokens, parse trees, meaning, output — and build each stage yourself in JavaScript.",
+    "order": 3,
+    "icon": "braces",
+    "language": "JavaScript",
+    "cover": "compilation-techniques.svg",
+    "author": {
+        "name": "hiyo"
+    }
+}

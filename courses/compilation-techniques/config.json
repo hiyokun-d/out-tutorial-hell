@@ -1,0 +1,11 @@
+{
+  "language": "javascript",
+  "features": {
+    "theorySandbox": true,
+    "hints": true,
+    "livePreview": false,
+    "snippets": true,
+    "formatButton": true,
+    "consoleOutput": true
+  }
+}

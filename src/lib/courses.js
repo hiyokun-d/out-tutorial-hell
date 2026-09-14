@@ -14,6 +14,30 @@ const challengeFiles = import.meta.glob('/courses/*/lessons/*/*.json', {
 	eager: true,
 	import: 'default'
 });
+// Optional cover art. meta.json `cover` is a filename inside src/lib/assets/course-covers/.
+const coverFiles = import.meta.glob('/src/lib/assets/course-covers/*.{svg,png,jpg,jpeg,webp}', {
+	eager: true,
+	query: '?url',
+	import: 'default'
+});
+
+/**
+ * Resolves a meta.json `cover` filename to a bundled asset URL.
+ * Returns null when the course has no cover; throws if the named file is missing.
+ * @param {string} courseId
+ * @param {string | undefined} cover
+ * @returns {string | null}
+ */
+function resolveCover(courseId, cover) {
+	if (!cover) return null;
+	const url = coverFiles[`/src/lib/assets/course-covers/${cover}`];
+	if (!url) {
+		throw new Error(
+			`Cover "${cover}" in courses/${courseId}/meta.json not found — put the file in src/lib/assets/course-covers/`
+		);
+	}
+	return url;
+}
 
 /**
  * Parse YAML frontmatter from a markdown string.
@@ -109,7 +133,7 @@ export function getAllCourses() {
 	return Object.entries(metaFiles)
 		.map(([path, data]) => {
 			const id = path.match(/\/courses\/([^/]+)\/meta\.json/)?.[1] ?? '';
-			return { ...data, id };
+			return { ...data, id, coverUrl: resolveCover(id, data.cover) };
 		})
 		.filter((c) => c.id !== '_template')
 		.sort((a, b) => a.order - b.order);

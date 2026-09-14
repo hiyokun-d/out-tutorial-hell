@@ -1,0 +1,12 @@
+{
+    "difficulty": "INTERMEDIATE",
+    "title": "Software Testing",
+    "description": "Stop trusting code because it ran once — design tests that actually find bugs, then write them in JavaScript.",
+    "order": 5,
+    "icon": "flask-conical",
+    "language": "JavaScript",
+    "cover": "software-testing.svg",
+    "author": {
+        "name": "hiyo"
+    }
+}

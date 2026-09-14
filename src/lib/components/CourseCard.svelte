@@ -1,6 +1,6 @@
 ﻿<script>
 	// @ts-nocheck
-	import { ArrowRight, Compass, Cpu, Globe, Terminal } from '@lucide/svelte';
+	import { ArrowRight, Braces, CircuitBoard, Compass, Cpu, FlaskConical, Globe, Smartphone, Terminal } from '@lucide/svelte';
 
 	/** @type {{ course: { id: string, icon: string, title: string, description: string, difficulty: string, lessonCount?: number, challengeCount?: number, totalXp?: number, author?: { name: string, link?: string } }, completed?: number }} */
 	let { course, completed = 0 } = $props();
@@ -9,7 +9,11 @@
 		globe: Globe,
 		terminal: Terminal,
 		cpu: Cpu,
-		compass: Compass
+		compass: Compass,
+		braces: Braces,
+		'flask-conical': FlaskConical,
+		'circuit-board': CircuitBoard,
+		smartphone: Smartphone
 	});
 
 	let IconComponent = $derived(ICON_MAP[course.icon] || Terminal);

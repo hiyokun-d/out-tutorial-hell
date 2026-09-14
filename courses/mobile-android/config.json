@@ -1,0 +1,10 @@
+{
+  "language": "kotlin",
+  "features": {
+    "theorySandbox": true,
+    "hints": true,
+    "livePreview": false,
+    "snippets": true,
+    "formatButton": true
+  }
+}

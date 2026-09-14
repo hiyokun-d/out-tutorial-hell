@@ -1,0 +1,15 @@
+{
+  "language": "javascript",
+  "instructions": "Write a regex named `identifier` that matches a whole identifier: it **starts with a letter**, followed by **zero or more letters or digits**.\n\nUse the character classes `[a-zA-Z]` and `[a-zA-Z0-9]`, anchor both ends, then log a few `.test()` results to check it. `count1` should match; `1count` and `my-var` should not.",
+  "starter": "// A lexer needs to recognise identifiers like: x, count, item2\n// Rule: first character is a letter, then any letters or digits.\n\nconst identifier = /replace-me/;\n\n// Now log the result of identifier.test on each of these:\n//   \"count1\"  -> should be true\n//   \"1count\"  -> should be false\n//   \"my-var\"  -> should be false\n",
+  "hints": [
+    "`^` anchors the start of the string and `$` anchors the end. Without them, `my-var` would match because it contains `my`.",
+    "The first character is exactly one letter: `^[a-zA-Z]`. Everything after it is `[a-zA-Z0-9]` repeated zero or more times — that's what `*` means.",
+    "Put it together: `/^[a-zA-Z][a-zA-Z0-9]*$/`"
+  ],
+  "tests": [
+    { "id": 1, "description": "Anchors the start and requires a letter first", "check": "code-contains", "value": "^[a-zA-Z]" },
+    { "id": 2, "description": "Allows zero or more letters or digits, anchored to the end", "check": "code-contains", "value": "[a-zA-Z0-9]*$" },
+    { "id": 3, "description": "Tests the regex with .test()", "check": "code-contains", "value": ".test(" }
+  ]
+}

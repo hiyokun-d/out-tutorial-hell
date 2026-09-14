@@ -53,7 +53,8 @@ This describes your course. Copy and fill in:
 | `description` | One sentence. Focus on what they'll *build*, not what they'll *read*. |
 | `difficulty` | `BEGINNER`, `INTERMEDIATE`, or `ADVANCED` |
 | `order` | Where it appears in the course list (1 = first) |
-| `icon` | Any emoji |
+| `icon` | A supported icon name: `globe`, `terminal`, `cpu`, `compass`, `braces`, `flask-conical`, `circuit-board`, `smartphone`. Anything else shows the `terminal` icon. |
+| `cover` | Optional. Filename of a cover image in `src/lib/assets/course-covers/` (e.g. `"my-course.svg"`), shown on the course page. |
 | `language` | The language name shown on the course card (display only) |
 | `author.name` | **Required.** Your name or handle — shown on the course card. |
 | `author.link` | Optional. A URL (GitHub profile, website, etc.) — makes your name clickable. |

@@ -1,0 +1,12 @@
+{
+    "difficulty": "ADVANCED",
+    "title": "Operating Systems",
+    "description": "Learn what the OS does between your code and the hardware — interrupts, processes, scheduling, memory — and write the C that proves it.",
+    "order": 4,
+    "icon": "cpu",
+    "language": "C",
+    "cover": "operating-systems.svg",
+    "author": {
+        "name": "hiyo"
+    }
+}
