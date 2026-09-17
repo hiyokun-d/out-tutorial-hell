@@ -5,7 +5,7 @@
     "order": 4,
     "icon": "cpu",
     "language": "C",
-    "cover": "operating-systems.svg",
+    "cover": "cover.svg",
     "author": {
         "name": "hiyo"
     }

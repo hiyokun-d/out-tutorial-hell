@@ -3,6 +3,8 @@
 // Adding a coding challenge = dropping a matching .json file with the same base name.
 // No DB, no backend, no config changes needed.
 
+import { hasWidget } from '$lib/widgets/registry.js';
+
 const metaFiles = import.meta.glob('/courses/*/meta.json', { eager: true, import: 'default' });
 const configFiles = import.meta.glob('/courses/*/config.json', { eager: true, import: 'default' });
 const lessonFiles = import.meta.glob('/courses/*/lessons/*/*.md', {
@@ -14,29 +16,52 @@ const challengeFiles = import.meta.glob('/courses/*/lessons/*/*.json', {
 	eager: true,
 	import: 'default'
 });
-// Optional cover art. meta.json `cover` is a filename inside src/lib/assets/course-covers/.
-const coverFiles = import.meta.glob('/src/lib/assets/course-covers/*.{svg,png,jpg,jpeg,webp}', {
+// Course assets live inside the course: courses/<slug>/assets/. Referenced by filename.
+// SVGs are imported as raw markup and rendered inline, so they can use the theme's
+// CSS variables (an <img>-loaded SVG is a separate document and can't).
+// Rasters get a hashed, build-safe URL.
+const svgAssets = import.meta.glob('/courses/*/assets/*.svg', {
+	eager: true,
+	query: '?raw',
+	import: 'default'
+});
+const rasterAssets = import.meta.glob('/courses/*/assets/*.{png,webp}', {
 	eager: true,
 	query: '?url',
 	import: 'default'
 });
 
 /**
- * Resolves a meta.json `cover` filename to a bundled asset URL.
- * Returns null when the course has no cover; throws if the named file is missing.
- * @param {string} courseId
- * @param {string | undefined} cover
- * @returns {string | null}
+ * Throws if an SVG asset could run code or is missing its accessible label.
+ * @param {string} path
+ * @param {string} svg
  */
-function resolveCover(courseId, cover) {
-	if (!cover) return null;
-	const url = coverFiles[`/src/lib/assets/course-covers/${cover}`];
-	if (!url) {
-		throw new Error(
-			`Cover "${cover}" in courses/${courseId}/meta.json not found — put the file in src/lib/assets/course-covers/`
-		);
+function validateSvg(path, svg) {
+	if (/<script|\son[a-z]+\s*=|javascript:/i.test(svg)) {
+		throw new Error(`${path} contains script or an event handler — assets must be static.`);
 	}
-	return url;
+	if (!/<svg[^>]*role="img"/.test(svg) || !/<title[\s>]/.test(svg) || !/<desc[\s>]/.test(svg)) {
+		throw new Error(`${path} needs role="img" on <svg> plus <title> and <desc>.`);
+	}
+}
+
+/**
+ * Resolves a filename inside courses/<courseId>/assets/.
+ * Returns null when no filename is given; throws if the named file is missing.
+ * @param {string} courseId
+ * @param {string | undefined} filename
+ * @param {string} field  frontmatter / meta key, for the error message
+ * @returns {{ svg: string, url: null } | { svg: null, url: string } | null}
+ */
+export function getCourseAsset(courseId, filename, field = 'asset') {
+	if (!filename) return null;
+	const path = `/courses/${courseId}/assets/${filename}`;
+	if (svgAssets[path] !== undefined) {
+		validateSvg(path, svgAssets[path]);
+		return { svg: svgAssets[path], url: null };
+	}
+	if (rasterAssets[path] !== undefined) return { svg: null, url: rasterAssets[path] };
+	throw new Error(`${field} "${filename}" not found — put the file in courses/${courseId}/assets/`);
 }
 
 /**
@@ -123,6 +148,41 @@ export function getCourseConfig(courseId) {
 	return { features, language: raw.language ?? null };
 }
 
+// ── Interactive lessons ───────────────────────────────────────────────────────
+
+const WIDGET_BLOCK = /^```widget[ \t]*\r?\n([\s\S]*?)\r?\n```[ \t]*$/gm;
+
+/**
+ * INTERACTIVE lessons name a widget in frontmatter and carry its props as JSON in
+ * a single ```widget fenced block. The block's position is where the widget renders.
+ * @param {string} path
+ * @param {string} content
+ * @param {string | undefined} widget
+ */
+function parseWidget(path, content, widget) {
+	if (!widget) throw new Error(`${path} is INTERACTIVE but has no \`widget\` in frontmatter.`);
+	if (!hasWidget(widget)) {
+		throw new Error(`${path} uses widget "${widget}" — no src/lib/widgets/${widget}.svelte exists.`);
+	}
+	const blocks = [...content.matchAll(WIDGET_BLOCK)];
+	if (blocks.length !== 1) {
+		throw new Error(`${path} needs exactly one \`\`\`widget block with the widget's JSON props, found ${blocks.length}.`);
+	}
+	const [block, json] = blocks[0];
+	let widgetProps;
+	try {
+		widgetProps = JSON.parse(json);
+	} catch (err) {
+		throw new Error(`${path} widget block is not valid JSON: ${err.message}`);
+	}
+	const at = content.indexOf(block);
+	return {
+		widgetProps,
+		content: content.slice(0, at).trim(),
+		contentAfter: content.slice(at + block.length).trim()
+	};
+}
+
 // ── Courses ───────────────────────────────────────────────────────────────────
 
 /**
@@ -133,7 +193,7 @@ export function getAllCourses() {
 	return Object.entries(metaFiles)
 		.map(([path, data]) => {
 			const id = path.match(/\/courses\/([^/]+)\/meta\.json/)?.[1] ?? '';
-			return { ...data, id, coverUrl: resolveCover(id, data.cover) };
+			return { ...data, id, coverArt: getCourseAsset(id, data.cover, 'cover') };
 		})
 		.filter((c) => c.id !== '_template')
 		.sort((a, b) => a.order - b.order);
@@ -214,7 +274,17 @@ export function getLessons(courseId) {
 				([p]) => p.startsWith(folderPath) && p.endsWith('.json')
 			)?.[1] ?? null;
 
-		lessons.push({ ...data, order, content, challenge });
+		const lesson = { ...data, order, content, challenge };
+		lesson.figureArt = getCourseAsset(courseId, data.figure, `figure in ${path}`);
+		// Optional phone variant: interrupt-cycle.svg -> interrupt-cycle.narrow.svg
+		const narrow = data.figure?.replace(/\.svg$/, '.narrow.svg');
+		lesson.figureArtNarrow =
+			narrow && svgAssets[`/courses/${courseId}/assets/${narrow}`] !== undefined
+				? getCourseAsset(courseId, narrow, `figure in ${path}`)
+				: null;
+		if (data.type === 'INTERACTIVE') Object.assign(lesson, parseWidget(path, content, data.widget));
+
+		lessons.push(lesson);
 	}
 
 	return lessons.sort((a, b) => a.order - b.order);

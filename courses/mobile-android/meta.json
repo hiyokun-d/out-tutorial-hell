@@ -5,7 +5,7 @@
     "order": 7,
     "icon": "smartphone",
     "language": "Kotlin",
-    "cover": "mobile-android.svg",
+    "cover": "cover.svg",
     "author": {
         "name": "hiyo"
     }

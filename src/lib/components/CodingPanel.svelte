@@ -4,6 +4,7 @@
 	import PreviewPane from './PreviewPane.svelte';
 	import ConsolePane from './ConsolePane.svelte';
 	import PistonPane from './PistonPane.svelte';
+	import SymbolBar from './SymbolBar.svelte';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 	import { isPistonLanguage } from '$lib/utils/piston.js';
 
@@ -105,6 +106,7 @@
 	<EditorToolbar {language} onReset={handleReset} onFormat={handleFormat} {formatting} {showFormat} />
 
 	<div class="editor-section">
+		<SymbolBar onInsert={(t) => editorApi?.insertText(t)} onTab={() => editorApi?.indent()} />
 		{#key resetKey}
 			<CodeEditor bind:value={code} {language} onReady={handleReady} {snippets} />
 		{/key}
@@ -201,7 +203,14 @@
 	}
 
 	.editor-section {
+		display: flex;
+		flex-direction: column;
 		overflow: hidden;
+		min-height: 0;
+	}
+
+	.editor-section :global(.wrap) {
+		flex: 1;
 		min-height: 0;
 	}
 
@@ -219,6 +228,7 @@
 		.panel,
 		.panel.with-piston {
 			display: flex;
+			flex-direction: column;
 			min-height: 720px;
 		}
 

@@ -4,6 +4,7 @@ title: "Interrupts"
 type: "THEORY"
 xpReward: 15
 module: "Foundations"
+figure: "interrupt-cycle.svg"
 ---
 
 # Interrupts
@@ -14,7 +15,7 @@ Interrupts are how the outside world taps it on the shoulder.
 
 ## What happens on an interrupt
 
-At the end of each instruction cycle, the CPU checks whether an interrupt signal is waiting. If one is:
+At the end of each instruction cycle, the CPU checks whether an interrupt signal is waiting. The diagram at the top of this lesson shows the full path. If a signal is waiting:
 
 1. **Save state.** The program counter and registers get pushed somewhere safe, so the interrupted program can pick up exactly where it stopped.
 2. **Look up the vector table.** Every interrupt has a number. The CPU uses it as an index into a table of addresses.

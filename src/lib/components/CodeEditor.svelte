@@ -3,7 +3,7 @@
 	import { expandEmmet, HTML_BOILERPLATE, SNIPPET_CURSOR_OFFSET, EMMET_ABBREVIATIONS } from '$lib/emmet.js';
 
 	/**
-	 * @typedef {{ setExternalDiags: (d: import('@codemirror/lint').Diagnostic[]) => void, setContent: (s: string) => void, scrollToLine: (n: number) => void, getLineY: (n: number) => number | null }} EditorApi
+	 * @typedef {{ setExternalDiags: (d: import('@codemirror/lint').Diagnostic[]) => void, setContent: (s: string) => void, insertText: (s: string) => void, indent: () => void, scrollToLine: (n: number) => void, getLineY: (n: number) => number | null }} EditorApi
 	 * @type {{ value?: string, language?: string, snippets?: boolean, onReady?: (api: EditorApi) => void, readonly?: boolean, spotlight?: { fromLine: number, toLine: number, style: string } | null }}
 	 */
 	let { value = $bindable(''), language = 'html', snippets = true, onReady, readonly = false, spotlight = null } = $props();
@@ -71,7 +71,7 @@
 			{ EditorView, basicSetup },
 			{ oneDark },
 			{ linter, lintGutter, forceLinting },
-			{ syntaxTree },
+			{ syntaxTree, indentUnit },
 			{ keymap, Decoration },
 			{ acceptCompletion },
 			{ indentWithTab },
@@ -503,6 +503,8 @@
 				spotlightField,
 				...extraExtensions,
 				...(readonly ? [EditorView.editable.of(false)] : []),
+				// Phones: stop the keyboard "fixing" code
+				EditorView.contentAttributes.of({ autocapitalize: 'off', autocorrect: 'off', autocomplete: 'off', spellcheck: 'false' }),
 				lintGutter(),
 				linter(mergedLintFn, { delay: 450 }),
 				// Emmet autocomplete — attached to the HTML language data so it merges
@@ -562,6 +564,16 @@
 						scrollIntoView: true
 					})
 				);
+			},
+			insertText(text) {
+				if (!view || readonly) return;
+				view.dispatch(view.state.replaceSelection(text), { scrollIntoView: true });
+				view.focus();
+			},
+			indent() {
+				if (!view || readonly) return;
+				view.dispatch(view.state.replaceSelection(view.state.facet(indentUnit)), { scrollIntoView: true });
+				view.focus();
 			},
 			scrollToLine(lineNumber) {
 				if (!view) return;

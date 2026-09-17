@@ -2,6 +2,7 @@
 	import InstructionsPanel from './InstructionsPanel.svelte';
 	import CodingPanel from './CodingPanel.svelte';
 	import WalkthroughOverlay from './WalkthroughOverlay.svelte';
+	import TestList from './TestList.svelte';
 	import { runCheck, buildDetail, computeTestDiagnostics, runJsCheck, buildJsDetail, runPistonCheck, buildPistonDetail } from '$lib/checker.js';
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 	import { markComplete } from '$lib/utils/progress.js';
@@ -31,6 +32,7 @@
 	/** @type {TestResult[]} */
 	let testResults = $state(challenge.tests.map((t) => ({ ...t, passed: null })));
 	let allPassed = $derived(testResults.length > 0 && testResults.every((r) => r.passed === true));
+	let passedCount = $derived(testResults.filter((r) => r.passed === true).length);
 	let running = $state(false);
 
 	/** @type {{ setExternalDiags: (d: any[]) => void, setContent: (s: string) => void } | null} */
@@ -184,6 +186,15 @@
 		pistonRunning={pistonRunning}
 		pistonError={pistonError}
 	/>
+
+	<!-- Stacked layout only: results sit under the editor, in flow, not behind the keyboard -->
+	<section class="mobile-results" aria-label="Test results">
+		<div class="mobile-results-top">
+			<button class="mobile-run" onclick={runTests} disabled={running}>{running ? 'Running…' : 'Run tests'}</button>
+			<span aria-live="polite">{passedCount}/{testResults.length} passing</span>
+		</div>
+		<TestList results={testResults} />
+	</section>
 </div>
 
 {#if allPassed && hasWalkthrough && !walkthroughOpen}
@@ -273,6 +284,8 @@
 		box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 36%, transparent);
 	}
 
+	.mobile-results { display: none; }
+
 	@media (max-width: 920px) {
 		.layout {
 			display: flex;
@@ -283,7 +296,41 @@
 		}
 
 		.resize-handle { display: none; }
+
+		.mobile-results {
+			display: block;
+			padding: 1rem;
+			border-top: 1px solid var(--border);
+			background: var(--surface);
+		}
+
+		.wt-trigger { position: static; margin: 1rem; animation: none; }
+		.wt-trigger button { width: 100%; min-height: 44px; }
 	}
+
+
+	.mobile-results-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+		color: var(--text-muted);
+		font-weight: 700;
+	}
+
+	.mobile-run {
+		min-height: 44px;
+		padding: 0 1.2rem;
+		border: none;
+		border-radius: 14px;
+		background: var(--accent);
+		color: #160d14;
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.mobile-run:disabled { opacity: 0.6; }
 
 	@keyframes wtSlideUp {
 		from { opacity: 0; transform: translateY(12px); }

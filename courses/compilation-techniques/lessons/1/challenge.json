@@ -1,15 +1,58 @@
 {
   "language": "javascript",
-  "instructions": "Write a regex named `identifier` that matches a whole identifier: it **starts with a letter**, followed by **zero or more letters or digits**.\n\nUse the character classes `[a-zA-Z]` and `[a-zA-Z0-9]`, anchor both ends, then log a few `.test()` results to check it. `count1` should match; `1count` and `my-var` should not.",
-  "starter": "// A lexer needs to recognise identifiers like: x, count, item2\n// Rule: first character is a letter, then any letters or digits.\n\nconst identifier = /replace-me/;\n\n// Now log the result of identifier.test on each of these:\n//   \"count1\"  -> should be true\n//   \"1count\"  -> should be false\n//   \"my-var\"  -> should be false\n",
+  "instructions": "Replace /replace-me/ with a regex that matches a whole identifier: it starts with a letter, followed by zero or more letters or digits. The five console.log lines are already written. Leave them alone and change only the regex, until the console prints true, true, false, false, false — one per line.",
+  "starter": "// Rule: a letter, then any letters or digits.\nconst identifier = /replace-me/;\n\nconsole.log(identifier.test(\"count1\")); // true\nconsole.log(identifier.test(\"x\"));      // true\nconsole.log(identifier.test(\"1count\")); // false\nconsole.log(identifier.test(\"my-var\")); // false\nconsole.log(identifier.test(\"\"));       // false\n",
   "hints": [
-    "`^` anchors the start of the string and `$` anchors the end. Without them, `my-var` would match because it contains `my`.",
-    "The first character is exactly one letter: `^[a-zA-Z]`. Everything after it is `[a-zA-Z0-9]` repeated zero or more times — that's what `*` means.",
+    "`^` pins the match to the start of the string and `$` pins it to the end. Without both, `my-var` passes because it *contains* `my`.",
+    "The first character is exactly one letter: `[a-zA-Z]`. Everything after it is `[a-zA-Z0-9]` repeated zero or more times — that's what `*` means.",
     "Put it together: `/^[a-zA-Z][a-zA-Z0-9]*$/`"
   ],
   "tests": [
-    { "id": 1, "description": "Anchors the start and requires a letter first", "check": "code-contains", "value": "^[a-zA-Z]" },
-    { "id": 2, "description": "Allows zero or more letters or digits, anchored to the end", "check": "code-contains", "value": "[a-zA-Z0-9]*$" },
-    { "id": 3, "description": "Tests the regex with .test()", "check": "code-contains", "value": ".test(" }
+    {
+      "id": 1,
+      "description": "Runs without errors",
+      "check": "console-no-error"
+    },
+    {
+      "id": 2,
+      "description": "The placeholder regex is gone",
+      "check": "code-not-contains",
+      "value": "replace-me"
+    },
+    {
+      "id": 3,
+      "description": "\"count1\" matches — letter first, digits allowed after",
+      "check": "console-output-line",
+      "line": 0,
+      "value": "true"
+    },
+    {
+      "id": 4,
+      "description": "\"x\" matches — one letter is a whole identifier",
+      "check": "console-output-line",
+      "line": 1,
+      "value": "true"
+    },
+    {
+      "id": 5,
+      "description": "\"1count\" is rejected — can't start with a digit",
+      "check": "console-output-line",
+      "line": 2,
+      "value": "false"
+    },
+    {
+      "id": 6,
+      "description": "\"my-var\" is rejected — the regex is anchored at both ends",
+      "check": "console-output-line",
+      "line": 3,
+      "value": "false"
+    },
+    {
+      "id": 7,
+      "description": "The empty string is rejected — there must be a first letter",
+      "check": "console-output-line",
+      "line": 4,
+      "value": "false"
+    }
   ]
 }

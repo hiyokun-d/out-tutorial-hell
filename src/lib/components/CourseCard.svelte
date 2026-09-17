@@ -1,8 +1,9 @@
 ﻿<script>
 	// @ts-nocheck
+	import CourseArt from './CourseArt.svelte';
 	import { ArrowRight, Braces, CircuitBoard, Compass, Cpu, FlaskConical, Globe, Smartphone, Terminal } from '@lucide/svelte';
 
-	/** @type {{ course: { id: string, icon: string, title: string, description: string, difficulty: string, lessonCount?: number, challengeCount?: number, totalXp?: number, author?: { name: string, link?: string } }, completed?: number }} */
+	/** @type {{ course: { id: string, icon: string, coverArt?: { svg: string | null, url: string | null } | null, title: string, description: string, difficulty: string, lessonCount?: number, challengeCount?: number, totalXp?: number, author?: { name: string, link?: string } }, completed?: number }} */
 	let { course, completed = 0 } = $props();
 
 	const ICON_MAP = /** @type {Record<string, any>} */ ({
@@ -21,13 +22,20 @@
 </script>
 
 <a href="/courses/{course.id}" class="course-card">
-	<div class="icon-wrap">
-		<IconComponent size={25} strokeWidth={2.2} class="course-icon" />
-	</div>
+	{#if course.coverArt}
+		<CourseArt art={course.coverArt} decorative class="card-cover" />
+	{:else}
+		<div class="icon-wrap">
+			<IconComponent size={25} strokeWidth={2.2} class="course-icon" />
+		</div>
+	{/if}
 
 	<div class="info">
 		<div class="card-header-row">
-			<h2>{course.title}</h2>
+			<h2>
+				{#if course.coverArt}<IconComponent size={17} strokeWidth={2.4} class="title-icon" aria-hidden="true" />{/if}
+				{course.title}
+			</h2>
 			<span class="badge {course.difficulty.toLowerCase()}">{course.difficulty}</span>
 		</div>
 		<p>{course.description}</p>
@@ -90,6 +98,19 @@
 		justify-content: center;
 		flex-shrink: 0;
 		color: var(--accent-strong);
+	}
+
+	.course-card :global(.card-cover) {
+		width: 9rem;
+		flex-shrink: 0;
+		align-self: flex-start;
+	}
+
+	h2 :global(.title-icon) {
+		color: var(--accent-strong);
+		display: inline-block;
+		vertical-align: -2px;
+		margin-right: 0.3rem;
 	}
 
 	.info {
@@ -215,6 +236,8 @@
 		.course-card { align-items: flex-start; }
 		.arrow-wrap { display: none; }
 		.card-header-row { align-items: flex-start; flex-direction: column; }
+		.course-card:has(:global(.card-cover)) { flex-direction: column; align-items: stretch; }
+		.course-card :global(.card-cover) { width: 100%; }
 	}
 </style>
 

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 392" width="340" height="392" role="img" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+<title>What the CPU does when an interrupt arrives</title>
+<desc>Six steps, top to bottom. One: the CPU finishes the instruction it is on; the interrupt signal arrives here, drawn as a dashed arrow. Two: it saves its state, the program counter and registers. Three: it finds the handler address in the vector table. Four: it runs the handler. Five: it restores the saved state. Six: it resumes the interrupted program at the next instruction, as if nothing happened.</desc>
+<rect class="f-surface s-accent" x="50" y="16" width="240" height="44" rx="10" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/>
+<text class="f-text" x="170" y="44" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Finish step</text>
+<path class="s-err" d="M170 60V78M165 71L170 78L175 71" fill="none" stroke="#ff6f73" stroke-width="2.5"/>
+<rect class="f-surface s-err" x="50" y="78" width="240" height="44" rx="10" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/>
+<text class="f-text" x="170" y="106" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Save state</text>
+<path class="s-err" d="M170 122V140M165 133L170 140L175 133" fill="none" stroke="#ff6f73" stroke-width="2.5"/>
+<rect class="f-surface s-err" x="50" y="140" width="240" height="44" rx="10" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/>
+<text class="f-text" x="170" y="168" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Find vector</text>
+<path class="s-err" d="M170 184V202M165 195L170 202L175 195" fill="none" stroke="#ff6f73" stroke-width="2.5"/>
+<rect class="f-surface s-err" x="50" y="202" width="240" height="44" rx="10" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/>
+<text class="f-text" x="170" y="230" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Run handler</text>
+<path class="s-err" d="M170 246V264M165 257L170 264L175 257" fill="none" stroke="#ff6f73" stroke-width="2.5"/>
+<rect class="f-surface s-err" x="50" y="264" width="240" height="44" rx="10" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/>
+<text class="f-text" x="170" y="292" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Restore state</text>
+<path class="s-err" d="M170 308V326M165 319L170 326L175 319" fill="none" stroke="#ff6f73" stroke-width="2.5"/>
+<rect class="f-surface s-accent" x="50" y="326" width="240" height="44" rx="10" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/>
+<text class="f-text" x="170" y="354" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">Resume</text>
+<path class="s-err" d="M8 69H160" fill="none" stroke="#ff6f73" stroke-width="2.5" stroke-dasharray="6 5"/>
+</svg>

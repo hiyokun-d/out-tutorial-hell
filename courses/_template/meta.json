@@ -3,7 +3,7 @@
   "description": "What students will build in this course.",
   "difficulty": "BEGINNER",
   "order": 99,
-  "icon": "📚",
+  "icon": "terminal",
   "language": "Python",
   "author": {
     "name": "Your Name",

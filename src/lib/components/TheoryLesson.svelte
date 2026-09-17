@@ -13,6 +13,8 @@
 	import TracerVars from './TracerVars.svelte';
 	import PistonPane from './PistonPane.svelte';
 	import PreviewPane from './PreviewPane.svelte';
+	import CourseArt from './CourseArt.svelte';
+	import LessonWidget from './LessonWidget.svelte';
 	import { isPistonLanguage, pistonRun, langLabel } from '$lib/utils/piston.js';
 	import { buildPythonTracerCode, parsePythonTrace } from '$lib/utils/python-tracer.js';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
@@ -320,7 +322,19 @@
 		</header>
 
 		<article class="content">
+			{#if lesson.figureArt}
+				<figure class="lesson-figure">
+					<CourseArt art={lesson.figureArt} alt={lesson.title} class={lesson.figureArtNarrow ? 'wide-only' : ''} />
+					{#if lesson.figureArtNarrow}
+						<CourseArt art={lesson.figureArtNarrow} alt={lesson.title} class="narrow-only" />
+					{/if}
+				</figure>
+			{/if}
 			{@html marked(lesson.content)}
+			{#if lesson.widget && lesson.widgetProps}
+				<LessonWidget name={lesson.widget} props={lesson.widgetProps} />
+				{#if lesson.contentAfter}{@html marked(lesson.contentAfter)}{/if}
+			{/if}
 		</article>
 
 		<div class="lesson-footer">
@@ -501,7 +515,7 @@
 <style>
 	.page {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		min-height: 100vh;
 	}
 
@@ -562,6 +576,8 @@
 		border: 1px solid var(--border);
 		padding: 3rem;
 		margin: 0 auto;
+		min-width: 0;
+		width: 100%;
 	}
 
 	main.sandbox-active {
@@ -605,21 +621,27 @@
 	h1 { margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); line-height: 1.2; }
 
 	.content { color: var(--text-muted); }
-	.content :global(h1) { font-size: 1.65rem; margin: 1.75rem 0 0.75rem; color: var(--text); font-weight: 700; }
-	.content :global(h2) { font-size: 1.2rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; color: var(--text); font-weight: 600; }
-	.content :global(h3) { font-size: 1rem; margin: 1.5rem 0 0.4rem; color: var(--text); font-weight: 600; }
-	.content :global(p) { line-height: 1.8; margin: 0.85rem 0; color: var(--text-muted); }
+	.content > :global(h1) { font-size: 1.65rem; margin: 1.75rem 0 0.75rem; color: var(--text); font-weight: 700; }
+	.content > :global(h2) { font-size: 1.2rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; color: var(--text); font-weight: 600; }
+	.content > :global(h3) { font-size: 1rem; margin: 1.5rem 0 0.4rem; color: var(--text); font-weight: 600; }
+	.content > :global(p) { line-height: 1.8; margin: 0.85rem 0; color: var(--text-muted); }
 	.content :global(code) { background: var(--surface-elevated); border: 1px solid var(--border); padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.875em; font-family: 'Fira Code', 'Cascadia Code', monospace; color: var(--accent); }
-	.content :global(pre) { background: var(--sandbox-bg); color: var(--sandbox-text); padding: 1.25rem; border-radius: 20px; overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--sandbox-border); }
+	.content > :global(pre) { background: var(--sandbox-bg); color: var(--sandbox-text); padding: 1.25rem; border-radius: 20px; overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--sandbox-border); }
 	.content :global(pre code) { background: none; border: none; padding: 0; font-size: 0.9rem; color: var(--sandbox-text); }
-	.content :global(ul), .content :global(ol) { padding-left: 1.5rem; line-height: 1.8; color: var(--text-muted); margin: 0.75rem 0; }
-	.content :global(li) { margin: 0.3rem 0; }
-	.content :global(table) { width: 100%; border-collapse: collapse; margin: 1.25rem 0; }
-	.content :global(th), .content :global(td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
-	.content :global(th) { background: var(--surface-elevated); font-weight: 600; color: var(--text); }
+	.content > :global(ul), .content > :global(ol) { padding-left: 1.5rem; line-height: 1.8; color: var(--text-muted); margin: 0.75rem 0; }
+	.content > :global(ul > li), .content > :global(ol > li) { margin: 0.3rem 0; }
+	.content > :global(table) { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 1.25rem 0; }
+	.lesson-figure { margin: 1.5rem 0; padding: 0; overflow-x: auto; border-radius: 18px; }
+	.lesson-figure :global(.narrow-only) { display: none; }
+	@media (max-width: 560px) {
+		.lesson-figure :global(.wide-only) { display: none; }
+		.lesson-figure :global(.narrow-only) { display: block; max-width: 340px; margin: 0 auto; }
+	}
+	.content > :global(table th), .content > :global(table td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+	.content > :global(table th) { background: var(--surface-elevated); font-weight: 600; color: var(--text); }
 	.content :global(strong) { color: var(--text); font-weight: 600; }
-	.content :global(blockquote) { border-left: 3px solid var(--accent); margin: 1rem 0; padding: 0.5rem 1rem; background: var(--accent-muted); border-radius: 0 6px 6px 0; }
-	.content :global(blockquote p) { margin: 0; color: var(--text); }
+	.content > :global(blockquote) { border-left: 3px solid var(--accent); margin: 1rem 0; padding: 0.5rem 1rem; background: var(--accent-muted); border-radius: 0 6px 6px 0; }
+	.content > :global(blockquote p) { margin: 0; color: var(--text); }
 	.content :global(a) { color: var(--accent); }
 
 	.lesson-footer { margin: 2rem 0 1.5rem; display: flex; align-items: center; }
@@ -819,6 +841,30 @@
 	}
 	.trace-prompt strong { color: var(--sandbox-text-muted); font-weight: 600; }
 	.trace-prompt-icon { font-size: 1rem; color: var(--accent); opacity: 0.6; }
+
+	/* Phones and small tablets: one column, bigger touch targets. */
+	@media (max-width: 767px) {
+		main { padding: 1.5rem 1rem; border-radius: 18px; }
+		h1 { font-size: 1.6rem; }
+		.top-bar { flex-wrap: wrap; gap: 0.5rem; }
+
+		.page.has-sandbox { display: flex; flex-direction: column; height: auto; overflow: visible; }
+		.resize-handle { display: none; }
+		main.sandbox-active { height: auto; overflow: visible; padding: 1.5rem 1rem; }
+		.sandbox-panel { height: auto; min-height: 75dvh; border-left: none; border-top: 1px solid var(--sandbox-border); }
+		.sandbox-editor { min-height: 18rem; }
+		.sandbox-lower { min-height: 16rem; }
+	}
+
+	@media (max-width: 767px), (pointer: coarse) {
+		.action-btn, .mark-btn, .step-btn, .trace-btn, .exit-trace-btn, .close-btn {
+			min-height: 44px;
+			min-width: 44px;
+			padding-inline: 0.9rem;
+			font-size: 0.85rem;
+		}
+		.step-controls, .panel-bar { gap: 0.5rem; flex-wrap: wrap; }
+	}
 
 </style>
 

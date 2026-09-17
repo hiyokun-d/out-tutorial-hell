@@ -5,7 +5,7 @@
     "order": 5,
     "icon": "flask-conical",
     "language": "JavaScript",
-    "cover": "software-testing.svg",
+    "cover": "cover.svg",
     "author": {
         "name": "hiyo"
     }

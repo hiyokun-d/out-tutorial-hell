@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" width="400" height="225" role="img" font-family="ui-monospace, Menlo, Consolas, monospace">
+<title>Android with Kotlin cover</title>
+<desc>An activity climbs from created to started to resumed as it becomes visible and then interactive, and steps back down the same ladder when it loses focus. A bar beside it shows the chance the system kills the process: low while resumed, high once it has dropped back down.</desc>
+<rect class="f-bg s-line" x="0.5" y="0.5" width="399" height="224" rx="18" fill="#0b0d1c" stroke="#3b2f28"/>
+<rect class="f-surface s-dim" x="20" y="150" width="100" height="36" rx="8" fill="#181a2d" stroke="#9f948d" stroke-width="2"/><text class="f-text" x="70.0" y="172.7" font-size="13" font-weight="700" text-anchor="middle" fill="#fff7ed">CREATED</text>
+<rect class="f-surface s-accent" x="126" y="100" width="100" height="36" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="176.0" y="122.7" font-size="13" font-weight="700" text-anchor="middle" fill="#fff7ed">STARTED</text>
+<rect class="f-surface s-ok" x="232" y="50" width="100" height="36" rx="8" fill="#181a2d" stroke="#69d19d" stroke-width="2"/><text class="f-text" x="282.0" y="72.7" font-size="13" font-weight="700" text-anchor="middle" fill="#fff7ed">RESUMED</text>
+<path class="s-accent" d="M104 150V118H126" fill="none" stroke="#ffb15f" stroke-width="2" />
+<path class="s-accent" d="M119 113L126 118L119 123" fill="none" stroke="#ffb15f" stroke-width="2"/>
+<path class="s-accent" d="M210 100V68H232" fill="none" stroke="#ffb15f" stroke-width="2" />
+<path class="s-accent" d="M225 63L232 68L225 73" fill="none" stroke="#ffb15f" stroke-width="2"/>
+<path class="s-dim" d="M176 136V168H120" fill="none" stroke="#9f948d" stroke-width="2" />
+<path class="s-dim" d="M127 163L120 168L127 173" fill="none" stroke="#9f948d" stroke-width="2"/>
+<path class="s-dim" d="M282 86V118H226" fill="none" stroke="#9f948d" stroke-width="2" />
+<path class="s-dim" d="M233 113L226 118L233 123" fill="none" stroke="#9f948d" stroke-width="2"/>
+<rect class="f-ok" x="356" y="44" width="14" height="72" rx="4" fill="#69d19d" fill-opacity="0.7"/>
+<rect class="f-err" x="356" y="118" width="14" height="72" rx="4" fill="#ff6f73" fill-opacity="0.7"/>
+<text class="f-ok" x="363" y="36" font-size="11" font-weight="700" text-anchor="middle" fill="#69d19d">low</text>
+<text class="f-err" x="363" y="206" font-size="11" font-weight="700" text-anchor="middle" fill="#ff6f73">high</text>
+</svg>

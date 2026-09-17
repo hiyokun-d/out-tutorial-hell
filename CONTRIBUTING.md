@@ -13,6 +13,7 @@ courses/
   your-course-name/      ← lowercase, hyphens instead of spaces
     meta.json
     config.json          ← optional (feature flags)
+    assets/              ← optional: cover.svg + lesson figures
     lessons/
       1/                 ← folder number = lesson order
         lesson.md        ← one .md file per folder, any filename
@@ -38,7 +39,7 @@ This describes your course. Copy and fill in:
   "description": "One sentence describing what learners will build or learn.",
   "difficulty": "BEGINNER",
   "order": 3,
-  "icon": "🐍",
+  "icon": "terminal",
   "language": "Python",
   "author": {
     "name": "Your Name",
@@ -54,7 +55,7 @@ This describes your course. Copy and fill in:
 | `difficulty` | `BEGINNER`, `INTERMEDIATE`, or `ADVANCED` |
 | `order` | Where it appears in the course list (1 = first) |
 | `icon` | A supported icon name: `globe`, `terminal`, `cpu`, `compass`, `braces`, `flask-conical`, `circuit-board`, `smartphone`. Anything else shows the `terminal` icon. |
-| `cover` | Optional. Filename of a cover image in `src/lib/assets/course-covers/` (e.g. `"my-course.svg"`), shown on the course page. |
+| `cover` | Optional. Filename inside your course's `assets/` folder (e.g. `"cover.svg"`). Shown on the course card and course page; without it the icon is shown. See **Course art** below. |
 | `language` | The language name shown on the course card (display only) |
 | `author.name` | **Required.** Your name or handle — shown on the course card. |
 | `author.link` | Optional. A URL (GitHub profile, website, etc.) — makes your name clickable. |
@@ -86,8 +87,11 @@ You can use **bold**, *italic*, `inline code`, and fenced code blocks.
 |-------|-------------|
 | `id` | Slug for the lesson (lowercase, hyphens, no spaces) — used in the URL |
 | `title` | Display name |
-| `type` | `THEORY` for reading lessons, `PRACTICE` for coding challenges |
-| `xpReward` | Points the learner earns. Theory = 10–15, Practice = 20–30 |
+| `type` | `THEORY` for reading lessons, `PRACTICE` for lessons with a challenge, `INTERACTIVE` for lessons with a widget. It's a label — what actually turns a lesson into a coding challenge is a `.json` file in the folder |
+| `xpReward` | Points the learner earns. Theory = 10–15, Interactive = 20, Practice = 20–30 |
+| `module` | Optional. Groups lessons on the course page |
+| `figure` | Optional. Filename in `assets/` shown at the top of the lesson. Add `name.narrow.svg` next to `name.svg` and phones get that instead |
+| `widget` | Required when `type` is `INTERACTIVE`. See **Interactive lessons** below |
 
 > **Note:** You don't set `order` in the frontmatter — the folder number controls order automatically.
 
@@ -95,7 +99,7 @@ You can use **bold**, *italic*, `inline code`, and fenced code blocks.
 
 ## Step 4 — Add a coding challenge (optional)
 
-If your lesson is type `PRACTICE`, add a `.json` file in the same numbered folder (any filename ending in `.json`):
+To make a lesson a coding challenge, add a `.json` file in the same numbered folder (any filename ending in `.json`):
 
 ```
 lessons/
@@ -141,54 +145,108 @@ lessons/
 | `hints` | Optional array of hints shown one at a time. |
 | `tests` | A list of checks. See below. |
 
-### Test types — HTML / CSS
+### Test types
+
+Only these `check` values exist — they're what `src/lib/checker.js` implements. **Line numbers are 0-based** (`"line": 0` is the first line).
+
+#### HTML / CSS (runs in the browser)
 
 | `check` | What it does | Required fields |
 |---------|-------------|-----------------|
-| `has-tag` | Tag exists on the page | `value`: tag name (e.g. `"h1"`) |
-| `not-empty` | Element is not empty | `selector`: CSS selector |
-| `tag-text` | Tag contains exact text | `tag`: tag name, `value`: exact text |
-| `tag-text-contains` | Tag contains partial text (case-insensitive) | `tag`: tag name, `value`: text to find |
-| `has-attribute` | Element has an attribute | `selector`: CSS selector, `attribute`: attribute name |
-| `attribute-not-empty` | Attribute exists and isn't blank | `selector`: CSS selector, `attribute`: attribute name |
-| `attribute-value` | Attribute has an exact value | `selector`: CSS selector, `attribute`: name, `value`: expected value |
-| `has-doctype` | Page has `<!DOCTYPE html>` | — |
+| `has-doctype` | Page starts with `<!DOCTYPE html>` | — |
 | `has-structure` | Page has `<html>`, `<head>`, `<body>` | — |
-| `code-contains` | Written code includes a string | `value`: the string |
+| `has-tag` | An element matches | `value`: CSS selector (e.g. `"h1"`) |
+| `tag-text` | Element text matches exactly (whitespace-normalised) | `tag`: selector, `value` |
+| `tag-text-contains` | Element text contains a string (case-insensitive) | `tag`: selector, `value` |
+| `not-empty` | Element has text | `selector` (or `tag` / `value`) |
+| `has-attribute` | Element has an attribute | `selector`, `attribute` |
+| `attribute-value` | Attribute equals a value | `selector`, `attribute`, `value` |
+| `attribute-contains` | Attribute contains a string | `selector`, `attribute`, `value` |
+| `attribute-not-empty` | Attribute exists and isn't blank | `selector`, `attribute` |
+| `child-of` | A matching element exists inside another | `parent`, `child` (selectors) |
+| `tag-count` | Exactly N elements match | `selector` (or `value`), `count` |
+| `min-count` | At least N elements match | `selector` (or `value`), `count` |
+| `css-property` | Inline `style` property equals a value | `selector`, `property`, `value` |
+| `code-contains` | Source includes a string (case-insensitive) | `value` |
+| `code-not-contains` | Source doesn't include a string (case-insensitive) | `value` |
 
-### Test types — JavaScript console
+#### JavaScript console
 
-Use these when `language` is `javascript` and `consoleOutput` is enabled.
+Use these when `language` is `javascript` or `consoleOutput` is enabled.
 
 | `check` | What it does | Required fields |
 |---------|-------------|-----------------|
-| `console-no-error` | No errors thrown | — |
-| `console-output-equals` | Full console output matches exactly | `value`: expected string |
-| `console-output-contains` | Console output includes a string | `value`: string to find |
-| `console-output-count` | Number of console.log calls | `value`: count (number) |
-| `console-output-line` | Specific line of output matches | `line`: line number (1-based), `value`: expected string |
+| `console-no-error` | Nothing was thrown or logged as an error | — |
+| `console-output-equals` | The **first** logged line equals a value | `value` |
+| `console-output-contains` | Any logged line contains a string | `value` |
+| `console-output-line` | A specific logged line equals a value | `line` (0-based), `value` |
+| `console-output-count` | Number of logged lines | `count` |
+| `code-contains` / `code-not-contains` | Source does / doesn't include a string | `value` |
 
-### Test types — compiled languages (Wandbox)
+`console.log(true)` logs the text `"true"`, so compare against strings.
 
-Use these for C, Python, Go, Rust, etc.
+#### Compiled languages (Wandbox)
+
+Use these for C, Python, Go, Rust, Kotlin, etc.
 
 | `check` | What it does | Required fields |
 |---------|-------------|-----------------|
-| `exit-code-zero` | Program exits without error | — |
-| `stdout-equals` | Full stdout matches exactly | `value`: expected output |
-| `stdout-contains` | stdout includes a string | `value`: string |
-| `stdout-line` | Specific line of stdout matches exactly | `line`: line number (1-based), `value`: expected string |
-| `stdout-line-contains` | Specific line contains a string | `line`: line number (1-based), `value`: string |
-| `stdout-regex` | stdout matches a regex | `value`: regex pattern |
-| `stdout-line-count` | Number of output lines | `value`: count (number) |
-| `code-contains` | Source code includes a string | `value`: string |
-| `code-not-contains` | Source code does not include a string | `value`: string |
+| `exit-code-zero` | Program exits with code 0 | — |
+| `stderr-empty` | Nothing written to stderr | — |
+| `stdout-equals` | Full stdout matches (trailing whitespace ignored) | `value` |
+| `stdout-contains` | stdout includes a string | `value` |
+| `stdout-line` | A specific line matches exactly | `line` (0-based), `value` |
+| `stdout-line-contains` | A specific line contains a string | `line` (0-based), `value` |
+| `stdout-regex` | stdout matches a regex | `value`: pattern |
+| `stdout-line-count` | Number of output lines | `count` |
+| `code-contains` / `code-not-contains` | Source does / doesn't include a string (case-sensitive) | `value` |
+
+Wandbox runs your code on a remote compiler: no filesystem, no network, no hardware. `fork()`, signals and timers won't behave.
 
 ### Supported languages
 
 `html` · `css` · `javascript` run entirely in the browser.
 
 Everything else routes through [Wandbox](https://wandbox.org): `c` · `cpp` · `python` · `rust` · `go` · `java` · `kotlin` · `swift` · `ruby` · `lua` · `perl` · `php` · `bash` · `haskell` · `erlang` · `ocaml` · `scala` · `nim` · `crystal` · `d` · `typescript` · `r` · `pascal` · `coffeescript`
+
+---
+
+## Interactive lessons (optional)
+
+Set `type: "INTERACTIVE"` and `widget` to one of the shared widgets in `src/lib/widgets/`: `Stepper`, `StateMachine`, `MemoryView`, `Timeline`. Put the widget's props as JSON in **one** fenced block tagged `widget`. The widget renders exactly where that block sits:
+
+````markdown
+---
+id: "my-lesson"
+title: "My Lesson"
+type: "INTERACTIVE"
+xpReward: 20
+widget: "Stepper"
+---
+
+Some prose.
+
+```widget
+{ "title": "Step through it", "steps": [{ "title": "First", "body": "Markdown **works** here." }] }
+```
+
+More prose.
+````
+
+Copy the props from an existing interactive lesson, such as `courses/software-testing/lessons/2/`. The prop types are documented at the top of each widget file. A bad widget name or invalid JSON fails loudly when the lesson loads.
+
+Don't build a one-off component for your course. If none of the four widgets fit, open an issue proposing a new shared one.
+
+## Course art (optional)
+
+Put SVGs in `courses/<your-course>/assets/` and reference them by filename (`cover` in meta.json, `figure` in frontmatter).
+
+- **Original work only.** No stock images, logos or figures traced from slides.
+- `<svg role="img">` with a `<title>` and `<desc>` that explain the idea. The loader rejects SVGs without them, and SVGs containing `<script>` or `on…=` handlers.
+- Covers: `viewBox="0 0 400 225"`, background `<rect rx="18">`. Figures: `viewBox="0 0 680 H"`.
+- Theme colours: give shapes a class **and** a fallback colour, e.g. `<rect class="f-surface s-accent" fill="#181a2d" stroke="#ffb15f">`. Classes: `f-bg f-surface f-text f-muted f-dim f-accent f-accent2 f-ok f-err` (fill) and `s-line s-text s-dim s-accent s-ok s-err` (stroke).
+- No `id`s (no gradients, markers or `url(#…)`). Several SVGs share one page, and duplicate ids break each other.
+- Under ~15 KB. More than about six text labels? Also ship `name.narrow.svg` for phones.
 
 ---
 

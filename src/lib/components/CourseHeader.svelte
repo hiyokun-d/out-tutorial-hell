@@ -1,10 +1,11 @@
 ﻿<script>
 	// @ts-nocheck
 	import { onMount } from 'svelte';
+	import CourseArt from './CourseArt.svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { Braces, CircuitBoard, Compass, Cpu, FlaskConical, Globe, Smartphone, Terminal } from '@lucide/svelte';
 
-	/** @type {{ course: { icon: string, title: string, description: string, difficulty?: string, coverUrl?: string | null, author?: { name: string, link?: string } }, lessons?: any[], courseId?: string }} */
+	/** @type {{ course: { icon: string, title: string, description: string, difficulty?: string, coverArt?: { svg: string | null, url: string | null } | null, author?: { name: string, link?: string } }, lessons?: any[], courseId?: string }} */
 	let { course, lessons = [], courseId = '' } = $props();
 
 	let completedCount = $state(0);
@@ -55,8 +56,8 @@
 				{/if}
 			</p>
 		</div>
-		{#if course.coverUrl}
-			<img class="cover" src={course.coverUrl} alt="" width="400" height="225" />
+		{#if course.coverArt}
+			<CourseArt art={course.coverArt} alt={course.title} class="cover" />
 		{/if}
 	</div>
 
@@ -107,10 +108,8 @@
 
 	.info { flex: 1; min-width: 0; }
 
-	.cover {
+	.top :global(.cover) {
 		width: clamp(220px, 30%, 320px);
-		height: auto;
-		aspect-ratio: 400 / 225;
 		flex-shrink: 0;
 		border-radius: 18px;
 		box-shadow: var(--base-shadow);
@@ -212,7 +211,7 @@
 	@media (max-width: 720px) {
 		header { border-radius: 0; border-left: 0; border-right: 0; }
 		.top { flex-direction: column; }
-		.cover { width: 100%; max-width: 400px; }
+		.top :global(.cover) { width: 100%; max-width: 400px; }
 		.progress-wrap { grid-template-columns: 1fr; }
 	}
 </style>

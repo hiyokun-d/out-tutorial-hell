@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" width="400" height="225" role="img" font-family="ui-monospace, Menlo, Consolas, monospace">
+<title>Operating Systems cover</title>
+<desc>The CPU runs fetch, decode, execute. After execute, an interrupt request arrives, so instead of fetching the next instruction the CPU saves its state, runs the interrupt handler, restores the saved state, and only then goes back to fetch.</desc>
+<rect class="f-bg s-line" x="0.5" y="0.5" width="399" height="224" rx="18" fill="#0b0d1c" stroke="#3b2f28"/>
+<rect class="f-surface s-accent" x="24" y="40" width="92" height="36" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="70.0" y="63.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">FETCH</text>
+<rect class="f-surface s-accent" x="154" y="40" width="92" height="36" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="200.0" y="63.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">DECODE</text>
+<rect class="f-surface s-accent" x="284" y="40" width="92" height="36" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="330.0" y="63.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">EXECUTE</text>
+<path class="s-dim" d="M116 58H154" fill="none" stroke="#9f948d" stroke-width="2" />
+<path class="s-dim" d="M147 53L154 58L147 63" fill="none" stroke="#9f948d" stroke-width="2"/>
+<path class="s-dim" d="M246 58H284" fill="none" stroke="#9f948d" stroke-width="2" />
+<path class="s-dim" d="M277 53L284 58L277 63" fill="none" stroke="#9f948d" stroke-width="2"/>
+<path class="s-err" d="M330 76V140" fill="none" stroke="#ff6f73" stroke-width="2.5" />
+<path class="s-err" d="M325 133L330 140L335 133" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<text class="f-err" x="342" y="114" font-size="14" font-weight="700" text-anchor="start" fill="#ff6f73">IRQ</text>
+<rect class="f-surface s-err" x="24" y="142" width="92" height="36" rx="8" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/><text class="f-text" x="70.0" y="165.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">RESTORE</text>
+<rect class="f-surface s-err" x="154" y="142" width="92" height="36" rx="8" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/><text class="f-text" x="200.0" y="165.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">HANDLER</text>
+<rect class="f-surface s-err" x="284" y="142" width="92" height="36" rx="8" fill="#181a2d" stroke="#ff6f73" stroke-width="2"/><text class="f-text" x="330.0" y="165.0" font-size="14" font-weight="700" text-anchor="middle" fill="#fff7ed">SAVE</text>
+<path class="s-err" d="M284 160H246" fill="none" stroke="#ff6f73" stroke-width="2" />
+<path class="s-err" d="M253 155L246 160L253 165" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<path class="s-err" d="M154 160H116" fill="none" stroke="#ff6f73" stroke-width="2" />
+<path class="s-err" d="M123 155L116 160L123 165" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<path class="s-accent" d="M70 142V78" fill="none" stroke="#ffb15f" stroke-width="2" />
+<path class="s-accent" d="M65 85L70 78L75 85" fill="none" stroke="#ffb15f" stroke-width="2"/>
+</svg>

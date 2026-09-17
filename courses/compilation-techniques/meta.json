@@ -5,7 +5,7 @@
     "order": 3,
     "icon": "braces",
     "language": "JavaScript",
-    "cover": "compilation-techniques.svg",
+    "cover": "cover.svg",
     "author": {
         "name": "hiyo"
     }

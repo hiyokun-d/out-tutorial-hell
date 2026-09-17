@@ -1,5 +1,5 @@
 ---
-id: "programming-under-constraints"
+id: "constraints"
 title: "Programming Under Constraints"
 type: "THEORY"
 xpReward: 15
