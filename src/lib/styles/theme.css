@@ -877,3 +877,67 @@ html.lenis body {
 	clip: rect(0 0 0 0);
 	white-space: nowrap;
 }
+
+/* ── Motion ────────────────────────────────────────────────────────────────────
+   All of it opt-out, transform + opacity only, one-shot (no loops over 2s). */
+@media (prefers-reduced-motion: no-preference) {
+	.widget { animation: widget-in 0.4s ease-out both; }
+	.widget-loading { animation: none; }
+
+	.reveal-pending {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+	.reveal-pending.revealed {
+		opacity: 1;
+		transform: none;
+		transition:
+			opacity 0.5s ease-out var(--reveal-delay, 0ms),
+			transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+	}
+
+	/* Course art that explains itself: groups tagged seq-1…seq-8 appear in the
+	   order the mechanism happens. seq-key gets one extra pulse. */
+	.art.play [class*='seq-'] {
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: art-step 0.42s ease-out both;
+	}
+	.art.play .seq-1 { animation-delay: 0ms; }
+	.art.play .seq-2 { animation-delay: 170ms; }
+	.art.play .seq-3 { animation-delay: 340ms; }
+	.art.play .seq-4 { animation-delay: 510ms; }
+	.art.play .seq-5 { animation-delay: 680ms; }
+	.art.play .seq-6 { animation-delay: 850ms; }
+	.art.play .seq-7 { animation-delay: 1020ms; }
+	.art.play .seq-8 { animation-delay: 1190ms; }
+	.art.play .seq-key {
+		animation-name: art-step-key;
+		animation-duration: 0.7s;
+	}
+}
+
+@keyframes widget-in {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 1; transform: none; }
+}
+
+@keyframes art-step {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+
+@keyframes art-step-key {
+	0% { opacity: 0; transform: scale(0.7); }
+	55% { opacity: 1; transform: scale(1.12); }
+	100% { opacity: 1; transform: scale(1); }
+}
+
+/* Page cross-fade (View Transitions API). Short, opacity only. */
+@media (prefers-reduced-motion: no-preference) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 220ms;
+		animation-timing-function: ease-out;
+	}
+}

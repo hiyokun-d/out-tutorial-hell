@@ -6,11 +6,25 @@
 	import FloatingNotes from '$lib/components/FloatingNotes.svelte';
 	import { xp } from '$lib/stores/xp.js';
 	import { onMount } from 'svelte';
+	import { onNavigate } from '$app/navigation';
+	import { motionState, prefersReducedMotion } from '$lib/utils/motion.js';
 	import Lenis from 'lenis';
 
 	let { children } = $props();
 
+	// Cross-fade between pages where the browser supports View Transitions.
+	onNavigate((navigation) => {
+		if (!document.startViewTransition || prefersReducedMotion()) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
+
 	onMount(() => {
+		motionState.hydrated = true;
 		xp.init();
 
 		const lenis = new Lenis({

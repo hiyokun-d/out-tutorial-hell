@@ -247,6 +247,7 @@ Put SVGs in `courses/<your-course>/assets/` and reference them by filename (`cov
 - Theme colours: give shapes a class **and** a fallback colour, e.g. `<rect class="f-surface s-accent" fill="#181a2d" stroke="#ffb15f">`. Classes: `f-bg f-surface f-text f-muted f-dim f-accent f-accent2 f-ok f-err` (fill) and `s-line s-text s-dim s-accent s-ok s-err` (stroke).
 - No `id`s (no gradients, markers or `url(#…)`). Several SVGs share one page, and duplicate ids break each other.
 - Under ~15 KB. More than about six text labels? Also ship `name.narrow.svg` for phones.
+- Optional motion: wrap parts in `<g class="seq-1">`, `<g class="seq-2">`… (up to 8) in the order the mechanism happens, and add `seq-key` to the moment that matters. Covers and figures then play step by step, and figures get a Play button.
 
 ---
 

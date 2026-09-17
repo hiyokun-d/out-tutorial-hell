@@ -22,6 +22,12 @@
 	let before = $derived(standalone ? (index > 0 ? frames[index - 1].cells : null) : previous);
 	let caption = $derived(standalone ? (frames[index].caption ?? '') : '');
 
+	/** Previous value of a cell, for the slide-out, or null if it's new. @param {Cell} cell */
+	function oldValue(cell) {
+		const old = before?.find((c) => c.label === cell.label);
+		return old && String(old.value) !== String(cell.value) ? old.value : null;
+	}
+
 	/** @param {Cell} cell */
 	function changed(cell) {
 		if (!before) return false;
@@ -47,9 +53,12 @@
 		{#each shown as cell (cell.label)}
 			<li class="cell" class:changed={changed(cell)}>
 				<span class="label">{cell.label}</span>
-				{#key cell.value}
-					<span class="value">{cell.value}</span>
-				{/key}
+				<span class="value-box">
+					{#if oldValue(cell) !== null}
+						{#key cell.value}<span class="old" aria-hidden="true">{oldValue(cell)}</span>{/key}
+					{/if}
+					{#key cell.value}<span class="value">{cell.value}</span>{/key}
+				</span>
 				{#if cell.note}<span class="note">{cell.note}</span>{/if}
 				{#if changed(cell)}<span class="w-sr">changed</span>{/if}
 			</li>
@@ -107,14 +116,34 @@
 
 	.cell.changed .value { color: var(--accent); }
 
+	.value-box { position: relative; display: block; }
+	.old {
+		position: absolute;
+		inset: 0 auto auto 0;
+		font-family: 'Fira Code', 'Cascadia Code', monospace;
+		font-size: 1rem;
+		color: var(--text-dim);
+		text-decoration: line-through;
+		opacity: 0;
+		pointer-events: none;
+	}
+
 	.note { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.cell.changed .value { animation: flash 0.6s ease-out; }
+		/* The old value lifts away as the new one drops in: you see *what* changed. */
+		.cell.changed .value { animation: value-in 0.55s ease-out 0.15s both; }
+		.old { animation: value-out 0.55s ease-in both; }
+		.cell { transition: border-color 0.3s ease, background-color 0.3s ease; }
 	}
 
-	@keyframes flash {
-		from { opacity: 0.2; transform: translateY(-4px); }
-		to { opacity: 1; transform: translateY(0); }
+	@keyframes value-in {
+		from { opacity: 0; transform: translateY(10px); }
+		to { opacity: 1; transform: none; }
+	}
+
+	@keyframes value-out {
+		from { opacity: 1; transform: none; }
+		to { opacity: 0; transform: translateY(-12px); }
 	}
 </style>

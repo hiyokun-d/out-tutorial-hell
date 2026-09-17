@@ -1,5 +1,6 @@
 <script>
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import { prefersReducedMotion } from '$lib/utils/motion.js';
 
 	/**
 	 * Nodes and edges. Highlights the active state, accepts an input and walks it
@@ -60,7 +61,49 @@
 	let finished = $derived(tokens !== null && pos >= tokens.length);
 	let exampleInput = $derived(mode === 'chars' ? alphabet.join('') : alphabet.slice(0, 2).join(' '));
 
+	// ── Guidance: show where the next symbol will go before the learner commits ──
+	/** @param {string} raw */
+	function parse(raw) {
+		const parts = mode === 'chars' ? [...raw] : raw.split(/[\s,]+/).map((t) => t.toLowerCase());
+		return raw && parts.every((p) => alphabet.includes(p)) ? parts : null;
+	}
+	let previewTokens = $derived(tokens !== null && text.trim() === loadedText ? tokens : parse(text.trim()));
+	let previewPos = $derived(tokens !== null && text.trim() === loadedText ? pos : 0);
+	let previewFrom = $derived(tokens !== null && text.trim() === loadedText ? current : start);
+	let nextEdge = $derived.by(() => {
+		if (halted || running || !previewTokens || previewPos >= previewTokens.length) return null;
+		const symbol = previewTokens[previewPos];
+		return edges.find((e) => e.from === previewFrom && e.symbol === symbol) ?? null;
+	});
+	let possible = $derived(new Set(edges.filter((e) => e.from === current).map((e) => e.symbol)));
+	let started = $derived(moves.length > 0);
+
+	// ── Motion: a token travels along the arrow that was just taken ──────────────
+	/** @type {SVGSVGElement | undefined} */
+	let svgEl = $state();
+	/** @type {SVGCircleElement | undefined} */
+	let tokenEl = $state();
+	let running = $state(false);
+	let runId = 0;
+	let errorKey = $state(0);
+
+	/** @param {Edge} edge */
+	async function travel(edge) {
+		if (prefersReducedMotion() || !svgEl || !tokenEl) return;
+		await tick();
+		const path = /** @type {SVGPathElement | null} */ (svgEl.querySelector(`[data-edge="${edges.indexOf(edge)}"]`));
+		if (!path || !tokenEl.animate) return;
+		const len = path.getTotalLength();
+		const frames = Array.from({ length: 13 }, (_, i) => {
+			const p = path.getPointAtLength((len * i) / 12);
+			return { transform: `translate(${p.x}px, ${p.y}px)`, opacity: i === 12 ? 0 : 1 };
+		});
+		tokenEl.animate(frames, { duration: 420, easing: 'ease-in-out' });
+	}
+
 	function reset() {
+		runId++;
+		running = false;
 		text = initialInput;
 		tokens = null;
 		pos = 0;
@@ -110,11 +153,13 @@
 			error =
 				stuck[`${current}:${symbol}`] ??
 				`There is no "${labelOf(symbol)}" arrow out of ${from}. That move is impossible from here.`;
+			errorKey++;
 			return false;
 		}
 		error = '';
 		moves = [...moves, { from: current, to: edge.to, symbol, note: edge.note }];
 		current = edge.to;
+		travel(edge);
 		return true;
 	}
 
@@ -133,12 +178,20 @@
 		else halted = true;
 	}
 
-	function runAll() {
+	// Run all walks at a readable pace so the learner can follow each arrow.
+	async function runAll() {
 		if (stale()) {
 			load();
 			if (stale()) return;
 		}
-		while (tokens && !halted && pos < tokens.length) step();
+		const id = ++runId;
+		const delay = prefersReducedMotion() ? 0 : 520;
+		running = true;
+		while (id === runId && tokens && !halted && pos < tokens.length) {
+			step();
+			if (delay) await new Promise((r) => setTimeout(r, delay));
+		}
+		if (id === runId) running = false;
 	}
 
 	/** @param {string} id */
@@ -215,7 +268,7 @@
 	</div>
 
 	<div class="diagram">
-		<svg viewBox="0 0 {width} {height}" role="img" aria-labelledby="{uid}-t {uid}-d" font-family="'Fira Code', ui-monospace, monospace">
+		<svg bind:this={svgEl} viewBox="0 0 {width} {height}" role="img" aria-labelledby="{uid}-t {uid}-d" font-family="'Fira Code', ui-monospace, monospace">
 			<title id="{uid}-t">{title}</title>
 			<desc id="{uid}-d">
 				States: {nodes.map((n) => n.label + (n.accept ? ' (accepting)' : '')).join(', ')}.
@@ -241,8 +294,16 @@
 
 			{#each edges as e}
 				{@const g = geometry(e)}
-				<path class="edge" class:on={isLast(e)} d={g.d} marker-end="url(#{uid}-arrow{isLast(e) ? '-on' : ''})" />
-				<text class="edge-label" class:on={isLast(e)} x={g.lx} y={g.ly} text-anchor="middle">{e.label ?? labelOf(e.symbol)}</text>
+				<path
+					class="edge"
+					class:on={isLast(e)}
+					class:next={nextEdge === e}
+					class:out={e.from === current && !isLast(e)}
+					data-edge={edges.indexOf(e)}
+					d={g.d}
+					marker-end="url(#{uid}-arrow{isLast(e) || nextEdge === e ? '-on' : ''})"
+				/>
+				<text class="edge-label" class:on={isLast(e) || nextEdge === e} x={g.lx} y={g.ly} text-anchor="middle">{e.label ?? labelOf(e.symbol)}</text>
 			{/each}
 
 			{#each nodes as n}
@@ -258,6 +319,8 @@
 					<text x={n.x} y={n.y + 5} text-anchor="middle">{n.label}</text>
 				</g>
 			{/each}
+
+			<circle bind:this={tokenEl} class="token" r="6" cx="0" cy="0" opacity="0" />
 		</svg>
 	</div>
 
@@ -278,11 +341,23 @@
 			spellcheck="false"
 		/>
 		<button class="w-btn" type="submit">Load</button>
-		<button class="w-btn primary" type="button" onclick={step} disabled={(halted || finished) && !stale()}>Step</button>
-		<button class="w-btn" type="button" onclick={runAll} disabled={(halted || finished) && !stale()}>Run all</button>
+		<button class="w-btn primary" type="button" onclick={step} disabled={running || ((halted || finished) && !stale())}>Step</button>
+		<button class="w-btn" type="button" onclick={runAll} disabled={running || ((halted || finished) && !stale())}>{running ? 'Running…' : 'Run all'}</button>
 	</form>
 
-	{#if error}<p class="w-error" role="alert">{error}</p>{/if}
+	{#if !started && !error}
+		<p class="hint">
+			{#if mode === 'chars'}
+				Press <strong>Step</strong> to read one symbol. The highlighted arrow shows where it will go.
+			{:else}
+				Press <strong>Step</strong> to play the sequence, or tap an event below. Highlighted events are possible from where you are.
+			{/if}
+		</p>
+	{/if}
+
+	{#if error}
+		{#key errorKey}<p class="w-error nudge" role="alert">{error}</p>{/key}
+	{/if}
 
 	{#if tokens}
 		<div class="tape" aria-label="Input">
@@ -299,13 +374,15 @@
 	{#if mode === 'events'}
 		<div class="widget-controls events" aria-label="Fire an event">
 			{#each events as ev}
-				<button class="w-btn" type="button" onclick={() => fire(ev.id)}>{ev.label}</button>
+				<button class="w-btn event" class:possible={possible.has(ev.id)} type="button" onclick={() => fire(ev.id)} disabled={running}>
+					{ev.label}
+				</button>
 			{/each}
 		</div>
 	{/if}
 
 	{#if lastMove?.note}
-		<p class="w-note">{lastMove.note}</p>
+		{#key moves.length}<p class="w-note enter">{lastMove.note}</p>{/key}
 	{/if}
 
 	{#if active.note}
@@ -338,6 +415,20 @@
 
 	.edge { fill: none; stroke: var(--text-dim); stroke-width: 1.6; }
 	.edge.on { stroke: var(--accent); stroke-width: 2.6; }
+	.edge.out { stroke: color-mix(in srgb, var(--accent) 45%, var(--text-dim)); }
+	.edge.next { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: 6 5; }
+	.token { fill: var(--accent); stroke: var(--sandbox-bg); stroke-width: 2; pointer-events: none; }
+
+	.hint {
+		margin: 0.6rem 0 0;
+		font-size: 0.88rem;
+		color: var(--text-dim);
+		line-height: 1.5;
+	}
+	.hint strong { color: var(--accent); }
+
+	.event.possible { border-color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+	.event:not(.possible) { color: var(--text-dim); }
 	:global(.machine) .head { fill: var(--text-dim); }
 	:global(.machine) .head.on { fill: var(--accent); }
 
@@ -386,13 +477,33 @@
 		color: var(--sandbox-text);
 		background: var(--sandbox-bg);
 	}
-	.sym.done { opacity: 0.4; text-decoration: line-through; }
-	.sym.next { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+	.sym.done { opacity: 0.4; text-decoration: line-through; transform: scale(0.92); }
+	.sym.next { border-color: var(--accent); color: var(--accent); font-weight: 700; transform: translateY(-2px); }
 
 	.events { margin-top: 0.75rem; }
 
 	@media (prefers-reduced-motion: no-preference) {
+		.sym { transition: opacity 0.3s ease, transform 0.3s ease; }
+		.edge.next { animation: breathe 1.4s ease-in-out infinite alternate; }
+		.nudge { animation: nudge 0.35s ease-out; }
+		.enter { animation: rise 0.3s ease-out; }
 		.node.on { animation: pop 0.3s ease-out; transform-box: fill-box; transform-origin: center; }
+	}
+
+	@keyframes breathe {
+		from { opacity: 1; }
+		to { opacity: 0.45; }
+	}
+
+	@keyframes nudge {
+		0%, 100% { transform: translateX(0); }
+		25% { transform: translateX(-5px); }
+		60% { transform: translateX(4px); }
+	}
+
+	@keyframes rise {
+		from { opacity: 0; transform: translateY(6px); }
+		to { opacity: 1; transform: none; }
 	}
 
 	@keyframes pop {

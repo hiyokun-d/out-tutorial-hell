@@ -24,6 +24,8 @@
 
 	// History instead of a bare index: branches can jump, and Prev should undo the jump.
 	let history = $state([0]);
+	// Which way the last move went, so the panel slides in from the matching side.
+	let dir = $state(/** @type {'fwd' | 'back' | 'none'} */ ('none'));
 
 	let index = $derived(history[history.length - 1]);
 	let step = $derived(steps[index]);
@@ -44,20 +46,27 @@
 	}
 
 	function next() {
-		if (nextIndex !== null) history = [...history, nextIndex];
+		if (nextIndex === null) return;
+		dir = nextIndex > index ? 'fwd' : 'back';
+		history = [...history, nextIndex];
 	}
 
 	function prev() {
-		if (history.length > 1) history = history.slice(0, -1);
+		if (history.length === 1) return;
+		dir = 'back';
+		history = history.slice(0, -1);
 	}
 
 	/** @param {Branch} branch */
 	function jump(branch) {
 		const target = indexOf(branch.to);
-		if (target !== null) history = [...history, target];
+		if (target === null) return;
+		dir = target > index ? 'fwd' : 'back';
+		history = [...history, target];
 	}
 
 	function reset() {
+		dir = 'back';
 		history = [0];
 	}
 </script>
@@ -78,7 +87,7 @@
 	</div>
 
 	{#key index}
-	<div class="panel">
+	<div class="panel {dir}">
 		<h3>{step.title}</h3>
 
 		{#if step.tags?.length}
@@ -129,7 +138,7 @@
 	.dots { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 	.dot { width: 8px; height: 8px; border-radius: 999px; background: var(--border); }
 	.dot.seen { background: color-mix(in srgb, var(--accent) 45%, transparent); }
-	.dot.on { background: var(--accent); }
+	.dot.on { background: var(--accent); transform: scale(1.5); }
 
 	.panel { margin: 0.75rem 0 1rem; }
 
@@ -168,11 +177,18 @@
 	.nav { justify-content: flex-end; }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.panel { animation: enter 0.25s ease-out; }
+		.dot { transition: transform 0.25s ease, background-color 0.25s ease; }
+		.panel.fwd { animation: from-right 0.32s cubic-bezier(0.2, 0.7, 0.2, 1); }
+		.panel.back { animation: from-left 0.32s cubic-bezier(0.2, 0.7, 0.2, 1); }
 	}
 
-	@keyframes enter {
-		from { opacity: 0; transform: translateY(6px); }
-		to { opacity: 1; transform: translateY(0); }
+	@keyframes from-right {
+		from { opacity: 0; transform: translateX(24px); }
+		to { opacity: 1; transform: none; }
+	}
+
+	@keyframes from-left {
+		from { opacity: 0; transform: translateX(-24px); }
+		to { opacity: 1; transform: none; }
 	}
 </style>

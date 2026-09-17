@@ -2,16 +2,25 @@
 <title>Compilation Techniques cover</title>
 <desc>The source line x = a + 1 is split by the lexer into five tokens: identifier x, equals, identifier a, plus, and the number 1. The parser then arranges those tokens into a tree with = at the root, x as its left child, and a + node holding a and 1 as its right child.</desc>
 <rect class="f-bg s-line" x="0.5" y="0.5" width="399" height="224" rx="18" fill="#0b0d1c" stroke="#3b2f28"/>
+<g class="seq-1">
 <text class="f-muted" x="32" y="52" font-size="20" font-weight="400" text-anchor="start" fill="#d8c8b8">x = a + 1</text>
+</g>
+<g class="seq-2">
 <path class="s-dim" d="M80 64V90" fill="none" stroke="#9f948d" stroke-width="2" />
 <path class="s-dim" d="M75 83L80 90L85 83" fill="none" stroke="#9f948d" stroke-width="2"/>
+</g>
+<g class="seq-3 seq-key">
 <rect class="f-surface s-accent" x="32" y="98" width="34" height="34" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="49.0" y="121.5" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">x</text>
 <rect class="f-surface s-dim" x="74" y="98" width="34" height="34" rx="8" fill="#181a2d" stroke="#9f948d" stroke-width="2"/><text class="f-text" x="91.0" y="121.5" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">=</text>
 <rect class="f-surface s-accent" x="116" y="98" width="34" height="34" rx="8" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/><text class="f-text" x="133.0" y="121.5" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">a</text>
 <rect class="f-surface s-dim" x="158" y="98" width="34" height="34" rx="8" fill="#181a2d" stroke="#9f948d" stroke-width="2"/><text class="f-text" x="175.0" y="121.5" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">+</text>
 <rect class="f-surface s-ok" x="200" y="98" width="34" height="34" rx="8" fill="#181a2d" stroke="#69d19d" stroke-width="2"/><text class="f-text" x="217.0" y="121.5" font-size="18" font-weight="700" text-anchor="middle" fill="#fff7ed">1</text>
+</g>
+<g class="seq-4">
 <path class="s-dim" d="M240 115H258" fill="none" stroke="#9f948d" stroke-width="2" />
 <path class="s-dim" d="M251 110L258 115L251 120" fill="none" stroke="#9f948d" stroke-width="2"/>
+</g>
+<g class="seq-5">
 <path class="s-dim" d="M312 64L280 118" fill="none" stroke="#9f948d" stroke-width="2" />
 <path class="s-dim" d="M312 64L344 118" fill="none" stroke="#9f948d" stroke-width="2" />
 <path class="s-dim" d="M344 118L320 172" fill="none" stroke="#9f948d" stroke-width="2" />
@@ -22,9 +31,14 @@
 <text class="f-text" x="280" y="124" font-size="16" font-weight="700" text-anchor="middle" fill="#fff7ed">x</text>
 <circle class="f-surface s-dim" cx="344" cy="118" r="16" fill="#181a2d" stroke="#9f948d" stroke-width="2"/>
 <text class="f-text" x="344" y="124" font-size="16" font-weight="700" text-anchor="middle" fill="#fff7ed">+</text>
+</g>
+<g class="seq-6">
 <circle class="f-surface s-accent" cx="320" cy="172" r="16" fill="#181a2d" stroke="#ffb15f" stroke-width="2"/>
 <text class="f-text" x="320" y="178" font-size="16" font-weight="700" text-anchor="middle" fill="#fff7ed">a</text>
 <circle class="f-surface s-ok" cx="368" cy="172" r="16" fill="#181a2d" stroke="#69d19d" stroke-width="2"/>
 <text class="f-text" x="368" y="178" font-size="16" font-weight="700" text-anchor="middle" fill="#fff7ed">1</text>
+</g>
+<g class="seq-7">
 <text class="f-dim" x="32" y="196" font-size="13" font-weight="400" text-anchor="start" fill="#9f948d">lexer → parser</text>
+</g>
 </svg>

@@ -1,13 +1,16 @@
 ﻿<script>
 	// @ts-nocheck
 	import { onMount } from 'svelte';
-	import { ArrowRight, CheckCircle2, Circle, Code2, Download, Lock, Map, Route, Sparkles, Upload } from '@lucide/svelte';
+	import { ArrowRight, CheckCircle2, Circle, Code2, Download, GraduationCap, Info, Lock, Map, Route, Sparkles, Upload } from '@lucide/svelte';
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { getProgress } from '$lib/utils/progress.js';
+	import { isAdvancedCourse } from '$lib/roadmap.js';
+	import { reveal } from '$lib/utils/motion.js';
 	import { downloadLearningSnapshot, importLearningSnapshot } from '$lib/utils/local-data.js';
 
 	let { data } = $props();
-	const { courses, tracks, skillMatrix } = data;
+	const { courses, tracks, skillMatrix, advanced } = data;
+	const beginnerCourses = courses.filter((c) => !isAdvancedCourse(c.id));
 
 	let completedByCourse = $state({});
 	let importMessage = $state('');
@@ -21,6 +24,12 @@
 		for (const course of courses) next[course.id] = getProgress(course.id).size;
 		completedByCourse = next;
 	}
+
+	// The beginner path is a recommendation, never a gate: this only changes the wording of the note.
+	let beginnerDone = $derived(
+		advanced.recommended.length > 0 &&
+			advanced.recommended.every((c) => c.lessonCount > 0 && (completedByCourse[c.id] ?? 0) >= c.lessonCount)
+	);
 
 	function trackProgress(track) {
 		const complete = track.courses.reduce((sum, course) => sum + (completedByCourse[course.id] ?? 0), 0);
@@ -68,8 +77,8 @@
 	{/if}
 
 	<section class="timeline" aria-label="Roadmap tracks">
-		{#each tracks as track}
-			<article class="timeline-item">
+		{#each tracks as track, i}
+			<article class="timeline-item" use:reveal={{ index: i }}>
 				<div class="rail">
 					<span>{track.order}</span>
 				</div>
@@ -105,11 +114,51 @@
 	<section class="catalog-section">
 		<div class="section-title">
 			<span class="eyebrow"><Sparkles size={15} /> Course catalog</span>
-			<h2>Available now</h2>
+			<h2>Beginner courses</h2>
 		</div>
 		<div class="course-grid">
-			{#each courses as course}
-				<CourseCard {course} completed={completedByCourse[course.id] ?? 0} />
+			{#each beginnerCourses as course, i}
+				<div class="card-slot" use:reveal={{ index: i }}>
+					<CourseCard {course} completed={completedByCourse[course.id] ?? 0} />
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section id="advanced" class="advanced-section" aria-labelledby="advanced-title">
+		<div class="section-title advanced-title">
+			<div>
+				<span class="eyebrow"><GraduationCap size={15} /> {advanced.title}</span>
+				<h2 id="advanced-title">{advanced.level} Go under the hood.</h2>
+				<p>{advanced.subtitle}</p>
+			</div>
+			<strong class="advanced-pct">{trackProgress(advanced)}%</strong>
+		</div>
+
+		<div class="soft-note" class:ready={beginnerDone} role="note">
+			{#if beginnerDone}
+				<CheckCircle2 size={18} />
+				<p>{advanced.readyNote}</p>
+			{:else}
+				<Info size={18} />
+				<p>
+					{advanced.note}
+					<span class="note-links">
+						{#each advanced.recommended as rec}
+							<a href="/courses/{rec.id}">{rec.title} <ArrowRight size={13} /></a>
+						{/each}
+					</span>
+				</p>
+			{/if}
+		</div>
+
+		<div class="meter advanced-meter" aria-hidden="true"><span style={`transform:scaleX(${trackProgress(advanced) / 100})`}></span></div>
+
+		<div class="course-grid">
+			{#each advanced.courses as course, i}
+				<div class="card-slot" use:reveal={{ index: i }}>
+					<CourseCard {course} completed={completedByCourse[course.id] ?? 0} />
+				</div>
 			{/each}
 		</div>
 	</section>
@@ -292,7 +341,63 @@
 	}
 
 	.catalog-section,
-	.skill-board { padding: 1.25rem; }
+	.skill-board,
+	.advanced-section { padding: 1.25rem; }
+
+	.card-slot { display: grid; }
+
+	/* Visually separate from the beginner path: cooler edge, its own header. */
+	.advanced-section {
+		border: 1px solid color-mix(in srgb, var(--info) 35%, var(--border));
+		border-radius: 18px;
+		background:
+			linear-gradient(160deg, color-mix(in srgb, var(--info) 8%, transparent), transparent 45%),
+			var(--surface);
+		box-shadow: var(--base-shadow);
+		scroll-margin-top: 5rem;
+	}
+	.advanced-section .eyebrow { color: var(--info); }
+	.advanced-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+	.advanced-title p { margin: 0.4rem 0 0; max-width: 640px; color: var(--text-muted); line-height: 1.6; }
+	.advanced-pct { color: var(--info); font-size: 1.35rem; }
+
+	.soft-note {
+		display: flex;
+		gap: 0.65rem;
+		align-items: flex-start;
+		margin: 0 0 1rem;
+		padding: 0.8rem 1rem;
+		border-radius: 14px;
+		border: 1px solid color-mix(in srgb, var(--info) 30%, var(--border));
+		background: var(--info-muted);
+		color: var(--info);
+	}
+	.soft-note p { margin: 0; color: var(--text-muted); line-height: 1.6; }
+	.soft-note.ready { border-color: color-mix(in srgb, var(--success) 35%, var(--border)); background: var(--success-muted); color: var(--success); }
+	.soft-note :global(svg) { flex-shrink: 0; margin-top: 0.2rem; }
+	.note-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+	.note-links a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		min-height: 44px;
+		padding: 0 0.85rem;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--surface-elevated);
+		color: var(--text);
+		font-weight: 800;
+		text-decoration: none;
+	}
+	.note-links a:hover { border-color: var(--info); color: var(--info); }
+
+	.advanced-meter span {
+		background: var(--info);
+		transform-origin: left;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.advanced-meter span { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+	}
 	.section-title { margin-bottom: 1rem; }
 	.section-title h2 { margin: 0.35rem 0 0; font-size: 1.7rem; }
 
@@ -314,7 +419,8 @@
 
 	@media (max-width: 620px) {
 		.courses-page { padding: 0 0 4rem; }
-		.page-hero, .catalog-section, .skill-board, .track-panel { border-radius: 0; }
+		.page-hero, .catalog-section, .skill-board, .track-panel, .advanced-section { border-radius: 0; }
+		.advanced-title { flex-direction: column; }
 		.timeline-item { grid-template-columns: 40px 1fr; gap: 0.5rem; }
 		.rail span { width: 36px; height: 36px; }
 		.track-top { flex-direction: column; }

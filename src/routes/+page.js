@@ -1,5 +1,5 @@
 import { getCourseSummaries } from '$lib/courses.js';
-import { buildRoadmapTracks, PLATFORM_FEATURES, SKILL_MATRIX } from '$lib/roadmap.js';
+import { buildAdvancedTrack, buildRoadmapTracks, PLATFORM_FEATURES, SKILL_MATRIX } from '$lib/roadmap.js';
 
 export function load() {
 	const courses = getCourseSummaries();
@@ -10,6 +10,7 @@ export function load() {
 	return {
 		courses,
 		tracks: buildRoadmapTracks(courses),
+		advanced: buildAdvancedTrack(courses),
 		features: PLATFORM_FEATURES,
 		skillMatrix: SKILL_MATRIX,
 		stats: { courses: courses.length, lessons, challenges, totalXp }

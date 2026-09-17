@@ -57,7 +57,7 @@
 			</p>
 		</div>
 		{#if course.coverArt}
-			<CourseArt art={course.coverArt} alt={course.title} class="cover" />
+			<CourseArt art={course.coverArt} alt={course.title} class="cover" animate replay />
 		{/if}
 	</div>
 

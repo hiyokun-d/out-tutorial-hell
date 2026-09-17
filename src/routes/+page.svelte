@@ -24,7 +24,7 @@
 	import TextMarquee from '$lib/components/TextMarquee.svelte';
 
 	let { data } = $props();
-	const { tracks, courses, features, stats } = data;
+	const { tracks, courses, features, stats, advanced } = data;
 
 	const FIRST_LESSON = '/courses/getting-started/1';
 
@@ -837,6 +837,17 @@
 				</article>
 			{/each}
 		</div>
+
+		<!-- Advanced track: separate from the beginner line above, never locked -->
+		<a
+			href="/courses#advanced"
+			class="advanced-strip jersey-15-regular mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-sky-400/20 bg-sky-400/[0.04] px-5 py-4 text-white/70 no-underline transition-colors duration-200 hover:border-sky-400/45 hover:text-white"
+		>
+			<span class="text-sky-300 text-sm tracking-[0.2em] uppercase">{advanced.level}</span>
+			<span class="text-lg">Advanced track — {advanced.courses.map((c) => c.title).join(' · ')}</span>
+			<span class="text-sm text-white/40">Recommended after the beginner path. Nothing is locked.</span>
+			<ArrowRight size={16} class="ml-auto" />
+		</a>
 
 		<!-- See full roadmap button -->
 		<div class="mt-10 flex justify-center">

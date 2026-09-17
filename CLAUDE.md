@@ -167,11 +167,21 @@ Each draft course has one THEORY + one INTERACTIVE lesson, ending in
 `> **Draft.** Full notes pending.` Only `compilation-techniques` lesson 1
 has a challenge.
 
-The landing page teases Python, React and Backend as what's next. The five
-draft courses are semester-5 CS material, outside that line. **Their
-positioning (separate advanced track / updated teasers / gating) is an
-open decision** — see Open questions. Until it's made, they show in the
-plain `/courses` catalog and nowhere in `roadmap.js`.
+**Positioning (decided 2026-09): a separate Advanced track, a soft note,
+no lock.**
+
+- `ADVANCED_TRACK` in `src/lib/roadmap.js` lists the course ids and holds
+  the note copy. Use `isAdvancedCourse(id)` and `buildAdvancedTrack(courses)`.
+- `/courses` shows the beginner timeline and "Beginner courses" first, then
+  a visually separate `#advanced` section (info-blue edge). Its soft note
+  links to the beginner courses, and switches to a "you finished the beginner
+  path" message once both are complete.
+- An advanced course page shows the same soft note under the header until
+  the beginner path is complete, with an "I already code — start here" link.
+- The landing page keeps the Python / React / Backend teasers and adds one
+  "Already code? Advanced track" strip linking to `/courses#advanced`.
+- **Never gate these courses.** The completion check only reads the
+  existing `progress:<slug>` keys; no schema change.
 
 ## Gamification
 
@@ -223,14 +233,13 @@ Answered (2026-09):
 
 - ~~Is `backend/` live?~~ Removed in `30b6ba0`. The `/api` proxy is dead
   config.
+- ~~Where do the CS courses go?~~ A separate Advanced track with a soft
+  note and no lock. See Shipped courses.
 - ~~Does the markdown renderer sanitize?~~ No. `marked` output goes
   straight to `{@html}`. Figures still go through `assets/` + `figure:`.
 
 Still open:
 
-- **Positioning of the five draft courses** (orders 3–7). Options on the
-  table: a separate Advanced track, updated roadmap teasers, or gating
-  behind the beginner courses. Undecided.
 - No test suite exists. Is one wanted?
 - Light mode: the rule says both modes must work, but no light palette or
   toggle exists. Build one, or relax the rule?
@@ -395,6 +404,47 @@ activity lifecycle with an `onRestart` loop). Embedded Systems uses
 
 **If a course needs a fifth primitive, add it to the shared set.** Do not
 add a one-off component inside a course folder.
+
+### Motion that explains
+
+Animation here exists to show *what just happened*, not to decorate.
+Shared pieces:
+
+- `src/lib/utils/motion.js`:
+  - `prefersReducedMotion()`.
+  - `motionState.hydrated`, set in `+layout.svelte` after the first mount.
+    Read it **synchronously at mount**: observer callbacks fire after the
+    layout has already flipped it.
+  - The `use:reveal={{ index }}` action fades content in as it scrolls into
+    view. It never hides content that is already on screen while the page
+    hydrates, because that would blink.
+- **Course art:** tag SVG groups `seq-1`…`seq-8` in the order the mechanism
+  happens, plus `seq-key` on the moment that matters. `CourseArt`'s
+  `animate` prop plays the groups when the art scrolls into view (or at once
+  after client-side navigation); `replay` adds a 44px Play/Replay button.
+  Cards use `animate`; headers and lesson figures use both.
+- **Page transitions:** a 220ms cross-fade via the View Transitions API
+  (`onNavigate` in `+layout.svelte`).
+- **StateMachine:**
+  - A token travels along the arrow just taken (Web Animations, transform
+    only).
+  - The arrow the *next* symbol will take is dashed and pulsing.
+  - Arrows out of the current state are tinted.
+  - Event buttons that are possible from the current state are highlighted.
+    Impossible ones stay clickable and explain why.
+  - Run all walks at 520ms per step.
+  - Errors nudge.
+  - A first-use hint disappears after the first move.
+- **Stepper:** the panel slides in from the side you moved toward, and the
+  active dot grows.
+- **MemoryView:** the old value lifts away, struck through, as the new one
+  drops in.
+- **Timeline:** the cursor glides (transform on a full-width layer), the
+  event at the current time pings, and new log lines slide in. A first-use
+  hint disappears once you move.
+
+Everything above is wrapped in `prefers-reduced-motion: no-preference`.
+Under reduced motion there are no Play buttons and Run all is instant.
 
 ### Widget rules
 

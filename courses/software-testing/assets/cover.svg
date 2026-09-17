@@ -2,26 +2,36 @@
 <title>Software Testing cover</title>
 <desc>A number line for an input that is valid from 12 to 24. Below 12 and above 24 are invalid partitions. Equivalence partitioning picks one value from each partition: 10, 18 and 27, none of them on an edge. Boundary value analysis picks 11, 12, 13, 23, 24 and 25, right where off-by-one bugs live.</desc>
 <rect class="f-bg s-line" x="0.5" y="0.5" width="399" height="224" rx="18" fill="#0b0d1c" stroke="#3b2f28"/>
+<g class="seq-1">
+<path class="s-dim" d="M70 155H370" fill="none" stroke="#9f948d" stroke-width="2" />
+</g>
+<g class="seq-2">
 <rect class="f-err" x="70" y="70" width="115" height="40" rx="6" fill="#ff6f73" fill-opacity="0.22"/>
 <rect class="f-ok" x="185" y="70" width="130" height="40" fill="#69d19d" fill-opacity="0.22"/>
 <rect class="f-err" x="315" y="70" width="55" height="40" rx="6" fill="#ff6f73" fill-opacity="0.22"/>
 <text class="f-err" x="127" y="95" font-size="13" font-weight="400" text-anchor="middle" fill="#ff6f73">invalid</text>
 <text class="f-ok" x="250" y="95" font-size="13" font-weight="700" text-anchor="middle" fill="#69d19d">valid</text>
 <text class="f-err" x="342" y="95" font-size="11" font-weight="400" text-anchor="middle" fill="#ff6f73">invalid</text>
-<text class="f-accent" x="190" y="134" font-size="14" font-weight="700" text-anchor="middle" fill="#ffb15f">12</text>
-<text class="f-accent" x="310" y="134" font-size="14" font-weight="700" text-anchor="middle" fill="#ffb15f">24</text>
+</g>
+<g class="seq-3">
 <path class="s-dim" d="M185 110V195" fill="none" stroke="#9f948d" stroke-width="1" stroke-dasharray="3 4"/>
 <path class="s-dim" d="M315 110V195" fill="none" stroke="#9f948d" stroke-width="1" stroke-dasharray="3 4"/>
-<path class="s-dim" d="M70 155H370" fill="none" stroke="#9f948d" stroke-width="2" />
-<text class="f-accent" x="24" y="160" font-size="13" font-weight="700" text-anchor="start" fill="#ffb15f">BVA</text>
+<text class="f-accent" x="190" y="134" font-size="14" font-weight="700" text-anchor="middle" fill="#ffb15f">12</text>
+<text class="f-accent" x="310" y="134" font-size="14" font-weight="700" text-anchor="middle" fill="#ffb15f">24</text>
+</g>
+<g class="seq-4">
 <text class="f-dim" x="24" y="195" font-size="13" font-weight="700" text-anchor="start" fill="#9f948d">EP</text>
+<circle class="f-bg s-dim" cx="170" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
+<circle class="f-bg s-dim" cx="250" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
+<circle class="f-bg s-dim" cx="340" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
+</g>
+<g class="seq-5 seq-key">
+<text class="f-accent" x="24" y="160" font-size="13" font-weight="700" text-anchor="start" fill="#ffb15f">BVA</text>
 <circle class="f-accent" cx="180" cy="155" r="5" fill="#ffb15f"/>
 <circle class="f-accent" cx="190" cy="155" r="5" fill="#ffb15f"/>
 <circle class="f-accent" cx="200" cy="155" r="5" fill="#ffb15f"/>
 <circle class="f-accent" cx="300" cy="155" r="5" fill="#ffb15f"/>
 <circle class="f-accent" cx="310" cy="155" r="5" fill="#ffb15f"/>
 <circle class="f-accent" cx="320" cy="155" r="5" fill="#ffb15f"/>
-<circle class="f-bg s-dim" cx="170" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
-<circle class="f-bg s-dim" cx="250" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
-<circle class="f-bg s-dim" cx="340" cy="190" r="6" fill="#0b0d1c" stroke="#9f948d" stroke-width="2"/>
+</g>
 </svg>

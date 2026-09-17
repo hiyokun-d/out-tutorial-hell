@@ -20,6 +20,40 @@ export const ROADMAP_TRACKS = [
 	}
 ];
 
+// A separate track for people who already code. Never locked — the beginner
+// path is a recommendation, shown as a soft note, not a gate.
+export const ADVANCED_TRACK = {
+	id: 'advanced',
+	title: 'Advanced track',
+	subtitle: 'How the machinery under your code works — compilers, operating systems, testing, embedded C and Android.',
+	courseIds: ['compilation-techniques', 'operating-systems', 'software-testing', 'embedded-systems', 'mobile-android'],
+	recommendedFirst: ['getting-started', 'web-development'],
+	note: 'Built for people who can already read a loop and write a function. New to code? Start with Getting Started and Web Development — nothing here is locked, but these courses assume that ground.',
+	readyNote: 'You finished the beginner path. This is where it goes next.',
+	level: 'Already code?'
+};
+
+/** @param {string} courseId */
+export function isAdvancedCourse(courseId) {
+	return ADVANCED_TRACK.courseIds.includes(courseId);
+}
+
+/**
+ * @param {Array<{ id: string, title?: string, lessonCount?: number, totalXp?: number }>} courses
+ */
+export function buildAdvancedTrack(courses) {
+	const byId = new Map(courses.map((course) => [course.id, course]));
+	const pick = (/** @type {string[]} */ ids) => ids.map((id) => byId.get(id)).filter((c) => c !== undefined);
+	const trackCourses = pick(ADVANCED_TRACK.courseIds);
+	return {
+		...ADVANCED_TRACK,
+		courses: trackCourses,
+		recommended: pick(ADVANCED_TRACK.recommendedFirst).map((c) => ({ id: c.id, title: c.title, lessonCount: c.lessonCount ?? 0 })),
+		lessonCount: trackCourses.reduce((sum, course) => sum + (course.lessonCount ?? 0), 0),
+		totalXp: trackCourses.reduce((sum, course) => sum + (course.totalXp ?? 0), 0)
+	};
+}
+
 export const PLATFORM_FEATURES = [
 	{
 		title: 'No account wall',

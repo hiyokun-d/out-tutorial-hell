@@ -1,13 +1,24 @@
 <script>
 	// @ts-nocheck
 	import CourseHeader from '$lib/components/CourseHeader.svelte';
-	import { ArrowLeft, BookOpen, CheckCircle2, Code2, FlaskConical, Play, Route, ScrollText, Target } from '@lucide/svelte';
+	import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Code2, FlaskConical, Info, MousePointerClick, Play, Route, ScrollText, Target } from '@lucide/svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { goto } from '$app/navigation';
+	import { reveal } from '$lib/utils/motion.js';
 
 	let { data } = $props();
 	let course = $derived(data.course);
 	let lessons = $derived(data.lessons);
+	let advanced = $derived(data.advanced);
+
+	// Soft note only: advanced courses are never locked. Hidden once the beginner path is done.
+	let beginnerDone = $state(true);
+	$effect(() => {
+		if (!advanced) return;
+		beginnerDone = advanced.recommended.every(
+			(/** @type {{ id: string, lessonCount: number }} */ c) => c.lessonCount > 0 && getProgress(c.id).size >= c.lessonCount
+		);
+	});
 
 	let challengeCount = $derived(lessons.filter((lesson) => lesson.challenge).length);
 	let totalXp = $derived(lessons.reduce((sum, lesson) => sum + (lesson.xpReward ?? 10), 0));
@@ -73,6 +84,7 @@
 
 	function typeLabel(lesson) {
 		if (lesson.challenge) return 'Lab';
+		if (lesson.type === 'INTERACTIVE') return 'Interactive';
 		return lesson.type === 'PROJECT' ? 'Project' : lesson.type === 'WALKTHROUGH' ? 'Walkthrough' : 'Lesson';
 	}
 </script>
@@ -83,6 +95,22 @@
 	<a href="/courses" class="back"><ArrowLeft size={16} /> Roadmap</a>
 
 	<CourseHeader {course} {lessons} courseId={course.id} />
+
+	{#if advanced && !beginnerDone}
+		<aside class="advanced-note" role="note">
+			<Info size={18} />
+			<div>
+				<strong>Part of the advanced track.</strong>
+				<p>{advanced.note}</p>
+				<div class="advanced-note-links">
+					{#each advanced.recommended as rec}
+						<a href="/courses/{rec.id}">{rec.title} <ArrowRight size={13} /></a>
+					{/each}
+					<a href="#course-path" class="stay">I already code — start here</a>
+				</div>
+			</div>
+		</aside>
+	{/if}
 
 	<section class="course-command" aria-label="Course command center">
 		<div>
@@ -101,7 +129,7 @@
 		<div><CheckCircle2 size={18} /><strong>{totalXp}</strong><span>total XP</span></div>
 	</section>
 
-	<section class="path-section">
+	<section class="path-section" id="course-path">
 		<div class="section-title">
 			<span><Route size={16} /> Visual roadmap</span>
 			<p>Follow the connected path. Every node opens a lesson, lab, walkthrough, or project.</p>
@@ -110,7 +138,7 @@
 			{#each lessonGroups as group, groupIndex}
 				{@const moduleNumber = String(groupIndex + 1).padStart(2, '0')}
 				{@const pct = Math.round((group.completed / group.lessons.length) * 100)}
-				<section class="module-track" aria-labelledby={`module-${groupIndex}`}>
+				<section class="module-track" aria-labelledby={`module-${groupIndex}`} use:reveal={{ index: groupIndex }}>
 					<div class="module-card">
 						<div class="module-kicker">
 							<span class="module-number">Module {moduleNumber}</span>
@@ -150,6 +178,8 @@
 								<span class="node-status" aria-hidden="true">
 									{#if lesson.challenge}
 										<FlaskConical size={15} />
+									{:else if lesson.type === 'INTERACTIVE'}
+										<MousePointerClick size={15} />
 									{:else}
 										<ScrollText size={15} />
 									{/if}
@@ -618,6 +648,44 @@
 		.roadmap-nodes { grid-template-columns: 1fr; padding-top: 0; }
 		.roadmap-node:nth-child(odd),
 		.roadmap-node:nth-child(even) { grid-column: 1; }
+	}
+
+	.advanced-note {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		margin-bottom: 1rem;
+		padding: 1rem 1.1rem;
+		border-radius: 18px;
+		border: 1px solid color-mix(in srgb, var(--info) 32%, var(--border));
+		background: var(--info-muted);
+		color: var(--info);
+	}
+	.advanced-note :global(svg) { flex-shrink: 0; margin-top: 0.15rem; }
+	.advanced-note strong { color: var(--text); }
+	.advanced-note p { margin: 0.25rem 0 0.6rem; color: var(--text-muted); line-height: 1.6; }
+	.advanced-note-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+	.advanced-note-links a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		min-height: 44px;
+		padding: 0 0.9rem;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--surface-elevated);
+		color: var(--text);
+		font-weight: 800;
+		text-decoration: none;
+	}
+	.advanced-note-links a:hover { border-color: var(--info); color: var(--info); }
+	.advanced-note-links a.stay { background: transparent; color: var(--text-muted); }
+	@media (prefers-reduced-motion: no-preference) {
+		.advanced-note { animation: note-in 0.4s ease-out both; }
+	}
+	@keyframes note-in {
+		from { opacity: 0; transform: translateY(-6px); }
+		to { opacity: 1; transform: none; }
 	}
 </style>
 

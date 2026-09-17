@@ -41,6 +41,11 @@
 		return `${((t - start) / (end - start)) * 100}%`;
 	}
 
+	/** Fraction 0–1, for transform-based positioning. @param {number} t */
+	function frac(t) {
+		return (t - start) / (end - start);
+	}
+
 	/** @param {string} id */
 	function trackLabel(id) {
 		return tracks.find((t) => t.id === id)?.label ?? id;
@@ -68,9 +73,11 @@
 						</span>
 					{/each}
 					{#each events.filter((e) => e.track === track.id) as e}
-						<span class="dot {e.tone ?? 'accent'}" class:future={e.t > now} style="left:{pct(e.t)}"></span>
+						<span class="dot {e.tone ?? 'accent'}" class:future={e.t > now} style="left:{pct(e.t)}">
+							{#if e.t === now}{#key index}<span class="ping"></span>{/key}{/if}
+						</span>
 					{/each}
-					<span class="cursor" style="left:{pct(now)}"></span>
+					<span class="cursor" style="transform: translateX({frac(now) * 100}%)"></span>
 				</div>
 			</div>
 		{/each}
@@ -103,10 +110,14 @@
 		</div>
 	</div>
 
-	<p class="w-note {stop.tone ?? ''}">{stop.caption}</p>
+	{#if index === 0}
+		<p class="hint">Drag the slider or press <strong>Next</strong> to move through time. Watch the white line.</p>
+	{/if}
+
+	{#key index}<p class="w-note caption {stop.tone ?? ''}">{stop.caption}</p>{/key}
 
 	<ol class="log">
-		{#each happened as e}
+		{#each happened as e (`${e.t}-${e.track}-${e.label}`)}
 			<li class="{e.tone ?? ''}"><span class="when">{e.t}{unit}</span> <span class="who">{trackLabel(e.track)}</span> {e.label}</li>
 		{/each}
 	</ol>
@@ -174,14 +185,35 @@
 
 	.future { opacity: 0.18; }
 
+	/* Full-width layer moved with transform, so the line glides instead of jumping. */
 	.cursor {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+	.cursor::before {
+		content: '';
 		position: absolute;
 		top: 0;
 		bottom: 0;
+		left: -1px;
 		width: 2px;
-		margin-left: -1px;
 		background: var(--text);
 	}
+
+	.ping {
+		position: absolute;
+		inset: -2px;
+		border-radius: 999px;
+		border: 2px solid currentColor;
+		opacity: 0;
+	}
+	.dot { color: var(--accent); }
+	.dot.ok { color: var(--success); }
+	.dot.bad { color: var(--error); }
+
+	.hint { margin: 0.6rem 0 0; font-size: 0.88rem; color: var(--text-dim); }
+	.hint strong { color: var(--accent); }
 
 	.axis { position: relative; height: 1.2rem; }
 	.tick {
@@ -216,7 +248,21 @@
 	.log li.ok { color: var(--success); }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.span, .dot { transition: opacity 0.3s ease; }
+		.span, .dot { transition: opacity 0.35s ease; }
+		.cursor { transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+		.ping { animation: ping 0.9s ease-out 0.35s; }
+		.log li { animation: log-in 0.35s ease-out both; }
+		.caption { animation: log-in 0.3s ease-out; }
+	}
+
+	@keyframes ping {
+		from { opacity: 0.9; transform: scale(1); }
+		to { opacity: 0; transform: scale(2.6); }
+	}
+
+	@keyframes log-in {
+		from { opacity: 0; transform: translateY(6px); }
+		to { opacity: 1; transform: none; }
 	}
 
 	@media (max-width: 480px) {

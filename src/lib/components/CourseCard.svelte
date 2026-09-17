@@ -23,7 +23,7 @@
 
 <a href="/courses/{course.id}" class="course-card">
 	{#if course.coverArt}
-		<CourseArt art={course.coverArt} decorative class="card-cover" />
+		<CourseArt art={course.coverArt} decorative class="card-cover" animate />
 	{:else}
 		<div class="icon-wrap">
 			<IconComponent size={25} strokeWidth={2.2} class="course-icon" />

@@ -1,22 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 260" width="680" height="260" role="img" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
 <title>What the CPU does when an interrupt arrives</title>
 <desc>Six steps in order. One: the CPU finishes the instruction it is on; the interrupt signal arrives here, drawn as a dashed arrow. Two: it saves its state, the program counter and registers. Three: it finds the handler address in the vector table. Four: it runs the handler. Five: it restores the saved state. Six: it resumes the interrupted program at the next instruction, as if nothing happened.</desc>
+<g class="seq-1">
 <rect class="f-surface s-accent" x="40" y="40" width="180" height="64" rx="12" fill="#181a2d" stroke="#ffb15f" stroke-width="2.5"/><text class="f-text" x="130" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Finish step</text>
-<rect class="f-surface s-err" x="250" y="40" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="340" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Save state</text>
-<rect class="f-surface s-err" x="460" y="40" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="550" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Find vector</text>
-<rect class="f-surface s-accent" x="40" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ffb15f" stroke-width="2.5"/><text class="f-text" x="130" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Resume</text>
-<rect class="f-surface s-err" x="250" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="340" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Restore state</text>
-<rect class="f-surface s-err" x="460" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="550" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Run handler</text>
-<path class="s-err" d="M220 72H250" fill="none" stroke="#ff6f73" stroke-width="3" />
-<path class="s-err" d="M243 67L250 72L243 77" fill="none" stroke="#ff6f73" stroke-width="2"/>
-<path class="s-err" d="M430 72H460" fill="none" stroke="#ff6f73" stroke-width="3" />
-<path class="s-err" d="M453 67L460 72L453 77" fill="none" stroke="#ff6f73" stroke-width="2"/>
-<path class="s-err" d="M550 104V176" fill="none" stroke="#ff6f73" stroke-width="3" />
-<path class="s-err" d="M545 169L550 176L555 169" fill="none" stroke="#ff6f73" stroke-width="2"/>
-<path class="s-err" d="M460 208H430" fill="none" stroke="#ff6f73" stroke-width="3" />
-<path class="s-err" d="M437 203L430 208L437 213" fill="none" stroke="#ff6f73" stroke-width="2"/>
-<path class="s-err" d="M250 208H220" fill="none" stroke="#ff6f73" stroke-width="3" />
-<path class="s-err" d="M227 203L220 208L227 213" fill="none" stroke="#ff6f73" stroke-width="2"/>
+</g>
+<g class="seq-2 seq-key">
 <path class="s-err" d="M235 8V58" fill="none" stroke="#ff6f73" stroke-width="3" stroke-dasharray="6 5"/>
 <path class="s-err" d="M230 55L235 62L240 55" fill="none" stroke="#ff6f73" stroke-width="2"/>
+</g>
+<g class="seq-3">
+<path class="s-err" d="M220 72H250" fill="none" stroke="#ff6f73" stroke-width="3" />
+<path class="s-err" d="M243 67L250 72L243 77" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<rect class="f-surface s-err" x="250" y="40" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="340" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Save state</text>
+</g>
+<g class="seq-4">
+<path class="s-err" d="M430 72H460" fill="none" stroke="#ff6f73" stroke-width="3" />
+<path class="s-err" d="M453 67L460 72L453 77" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<rect class="f-surface s-err" x="460" y="40" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="550" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Find vector</text>
+</g>
+<g class="seq-5">
+<path class="s-err" d="M550 104V176" fill="none" stroke="#ff6f73" stroke-width="3" />
+<path class="s-err" d="M545 169L550 176L555 169" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<rect class="f-surface s-err" x="460" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="550" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Run handler</text>
+</g>
+<g class="seq-6">
+<path class="s-err" d="M460 208H430" fill="none" stroke="#ff6f73" stroke-width="3" />
+<path class="s-err" d="M437 203L430 208L437 213" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<rect class="f-surface s-err" x="250" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ff6f73" stroke-width="2.5"/><text class="f-text" x="340" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Restore state</text>
+</g>
+<g class="seq-7">
+<path class="s-err" d="M250 208H220" fill="none" stroke="#ff6f73" stroke-width="3" />
+<path class="s-err" d="M227 203L220 208L227 213" fill="none" stroke="#ff6f73" stroke-width="2"/>
+<rect class="f-surface s-accent" x="40" y="176" width="180" height="64" rx="12" fill="#181a2d" stroke="#ffb15f" stroke-width="2.5"/><text class="f-text" x="130" y="216" font-size="22" font-weight="700" text-anchor="middle" fill="#fff7ed">Resume</text>
+</g>
 </svg>

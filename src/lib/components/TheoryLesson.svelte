@@ -324,9 +324,9 @@
 		<article class="content">
 			{#if lesson.figureArt}
 				<figure class="lesson-figure">
-					<CourseArt art={lesson.figureArt} alt={lesson.title} class={lesson.figureArtNarrow ? 'wide-only' : ''} />
+					<CourseArt art={lesson.figureArt} alt={lesson.title} class={lesson.figureArtNarrow ? 'wide-only' : ''} animate replay />
 					{#if lesson.figureArtNarrow}
-						<CourseArt art={lesson.figureArtNarrow} alt={lesson.title} class="narrow-only" />
+						<CourseArt art={lesson.figureArtNarrow} alt={lesson.title} class="narrow-only" animate replay />
 					{/if}
 				</figure>
 			{/if}
