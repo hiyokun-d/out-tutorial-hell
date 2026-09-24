@@ -5,6 +5,10 @@
 	 * the non-drag alternative to the slider.
 	 *
 	 * Built from HTML, not SVG, so labels stay readable at any width.
+ *
+ * `index` is bindable, so a composing widget can drive the scrubber. `minWidth`
+ * (e.g. "34rem") keeps dense charts legible: the chart scrolls sideways inside
+ * its own container instead of squeezing.
 	 *
 	 * @typedef {'ok' | 'bad' | 'accent' | 'dim'} Tone
 	 * @typedef {{ id: string, label: string }} Track
@@ -16,14 +20,17 @@
 	/**
 	 * @type {{
 	 *   title?: string, start?: number, end: number, unit?: string, ticks?: number[],
-	 *   tracks: Track[], spans?: Span[], events?: TimelineEvent[], stops: Stop[]
+	 *   tracks: Track[], spans?: Span[], events?: TimelineEvent[], stops: Stop[],
+ *   index?: number, minWidth?: string, logSpans?: boolean
 	 * }}
 	 */
-	let { title = 'Timeline', start = 0, end, unit = '', ticks = [], tracks, spans = [], events = [], stops } = $props();
+	let {
+		title = 'Timeline', start = 0, end, unit = '', ticks = [], tracks, spans = [], events = [], stops,
+		index = $bindable(0), minWidth = '', logSpans = true
+	} = $props();
 
 	const uid = $props.id();
 
-	let index = $state(0);
 	// Reset jumps straight back: the cursor and caption don't animate the unwind.
 	let snap = $state(false);
 
@@ -33,12 +40,14 @@
 		requestAnimationFrame(() => requestAnimationFrame(() => (snap = false)));
 	}
 
-	let now = $derived(stops[index].t);
-	let stop = $derived(stops[index]);
+	// Clamped: a composing widget may swap in shorter data while index is still high.
+	let at = $derived(Math.max(0, Math.min(index, stops.length - 1)));
+	let now = $derived(stops[at].t);
+	let stop = $derived(stops[at]);
 	let happened = $derived(
 		[
 			...events.map((e) => ({ t: e.t, track: e.track, label: e.label, tone: e.tone })),
-			...spans.map((s) => ({ t: s.from, track: s.track, label: s.label, tone: s.tone }))
+			...(logSpans ? spans : []).map((s) => ({ t: s.from, track: s.track, label: s.label, tone: s.tone }))
 		]
 			.filter((e) => e.t <= now)
 			.sort((a, b) => a.t - b.t)
@@ -66,7 +75,8 @@
 		<button class="w-btn" onclick={reset}>Reset</button>
 	</div>
 
-	<div class="chart">
+	<div class="chart-scroll">
+	<div class="chart" style:min-width={minWidth || null}>
 		{#each tracks as track}
 			<div class="row">
 				<span class="track-name">{track.label}</span>
@@ -98,6 +108,7 @@
 				{/each}
 			</div>
 		</div>
+	</div>
 	</div>
 
 	<div class="scrub">
@@ -132,6 +143,7 @@
 </section>
 
 <style>
+	.chart-scroll { overflow-x: auto; }
 	.chart { display: grid; gap: 0.5rem; }
 
 	.row {

@@ -10,7 +10,8 @@
 	 * mode "events": input is space-separated event ids, and each event also gets
 	 *                a button that fires it directly (process state models).
 	 *
-	 * @typedef {{ id: string, label: string, x: number, y: number, accept?: boolean, note?: string }} Node
+	 * @typedef {{ id: string, label: string, x: number, y: number, accept?: boolean, note?: string, tint?: string }} Node
+	 * `tint` is a CSS colour (use a theme variable, e.g. "var(--info)") for grouping states.
 	 * @typedef {{ from: string, to: string, symbol: string, label?: string, bend?: number, loop?: 'top' | 'bottom', note?: string }} Edge
 	 * @typedef {{ id: string, label: string }} EventDef
 	 */
@@ -311,7 +312,7 @@
 
 			{#each nodes as n}
 				{@const s = halfSize(n)}
-				<g class="node" class:on={n.id === current}>
+				<g class="node" class:on={n.id === current} class:tinted={!!n.tint} style:--tint={n.tint || null}>
 					{#if mode === 'chars'}
 						<circle cx={n.x} cy={n.y} r={R} />
 						{#if n.accept}<circle class="inner" cx={n.x} cy={n.y} r={R - 5} />{/if}
@@ -448,6 +449,11 @@
 	.node circle,
 	.node rect { fill: var(--surface-elevated); stroke: var(--text-dim); stroke-width: 1.6; }
 	.node .inner { fill: none; }
+	.node.tinted circle:not(.inner),
+	.node.tinted rect:not(.inner) { stroke: var(--tint); stroke-width: 2.4; fill: color-mix(in srgb, var(--tint) 16%, var(--surface-elevated)); }
+	.node.tinted .inner { stroke: var(--tint); }
+	.node.on.tinted circle:not(.inner),
+	.node.on.tinted rect:not(.inner) { stroke: var(--accent); stroke-width: 3; }
 	.node text { fill: var(--text); font-size: 13px; font-weight: 700; }
 	.node.on circle,
 	.node.on rect { stroke: var(--accent); stroke-width: 3; }

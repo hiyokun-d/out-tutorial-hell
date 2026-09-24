@@ -15,12 +15,15 @@
 	 *   next?: string | false
 	 * }} Step
 	 * `next` overrides where Next goes: a step id to loop back, or false to end there.
+ *
+ * `onchange(index, dir)` lets a composing widget react to the current step
+ * (dir is 'fwd', 'back', or 'none' after Reset). It's called before the DOM updates.
 	 */
 
 	/**
-	 * @type {{ title?: string, steps: Step[], wrap?: boolean }}
+	 * @type {{ title?: string, steps: Step[], wrap?: boolean, onchange?: (index: number, dir: 'fwd' | 'back' | 'none') => void }}
 	 */
-	let { title = 'Step through it', steps, wrap = false } = $props();
+	let { title = 'Step through it', steps, wrap = false, onchange } = $props();
 
 	// History instead of a bare index: branches can jump, and Prev should undo the jump.
 	let history = $state([0]);
@@ -49,12 +52,14 @@
 		if (nextIndex === null) return;
 		dir = nextIndex > index ? 'fwd' : 'back';
 		history = [...history, nextIndex];
+		onchange?.(nextIndex, dir);
 	}
 
 	function prev() {
 		if (history.length === 1) return;
 		dir = 'back';
 		history = history.slice(0, -1);
+		onchange?.(history[history.length - 1], dir);
 	}
 
 	/** @param {Branch} branch */
@@ -63,12 +68,14 @@
 		if (target === null) return;
 		dir = target > index ? 'fwd' : 'back';
 		history = [...history, target];
+		onchange?.(target, dir);
 	}
 
 	// Reset is instant: nobody wants to watch the unwind.
 	function reset() {
 		dir = 'none';
 		history = [0];
+		onchange?.(0, dir);
 	}
 </script>
 

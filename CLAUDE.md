@@ -157,15 +157,29 @@ other languages are sent to **Wandbox**.
 | ----- | ---------------------- | ------- | --- | ----- |
 | 1     | getting-started        | 18      | 230 | live |
 | 2     | web-development        | 35      | 550 | live |
-| 3     | compilation-techniques | 2       | 30  | draft |
-| 4     | operating-systems      | 2       | 35  | draft |
-| 5     | software-testing       | 2       | 30  | draft |
-| 6     | embedded-systems       | 2       | 35  | draft |
-| 7     | mobile-android         | 2       | 30  | draft |
+| 3     | compilation-techniques | 4       | 80  | draft |
+| 4     | operating-systems      | 7       | 145 | draft |
+| 5     | software-testing       | 4       | 70  | draft |
+| 6     | embedded-systems       | 4       | 75  | draft |
+| 7     | mobile-android         | 4       | 75  | draft |
 
-Each draft course has one THEORY + one INTERACTIVE lesson, ending in
-`> **Draft.** Full notes pending.` Only `compilation-techniques` lesson 1
-has a challenge.
+Lessons 1–2 of each advanced course are the original drafts, still ending in
+`> **Draft.** Full notes pending.` Lessons 3+ are the week-3 content
+(2026-09) and are complete. Only `compilation-techniques` lesson 1 has a
+challenge. `software-testing` also covers metrics/QA (SUS, human factors);
+"Software Metrics & QA" in course briefs maps to it, and "Mobile
+Technology" maps to `mobile-android`.
+
+Week-3 content rules that still apply to anything added later:
+- Lesson prose is original. The source decks are copyrighted slides, so
+  don't reuse their text, structure or figures.
+- Teach the correct version silently when the source is wrong: SUS odd
+  items are the positive ones; Thompson concatenation uses the ε-linked
+  form; `pthread_join` ↔ `wait()` (zombie threads ↔ zombie processes);
+  a Solaris LWP is not the same thing as a thread.
+- The widget goes *before* the formal definition: play, then name it.
+- pthreads programs run in the C sandbox (Wandbox links them without flags;
+  verified 2026-09).
 
 **Positioning (decided 2026-09): a separate Advanced track, a soft note,
 no lock.**
@@ -199,6 +213,8 @@ src/
     components/       # CourseCard, CourseHeader, TheoryLesson, ChallengeEditor,
                       # CourseArt (inline SVG), LessonWidget, SymbolBar, ...
     widgets/          # Stepper, StateMachine, MemoryView, Timeline + registry.js
+                      # + composite widgets; widgets/lib/*.js = their pure logic
+    motion.js         # motion tokens, reducedMotion, FLIP/shake helpers
     courses.js        # glob loader, asset resolution, widget-block parsing
     checker.js        # challenge test runner
     styles/theme.css  # theme variables, .art SVG classes, .widget controls
@@ -402,49 +418,103 @@ Testing and Android use `Stepper` (EP→BVA derivation with `cells`, the
 activity lifecycle with an `onRestart` loop). Embedded Systems uses
 `Timeline` (super-loop vs interrupt). Same parts, different assembly.
 
+Composite widgets (week 3). Each is a top-level `.svelte` in
+`src/lib/widgets/` that composes primitives. Pure logic lives in
+`src/lib/widgets/lib/*.js`, which the registry ignores:
+
+| widget | composes | logic |
+| --- | --- | --- |
+| `FollowposBuilder` | Stepper (+MemoryView cells, tree SVG in step bodies), StateMachine | `lib/automata.js` |
+| `DfaMinimizer` | Stepper, StateMachine (tinted), block board with FLIP | `lib/automata.js` |
+| `ThreadModels` | Timeline per model, ARIA tabs | inline scenario data |
+| `ServerArchitectures` | Timeline + load slider | `lib/servers.js` |
+| `ActivityStack` | Timeline (bound `index`, auto-played) + stack cards | inline |
+| `SusCalculator` | MemoryView (per-item contributions) | inline |
+
+Primitive props added so they could be composed: Stepper `onchange(index, dir)`;
+Timeline bindable `index`, `minWidth` (chart scrolls inside its own
+container), `logSpans`; StateMachine node `tint`. The Timeline stops double
+as scheduler ticks in `ThreadModels`, so there's no separate Stepper there.
+`automata.layoutDfa()` turns any DFA into StateMachine nodes and edges.
+
 **If a course needs a fifth primitive, add it to the shared set.** Do not
 add a one-off component inside a course folder.
 
 ### Motion that explains
 
-Animation here exists to show *what just happened*, not to decorate.
-Shared pieces:
+**The rule: motion must carry information.** Every animation answers one of
+four questions, or it gets deleted:
 
-- `src/lib/utils/motion.js`:
-  - `prefersReducedMotion()`.
-  - `motionState.hydrated`, set in `+layout.svelte` after the first mount.
-    Read it **synchronously at mount**: observer callbacks fire after the
-    layout has already flipped it.
-  - The `use:reveal={{ index }}` action fades content in as it scrolls into
-    view. It never hides content that is already on screen while the page
-    hydrates, because that would blink.
-- **Course art:** tag SVG groups `seq-1`…`seq-8` in the order the mechanism
-  happens, plus `seq-key` on the moment that matters. `CourseArt`'s
-  `animate` prop plays the groups when the art scrolls into view (or at once
-  after client-side navigation); `replay` adds a 44px Play/Replay button.
-  Cards use `animate`; headers and lesson figures use both.
-- **Page transitions:** a 220ms cross-fade via the View Transitions API
-  (`onNavigate` in `+layout.svelte`).
-- **StateMachine:**
-  - A token travels along the arrow just taken (Web Animations, transform
-    only).
-  - The arrow the *next* symbol will take is dashed and pulsing.
-  - Arrows out of the current state are tinted.
-  - Event buttons that are possible from the current state are highlighted.
-    Impossible ones stay clickable and explain why.
-  - Run all walks at 520ms per step.
-  - Errors nudge.
-  - A first-use hint disappears after the first move.
-- **Stepper:** the panel slides in from the side you moved toward, and the
-  active dot grows.
-- **MemoryView:** the old value lifts away, struck through, as the new one
-  drops in.
-- **Timeline:** the cursor glides (transform on a full-width layer), the
-  event at the current time pings, and new log lines slide in. A first-use
-  hint disappears once you move.
+1. *Where did this come from?* (enter)
+2. *Where did it go?* (exit)
+3. *What just changed?* (emphasis)
+4. *How are these two things related?* (shared element / FLIP)
 
-Everything above is wrapped in `prefers-reduced-motion: no-preference`.
-Under reduced motion there are no Play buttons and Run all is instant.
+Decoration is out: page-load hero animations, scroll-triggered reveals,
+parallax, drifting gradients, looping icons, typewriter text, confetti.
+(Exception, decided 2026-09: the landing page keeps its existing WebGL
+background, fuzzy text, marquee and glitch as brand. They hold still under
+reduced motion. Don't add more, and don't copy them elsewhere.)
+
+**Tokens: never hardcode a duration or an easing curve.** JS imports from
+`src/lib/motion.js`; CSS uses the matching variables on `:root` in
+`theme.css`. Keep the two in sync.
+
+| token | ms | CSS | use |
+| --- | --- | --- | --- |
+| `instant` | 0 | — | mechanical state: checkbox, tab underline |
+| `fast` | 120 | `--dur-fast` | hover, press, toggle, tooltip |
+| `base` | 200 | `--dur-base` | small enter/exit, list item, badge |
+| `slow` | 320 | `--dur-slow` | panel, drawer, modal, route transition |
+| `teach` | 480 | `--dur-teach` | **widgets only**: the eye must track a value moving |
+
+Exits run at 0.6× (`dur(name, { exit: true })`, `--dur-*-out`). Curves:
+entering `EASE.enter` / `--ease-enter` (cubicOut), leaving `EASE.exit`
+(cubicIn), moving A→B `EASE.move` (cubicInOut), value emphasis `EASE.back`
+(backOut, **widgets only, never chrome**). `--stagger-step` is 40ms.
+
+`motion.js` also exports `reducedMotion` (a `MediaQuery`), `dur()` / `fadeDur()`,
+`motionState` (`hydrated`, plus the running view transition's promise),
+`shake`, `pulse`, `flipFrom`, `cancelAnimations`.
+
+**Reduced motion is required, not a nice-to-have.** Durations collapse to 0
+but the state change still happens. Movement is dropped. Opacity fades may
+stay, capped at 80ms (`fadeDur`). Nothing is gated behind an animation
+finishing. `theme.css` ends with the global `prefers-reduced-motion: reduce`
+override, which catches anything outside the tokens. Check it by hand with
+DevTools → Rendering → Emulate `prefers-reduced-motion`.
+
+**Performance floor:** animate `transform` and `opacity` only. Progress bars
+use `scaleX`, not `width`. Set `will-change` only while an animation is
+running (`flipFrom` does this). No animation libraries: `lenis`, `animejs`
+and `canvas-confetti` were removed in 2026-09. The only infinite loop allowed
+is the `.skeleton` shimmer. Target 60fps on a mid-range Android phone.
+
+What's wired:
+- **Route transitions** (`onNavigate` in `+layout.svelte`, View Transitions
+  API, feature-detected): a 200ms cross-fade by default. Lesson → next/prev
+  lesson slides in the direction of travel (`data-vt` on `<html>`). Course
+  card → course page morphs title, icon and cover via
+  `view-transition-name: vt-{title|icon|cover}-{slug}`. Those elements must
+  stay single-box (`display: inline-block`): a named element that wraps
+  across lines aborts the whole transition. `.main-content` is only named
+  (`page`) while a transition runs.
+- **Chrome:**
+  - Lesson content flies in (y 8, `base`) when no route transition is running.
+  - The course page's lesson list staggers: 6 items, then the rest at once.
+    It only plays on client navigation.
+  - The completion check scales in with backOut.
+  - The XP chip counts up (`Tween`, `teach`).
+  - A challenge pass shifts the border colour and draws a check.
+  - A challenge fail shakes the panel once.
+  - Modals and the notes window scale in from 0.96 + fade: `slow` in, `base` out.
+- **Course art:** `seq-1`…`seq-8` groups play on mount after client
+  navigation, and only when no route transition is running. `replay` adds a
+  Play/Replay button. Nothing is tied to scrolling.
+- **Widgets:** a step transition uses `teach`. Moving things are the same DOM
+  node moved with FLIP; never fade one out and another in. Back plays the
+  motion reversed. **Reset is instant.** StateMachine walks run one step per
+  `teach`. Its "next arrow" pulse is finite.
 
 ### Widget rules
 
@@ -457,9 +527,10 @@ Under reduced motion there are no Play buttons and Run all is instant.
   why — inline, next to the control, not in a console.
 - **Validate input before acting.** Empty or invalid input shows an
   inline error and stops; it never silently advances.
-- **Animation is opt-out**: wrap in
-  `@media (prefers-reduced-motion: no-preference)`. Animate `transform`
-  and `opacity` only. Keep loops under 2s.
+- **Animation is opt-out**: wrap CSS motion in
+  `@media (prefers-reduced-motion: no-preference)` and JS motion in
+  `dur()` / `reducedMotion`. Use the motion tokens. Animate `transform` and
+  `opacity` only. No infinite loops, and keep finite ones under 2s.
 - **Keyboard operable.** Every control reachable by Tab, activated by
   Enter or Space. A stepper's Next must be a real `<button>`.
 - **No network.** Widgets are self-contained; they never fetch.
