@@ -1,7 +1,7 @@
 <script>
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { animate } from 'animejs';
+	import { fadeDur, pulse } from '$lib/motion.js';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import NotesPanel from './NotesPanel.svelte';
 
@@ -22,7 +22,7 @@
 		if (!dotContainer) return;
 		const activeDot = dotContainer.querySelectorAll('.wt-dot')[n];
 		if (activeDot) {
-			animate(activeDot, { scale: [1, 1.5, 1], duration: 350, easing: 'outElastic(1, 0.5)' });
+			pulse(activeDot);
 		}
 	});
 </script>
@@ -59,7 +59,7 @@
 
 	<!-- Step content (keyed so Svelte remounts on step change → fade animates) -->
 	{#key currentStep}
-		<div class="step-content" in:fade={{ duration: 180 }}>
+		<div class="step-content" in:fade={{ duration: fadeDur('base') }}>
 			<h3 class="step-title">{step.title}</h3>
 			<p class="step-explanation">{step.explanation}</p>
 
@@ -120,7 +120,7 @@
 		color: var(--text-muted);
 		cursor: pointer;
 		white-space: nowrap;
-		transition: border-color 0.15s, color 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast);
 		flex-shrink: 0;
 	}
 
@@ -169,7 +169,7 @@
 		height: 7px;
 		border-radius: 50%;
 		background: var(--border);
-		transition: background 0.2s, transform 0.2s;
+		transition: background var(--dur-base), transform var(--dur-base);
 	}
 
 	.wt-dot.done {
@@ -254,7 +254,7 @@
 		font-size: 0.875rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+		transition: background var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast);
 		border: 1px solid var(--border);
 	}
 

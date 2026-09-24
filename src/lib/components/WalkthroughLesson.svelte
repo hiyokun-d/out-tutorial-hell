@@ -105,7 +105,7 @@
 	.resize-handle {
 		background: var(--sandbox-border);
 		cursor: col-resize;
-		transition: background 0.15s;
+		transition: background var(--dur-fast);
 		position: relative;
 	}
 

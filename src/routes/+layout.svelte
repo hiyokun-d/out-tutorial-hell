@@ -7,42 +7,53 @@
 	import { xp } from '$lib/stores/xp.js';
 	import { onMount } from 'svelte';
 	import { onNavigate } from '$app/navigation';
-	import { motionState, prefersReducedMotion } from '$lib/utils/motion.js';
-	import Lenis from 'lenis';
+	import { page } from '$app/state';
+	import { motionState, reducedMotion } from '$lib/motion.js';
 
 	let { children } = $props();
 
-	// Cross-fade between pages where the browser supports View Transitions.
+	/**
+	 * Which route transition fits this navigation:
+	 *  - next / prev: lesson to its neighbour in the same course — slide the way you moved.
+	 *  - fade: everything else. Course card → course page also fades, but its title,
+	 *    icon and cover carry view-transition-names, so they morph into the header.
+	 * @param {import('@sveltejs/kit').OnNavigate} nav
+	 * @returns {'next' | 'prev' | 'fade'}
+	 */
+	function kind(nav) {
+		const from = nav.from?.params;
+		const to = nav.to?.params;
+		if (!from?.lesson || !to?.lesson || from.course !== to.course) return 'fade';
+		// Current page's data knows its neighbours; the browser Back button reports delta.
+		if (to.lesson === page.data?.next?.id) return 'next';
+		if (to.lesson === page.data?.prev?.id) return 'prev';
+		if (nav.delta) return nav.delta > 0 ? 'next' : 'prev';
+		return 'fade';
+	}
+
 	onNavigate((navigation) => {
-		if (!document.startViewTransition || prefersReducedMotion()) return;
+		if (!document.startViewTransition || reducedMotion.current) return;
+		if (navigation.from?.url.pathname === navigation.to?.url.pathname) return;
+
+		const root = document.documentElement;
+		root.dataset.vt = kind(navigation);
+
 		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
+			const vt = document.startViewTransition(async () => {
 				resolve();
 				await navigation.complete;
 			});
+			const done = vt.finished.finally(() => {
+				if (motionState.transition === done) motionState.transition = null;
+				delete root.dataset.vt;
+			});
+			motionState.transition = done;
 		});
 	});
 
 	onMount(() => {
 		motionState.hydrated = true;
 		xp.init();
-
-		const lenis = new Lenis({
-			lerp: 0.08,
-			wheelMultiplier: 1.1,
-			smoothWheel: true
-		});
-
-		function raf(time) {
-			lenis.raf(time);
-			requestAnimationFrame(raf);
-		}
-
-		requestAnimationFrame(raf);
-
-		return () => {
-			lenis.destroy();
-		};
 	});
 </script>
 

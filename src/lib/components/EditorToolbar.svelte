@@ -57,7 +57,7 @@
 		border-radius: 18px;
 		padding: 0.2rem 0.6rem;
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s, background 0.15s;
+		transition: color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
 	}
 
 	button:hover:not(:disabled) {

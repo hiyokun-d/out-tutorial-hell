@@ -26,7 +26,7 @@
 	a {
 		color: var(--text-muted);
 		text-decoration: none;
-		transition: color 0.15s;
+		transition: color var(--dur-fast);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;

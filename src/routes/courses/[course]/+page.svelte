@@ -4,12 +4,17 @@
 	import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Code2, FlaskConical, Info, MousePointerClick, Play, Route, ScrollText, Target } from '@lucide/svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { goto } from '$app/navigation';
-	import { reveal } from '$lib/utils/motion.js';
+	import { fade, scale } from 'svelte/transition';
+	import { motionState, dur, fadeDur, EASE } from '$lib/motion.js';
 
 	let { data } = $props();
 	let course = $derived(data.course);
 	let lessons = $derived(data.lessons);
 	let advanced = $derived(data.advanced);
+
+	// Lesson list staggers in only after client-side navigation; on first load it's
+	// already painted, and hiding it to animate would blink. Read once, at mount.
+	const staggerIn = motionState.hydrated;
 
 	// Soft note only: advanced courses are never locked. Hidden once the beginner path is done.
 	let beginnerDone = $state(true);
@@ -138,7 +143,7 @@
 			{#each lessonGroups as group, groupIndex}
 				{@const moduleNumber = String(groupIndex + 1).padStart(2, '0')}
 				{@const pct = Math.round((group.completed / group.lessons.length) * 100)}
-				<section class="module-track" aria-labelledby={`module-${groupIndex}`} use:reveal={{ index: groupIndex }}>
+				<section class="module-track" aria-labelledby={`module-${groupIndex}`}>
 					<div class="module-card">
 						<div class="module-kicker">
 							<span class="module-number">Module {moduleNumber}</span>
@@ -155,7 +160,7 @@
 							</div>
 						</div>
 						<div class="module-progress" aria-label={`Module ${groupIndex + 1} is ${pct}% complete`}>
-							<span style={`width: ${pct}%`}></span>
+							<span style={`transform: scaleX(${pct / 100})`}></span>
 						</div>
 					</div>
 
@@ -166,6 +171,8 @@
 							<a
 								href="/courses/{course.id}/{lesson.id}"
 								class="roadmap-node"
+								class:stagger-in={staggerIn}
+								style:--i={i}
 								class:branch-right={localIndex % 2 === 1}
 								class:completed={done}
 								onclick={(e) => handleNodeClick(e, lesson, i)}
@@ -194,8 +201,20 @@
 </main>
 
 {#if skipDialog}
-	<div class="skip-overlay" role="dialog" aria-modal="true" onclick={() => (skipDialog = null)}>
-		<div class="skip-dialog" onclick={(e) => e.stopPropagation()}>
+	<div
+		class="skip-overlay"
+		role="dialog"
+		aria-modal="true"
+		onclick={() => (skipDialog = null)}
+		in:fade={{ duration: fadeDur('slow') }}
+		out:fade={{ duration: fadeDur('base', { exit: true }) }}
+	>
+		<div
+			class="skip-dialog"
+			onclick={(e) => e.stopPropagation()}
+			in:scale={{ start: 0.96, duration: dur('slow'), easing: EASE.enter }}
+			out:scale={{ start: 0.96, duration: dur('base', { exit: true }), easing: EASE.exit }}
+		>
 			<h3>Skip ahead?</h3>
 			<p>
 				{skipDialog.skipped === 1
@@ -449,7 +468,8 @@
 		height: 100%;
 		border-radius: inherit;
 		background: var(--accent);
-		transition: width 0.35s ease;
+		transform-origin: left;
+		transition: transform var(--dur-slow) var(--ease-enter);
 	}
 
 	.roadmap-nodes {
@@ -479,7 +499,7 @@
 		background: var(--surface-elevated);
 		color: var(--text);
 		text-decoration: none;
-		transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+		transition: transform var(--dur-fast) var(--ease-enter), border-color var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast) var(--ease-enter);
 	}
 
 	.roadmap-node:nth-child(odd) { grid-column: 1; }
@@ -608,7 +628,7 @@
 		font-weight: 800;
 		cursor: pointer;
 		font-family: inherit;
-		transition: background 0.15s, border-color 0.15s;
+		transition: background var(--dur-fast), border-color var(--dur-fast);
 	}
 
 	.skip-cancel {
@@ -681,7 +701,7 @@
 	.advanced-note-links a:hover { border-color: var(--info); color: var(--info); }
 	.advanced-note-links a.stay { background: transparent; color: var(--text-muted); }
 	@media (prefers-reduced-motion: no-preference) {
-		.advanced-note { animation: note-in 0.4s ease-out both; }
+		.advanced-note { animation: note-in var(--dur-base) var(--ease-enter) both; }
 	}
 	@keyframes note-in {
 		from { opacity: 0; transform: translateY(-6px); }

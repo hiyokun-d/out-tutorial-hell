@@ -44,7 +44,8 @@
 		border-left: 3px solid var(--success);
 		border-radius: 20px;
 		padding: 0.7rem 1rem;
-		animation: slideIn 0.25s ease, fadeOut 0.3s ease 2.5s forwards;
+		/* Enters from the edge it lives on; leaves faster, after a readable hold. */
+		animation: slideIn var(--dur-base) var(--ease-enter), fadeOut var(--dur-base-out) var(--ease-exit) var(--toast-hold, 2.5s) forwards;
 		min-width: 180px;
 	}
 

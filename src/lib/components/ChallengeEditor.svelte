@@ -7,6 +7,8 @@
 	import { DEFAULT_CONFIG } from '$lib/courses.js';
 	import { markComplete } from '$lib/utils/progress.js';
 	import { pistonRun, isPistonLanguage } from '$lib/utils/piston.js';
+	import { untrack } from 'svelte';
+	import { shake } from '$lib/motion.js';
 
 	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any, courseSlug?: string, lessonId?: string }} */
 	let { lesson, course, prev, next, config = DEFAULT_CONFIG, courseSlug = '', lessonId = '' } = $props();
@@ -132,6 +134,13 @@
 		executeTests(code, false);
 	}
 
+	// Stacked layout mirrors TestPanel: a failing run shakes the results once.
+	/** @type {HTMLElement | undefined} */
+	let mobileResults = $state();
+	$effect(() => {
+		if (testResults.some((r) => r.passed === false)) untrack(() => shake(mobileResults));
+	});
+
 	function handleReset() {
 		testResults = challenge.tests.map((t) => ({ ...t, passed: null, actual: undefined, detail: null }));
 	}
@@ -188,7 +197,7 @@
 	/>
 
 	<!-- Stacked layout only: results sit under the editor, in flow, not behind the keyboard -->
-	<section class="mobile-results" aria-label="Test results">
+	<section class="mobile-results" class:passed={allPassed} aria-label="Test results" bind:this={mobileResults}>
 		<div class="mobile-results-top">
 			<button class="mobile-run" onclick={runTests} disabled={running}>{running ? 'Running…' : 'Run tests'}</button>
 			<span aria-live="polite">{passedCount}/{testResults.length} passing</span>
@@ -225,7 +234,7 @@
 	.resize-handle {
 		background: color-mix(in srgb, var(--border) 72%, transparent);
 		cursor: col-resize;
-		transition: background 0.15s;
+		transition: background var(--dur-fast);
 		position: relative;
 	}
 
@@ -262,7 +271,7 @@
 		bottom: 1.5rem;
 		right: 1.5rem;
 		z-index: 100;
-		animation: wtSlideUp 0.3s ease;
+		animation: wtSlideUp var(--dur-slow) var(--ease-enter);
 	}
 
 	.wt-trigger button {
@@ -275,7 +284,7 @@
 		font-weight: 800;
 		cursor: pointer;
 		box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 28%, transparent);
-		transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+		transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast);
 	}
 
 	.wt-trigger button:hover {
@@ -284,7 +293,7 @@
 		box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 36%, transparent);
 	}
 
-	.mobile-results { display: none; }
+	.mobile-results { display: none; transition: border-color var(--dur-base) var(--ease-enter); }
 
 	@media (max-width: 920px) {
 		.layout {
@@ -303,6 +312,7 @@
 			border-top: 1px solid var(--border);
 			background: var(--surface);
 		}
+		.mobile-results.passed { border-top-color: var(--success); }
 
 		.wt-trigger { position: static; margin: 1rem; animation: none; }
 		.wt-trigger button { width: 100%; min-height: 44px; }

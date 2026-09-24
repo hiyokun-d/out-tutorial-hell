@@ -42,7 +42,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: 48%;
-		transition: border-color 0.15s, color 0.15s, background 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
 		background: var(--surface-elevated);
 		cursor: pointer;
 		font-family: inherit;

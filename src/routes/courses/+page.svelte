@@ -5,7 +5,6 @@
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { getProgress } from '$lib/utils/progress.js';
 	import { isAdvancedCourse } from '$lib/roadmap.js';
-	import { reveal } from '$lib/utils/motion.js';
 	import { downloadLearningSnapshot, importLearningSnapshot } from '$lib/utils/local-data.js';
 
 	let { data } = $props();
@@ -78,7 +77,7 @@
 
 	<section class="timeline" aria-label="Roadmap tracks">
 		{#each tracks as track, i}
-			<article class="timeline-item" use:reveal={{ index: i }}>
+			<article class="timeline-item">
 				<div class="rail">
 					<span>{track.order}</span>
 				</div>
@@ -118,7 +117,7 @@
 		</div>
 		<div class="course-grid">
 			{#each beginnerCourses as course, i}
-				<div class="card-slot" use:reveal={{ index: i }}>
+				<div class="card-slot">
 					<CourseCard {course} completed={completedByCourse[course.id] ?? 0} />
 				</div>
 			{/each}
@@ -156,7 +155,7 @@
 
 		<div class="course-grid">
 			{#each advanced.courses as course, i}
-				<div class="card-slot" use:reveal={{ index: i }}>
+				<div class="card-slot">
 					<CourseCard {course} completed={completedByCourse[course.id] ?? 0} />
 				</div>
 			{/each}
@@ -396,7 +395,7 @@
 		transform-origin: left;
 	}
 	@media (prefers-reduced-motion: no-preference) {
-		.advanced-meter span { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+		.advanced-meter span { transition: transform var(--dur-slow) var(--ease-enter); }
 	}
 	.section-title { margin-bottom: 1rem; }
 	.section-title h2 { margin: 0.35rem 0 0; font-size: 1.7rem; }

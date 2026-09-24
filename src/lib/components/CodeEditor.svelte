@@ -602,7 +602,7 @@
 	});
 </script>
 
-<div class="wrap" bind:this={editorEl} data-lenis-prevent></div>
+<div class="wrap" bind:this={editorEl}></div>
 
 <style>
 	.wrap {
@@ -644,7 +644,7 @@
 
 	/* Walkthrough spotlight decorations */
 	.wrap :global(.cm-line) {
-		transition: opacity 0.25s ease, background-color 0.25s ease;
+		transition: opacity var(--dur-base) var(--ease-enter), background-color var(--dur-base) var(--ease-enter);
 	}
 
 	.wrap :global(.cm-line.wt-spotlight) {
@@ -658,7 +658,8 @@
 	}
 
 	.wrap :global(.cm-line.wt-pulse) {
-		animation: wtPulse 1.8s ease-in-out infinite;
+		/* Two pulses to point at the line, then hold still — no infinite loops. */
+		animation: wtPulse calc(var(--dur-teach) * 2) var(--ease-move) 2;
 	}
 
 	@keyframes wtPulse {

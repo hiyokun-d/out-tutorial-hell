@@ -3,7 +3,7 @@
 
 	// @ts-nocheck
 	import { onMount } from 'svelte';
-	import { animate, stagger } from 'animejs';
+	import { reducedMotion } from '$lib/motion.js';
 	import FaultyTerminal from '$lib/components/FaultyTerminal.svelte';
 	import FuzzyText from '$lib/components/FuzzyText.svelte';
 	import {
@@ -24,6 +24,9 @@
 	import TextMarquee from '$lib/components/TextMarquee.svelte';
 
 	let { data } = $props();
+
+	// Reduced motion: every decorative engine on this page holds still.
+	let still = $derived(reducedMotion.current);
 	const { tracks, courses, features, stats, advanced } = data;
 
 	const FIRST_LESSON = '/courses/getting-started/1';
@@ -102,23 +105,7 @@
 			continuehref = firstOpen ? `/courses/${firstOpen.id}` : '/courses';
 		}
 
-		const io = new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting) {
-					animate('.track-item', {
-						translateY: [40, 0],
-						opacity: [0, 1],
-						duration: 650,
-						delay: stagger(110),
-						easing: 'outExpo'
-					});
-					io.disconnect();
-				}
-			},
-			{ threshold: 0.05 }
-		);
-
-		if (trackListEl) io.observe(trackListEl);
+		if (reducedMotion.current) return;
 
 		// ── Random glitch engine ──────────────────────────────────────
 		/** @param {number} min @param {number} max @returns {number} */
@@ -187,7 +174,6 @@
 		}, 1400);
 
 		return () => {
-			io.disconnect();
 			clearTimeout(initTimer);
 			glitchCleanups.forEach((fn) => fn());
 		};
@@ -223,10 +209,11 @@
 			scanlineIntensity={0.6}
 			curvature={0.18}
 			tint="#002e7a"
-			mouseReact={true}
+			mouseReact={!still}
 			mouseStrength={0.7}
 			globalMouse={true}
-			pageLoadAnimation={true}
+			pageLoadAnimation={!still}
+			pause={still}
 			noiseAmp={1}
 			brightness={0.6}
 		/>
@@ -241,9 +228,9 @@
 				<FuzzyText
 					class="-ml-[50px]"
 					text="Tutorial Hell"
-					baseIntensity={0.2}
+					baseIntensity={still ? 0 : 0.2}
 					hoverIntensity={0.5}
-					enableHover={true}
+					enableHover={!still}
 					fuzzRange={30}
 					fps={60}
 					direction="horizontal"
@@ -356,9 +343,9 @@
 					<FuzzyText
 						text="DASHBOARD ERROR"
 						fontSize={18}
-						baseIntensity={0.08}
+						baseIntensity={still ? 0 : 0.08}
 						hoverIntensity={0.3}
-						enableHover={true}
+						enableHover={!still}
 						fuzzRange={14}
 						fps={30}
 						direction="horizontal"
@@ -369,9 +356,9 @@
 					<FuzzyText
 						text={`404 NOT FOUND`}
 						fontSize={19}
-						baseIntensity={0.18}
+						baseIntensity={still ? 0 : 0.18}
 						hoverIntensity={0.45}
-						enableHover={true}
+						enableHover={!still}
 						fuzzRange={20}
 						fps={45}
 						direction="vertical"
@@ -454,9 +441,9 @@
 						<FuzzyText
 							text={`404`}
 							fontSize={52}
-							baseIntensity={0.25}
+							baseIntensity={still ? 0 : 0.25}
 							hoverIntensity={0.6}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={32}
 							fps={60}
 							direction="horizontal"
@@ -469,9 +456,9 @@
 						<FuzzyText
 							text="START NOW"
 							fontSize={23}
-							baseIntensity={0.05}
+							baseIntensity={still ? 0 : 0.05}
 							hoverIntensity={0.2}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={10}
 							fps={20}
 							direction="vertical"
@@ -488,9 +475,9 @@
 						<FuzzyText
 							text={'0000'}
 							fontSize={28}
-							baseIntensity={0.2}
+							baseIntensity={still ? 0 : 0.2}
 							hoverIntensity={0.5}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={24}
 							fps={40}
 							direction="vertical"
@@ -501,9 +488,9 @@
 						<FuzzyText
 							text="lessons"
 							fontSize={22}
-							baseIntensity={0.06}
+							baseIntensity={still ? 0 : 0.06}
 							hoverIntensity={0.25}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={8}
 							fps={20}
 							direction="horizontal"
@@ -516,9 +503,9 @@
 						<FuzzyText
 							text={String(courses.length)}
 							fontSize={28}
-							baseIntensity={0.3}
+							baseIntensity={still ? 0 : 0.3}
 							hoverIntensity={0.55}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={28}
 							fps={50}
 							direction="horizontal"
@@ -529,9 +516,9 @@
 						<FuzzyText
 							text="LESSONS"
 							fontSize={22}
-							baseIntensity={0.04}
+							baseIntensity={still ? 0 : 0.04}
 							hoverIntensity={0.2}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={8}
 							fps={20}
 							direction="vertical"
@@ -544,9 +531,9 @@
 						<FuzzyText
 							text={'404'}
 							fontSize={28}
-							baseIntensity={0.22}
+							baseIntensity={still ? 0 : 0.22}
 							hoverIntensity={0.5}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={26}
 							fps={35}
 							direction="vertical"
@@ -559,9 +546,9 @@
 						<FuzzyText
 							text="no progress"
 							fontSize={12}
-							baseIntensity={0.1}
+							baseIntensity={still ? 0 : 0.1}
 							hoverIntensity={0.35}
-							enableHover={true}
+							enableHover={!still}
 							fuzzRange={12}
 							fps={25}
 							direction="horizontal"
@@ -582,7 +569,7 @@
 >
 	<TextMarquee
 		text="Happy Learning ✦ Keep coding ✦ i don't know what to type anymore ✦ do something ✦ just do it ✦"
-		baseVelocity={-4}
+		baseVelocity={still ? 0 : -4}
 		scrollDependent={true}
 		class="jersey-15-regular text-[2vw] text-white/40 tracking-widest uppercase"
 	/>
@@ -600,9 +587,9 @@
 					<FuzzyText
 						text={feature.title}
 						fontSize={20}
-						baseIntensity={0.07}
+						baseIntensity={still ? 0 : 0.07}
 						hoverIntensity={0.28}
-						enableHover={true}
+						enableHover={!still}
 						fuzzRange={12}
 						fps={25}
 						direction="horizontal"
@@ -649,7 +636,6 @@
 						{track.locked
 						? 'border-white/8 bg-[#070810]/90 backdrop-blur-xl'
 						: 'border-white/12 bg-[#0f1330]/88 backdrop-blur-xl hover:border-white/22'}"
-					style="opacity: 0;"
 					onmousemove={(e) => {
 						if (track.locked) return;
 						const r = e.currentTarget.getBoundingClientRect();
@@ -688,9 +674,9 @@
 									text={String(track.order).padStart(2, '0')}
 									fontSize={48}
 									color="rgba(255,255,255,0.08)"
-									baseIntensity={0.44}
+									baseIntensity={still ? 0 : 0.44}
 									hoverIntensity={0.78}
-									enableHover={true}
+									enableHover={!still}
 									fuzzRange={42}
 									fps={35}
 									direction="horizontal"
@@ -723,9 +709,9 @@
 										text="CORRUPTED"
 										fontSize={10}
 										color="rgba(248,113,113,0.7)"
-										baseIntensity={0.32}
+										baseIntensity={still ? 0 : 0.32}
 										hoverIntensity={0.68}
-										enableHover={true}
+										enableHover={!still}
 										fuzzRange={12}
 										fps={25}
 										direction="vertical"
@@ -745,9 +731,9 @@
 								<FuzzyText
 									text={track.title}
 									fontSize={i === 0 ? 26 : 20}
-									baseIntensity={0.52}
+									baseIntensity={still ? 0 : 0.52}
 									hoverIntensity={0.95}
-									enableHover={true}
+									enableHover={!still}
 									fuzzRange={52}
 									fps={45}
 									direction="horizontal"
@@ -819,9 +805,9 @@
 								<FuzzyText
 									text="— ACCESS DENIED —"
 									fontSize={10}
-									baseIntensity={0.38}
+									baseIntensity={still ? 0 : 0.38}
 									hoverIntensity={0.75}
-									enableHover={true}
+									enableHover={!still}
 									fuzzRange={18}
 									fps={30}
 									direction="horizontal"

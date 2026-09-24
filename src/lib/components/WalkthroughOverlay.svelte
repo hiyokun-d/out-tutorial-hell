@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { tick } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
-	import { animate } from 'animejs';
+	import { dur, fadeDur, pulse } from '$lib/motion.js';
 	import WalkthroughCode from './WalkthroughCode.svelte';
 	import { resolveHighlightLines } from '$lib/utils/walkthrough.js';
 
@@ -97,7 +97,7 @@
 		if (!dotsEl) return;
 		const active = dotsEl.querySelectorAll('.wt-ov-dot')[n];
 		if (active) {
-			animate(active, { scale: [1, 1.5, 1], duration: 300, easing: 'outElastic(1, 0.5)' });
+			pulse(active);
 		}
 	});
 
@@ -112,7 +112,7 @@
 
 <svelte:window onkeydown={handleKey} />
 
-<div class="overlay" role="dialog" aria-modal="true" aria-label="Code walkthrough" in:fade={{ duration: 180 }} out:fade={{ duration: 150 }}>
+<div class="overlay" role="dialog" aria-modal="true" aria-label="Code walkthrough" in:fade={{ duration: fadeDur('slow') }} out:fade={{ duration: fadeDur('base', { exit: true }) }}>
 
 	<!-- Top bar: progress + skip -->
 	<div class="ov-header">
@@ -187,9 +187,9 @@
 
 				<!-- Panel body (collapses when minimized) -->
 				{#if !minimized}
-					<div class="panel-body" transition:slide={{ duration: 180 }}>
+					<div class="panel-body" transition:slide={{ duration: dur('base') }}>
 						{#key currentStep}
-							<div class="panel-content" in:fade={{ duration: 150 }}>
+							<div class="panel-content" in:fade={{ duration: fadeDur('base') }}>
 								<p class="panel-explanation">{step.explanation}</p>
 
 								{#if step.why}
@@ -260,7 +260,7 @@
 		height: 6px;
 		border-radius: 50%;
 		background: var(--border);
-		transition: background 0.2s;
+		transition: background var(--dur-base);
 		flex-shrink: 0;
 	}
 
@@ -305,7 +305,7 @@
 		border-radius: 6px;
 		padding: 0.25rem 0.65rem;
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s;
+		transition: color var(--dur-fast), border-color var(--dur-fast);
 	}
 
 	.ov-skip:hover {
@@ -331,7 +331,7 @@
 		border-radius: 12px;
 		box-shadow: var(--base-shadow);
 		overflow: hidden;
-		transition: box-shadow 0.15s;
+		transition: box-shadow var(--dur-fast);
 	}
 
 	.wt-panel.is-dragging {
@@ -363,7 +363,7 @@
 		flex-shrink: 0;
 		padding: 2px;
 		opacity: 0.35;
-		transition: opacity 0.15s;
+		transition: opacity var(--dur-fast);
 	}
 
 	.panel-header:hover .panel-drag-grip {
@@ -425,7 +425,7 @@
 		font-size: 0.7rem;
 		color: var(--text-muted);
 		cursor: pointer;
-		transition: background 0.15s, color 0.15s, border-color 0.15s;
+		transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
 		line-height: 1;
 	}
 
@@ -494,7 +494,7 @@
 		font-size: 0.78rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+		transition: background var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast);
 		border: 1px solid var(--border);
 	}
 
@@ -535,7 +535,7 @@
 		height: 5px;
 		border-radius: 50%;
 		background: var(--border);
-		transition: background 0.2s, transform 0.2s;
+		transition: background var(--dur-base), transform var(--dur-base);
 	}
 
 	.pn-dot.active {

@@ -8,7 +8,7 @@
 </script>
 
 {#await widget}
-	<div class="widget widget-loading">Loading interactive…</div>
+	<div class="widget skeleton widget-loading" aria-busy="true">Loading interactive…</div>
 {:then Widget}
 	<Widget {...props} />
 {:catch err}

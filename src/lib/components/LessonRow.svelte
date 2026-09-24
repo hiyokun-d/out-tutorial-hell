@@ -59,7 +59,7 @@
 		border-radius: 18px;
 		text-decoration: none;
 		color: var(--text);
-		transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+		transition: transform var(--dur-fast) var(--ease-enter), border-color var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast) var(--ease-enter);
 		box-shadow: var(--base-shadow);
 		min-height: 70px;
 	}

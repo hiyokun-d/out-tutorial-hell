@@ -2,6 +2,8 @@
 	// @ts-nocheck
 	import { browser } from '$app/environment';
 	import { NotebookPen, X, GripHorizontal } from '@lucide/svelte';
+	import { scale } from 'svelte/transition';
+	import { dur, EASE } from '$lib/motion.js';
 
 	const CONTENT_KEY = 'notes:global';
 	const POS_KEY = 'notes:global:pos';
@@ -138,6 +140,8 @@
 		style="left:{x}px; top:{y}px"
 		role="dialog"
 		aria-label="Notes"
+		in:scale={{ start: 0.96, duration: dur('slow'), easing: EASE.enter }}
+		out:scale={{ start: 0.96, duration: dur('base', { exit: true }), easing: EASE.exit }}
 	>
 		<!-- Drag handle / header -->
 		<div
@@ -166,7 +170,6 @@
 			oninput={handleInput}
 			placeholder="Write anything…&#10;&#10;Your notes save automatically to this browser. Nothing leaves your device."
 			spellcheck="false"
-			data-lenis-prevent
 		></textarea>
 
 		<div class="fn-footer">
@@ -193,7 +196,7 @@
 		justify-content: center;
 		cursor: pointer;
 		box-shadow: var(--depth-shadow);
-		transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+		transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-enter);
 	}
 
 	.fn-trigger:hover {
@@ -289,7 +292,7 @@
 		color: var(--text-dim);
 		cursor: pointer;
 		flex-shrink: 0;
-		transition: background 0.12s, color 0.12s;
+		transition: background var(--dur-fast), color var(--dur-fast);
 	}
 
 	.fn-close:hover { background: var(--surface-elevated); color: var(--text); }

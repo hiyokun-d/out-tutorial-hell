@@ -1,6 +1,9 @@
 ﻿<script>
 	import TestList from './TestList.svelte';
 	import HintPanel from './HintPanel.svelte';
+	import { untrack } from 'svelte';
+	import { draw } from 'svelte/transition';
+	import { shake, dur, EASE } from '$lib/motion.js';
 
 	/**
 	 * @typedef {{ id: number, description: string, passed: boolean | null, detail?: string | null }} TestResult
@@ -10,25 +13,18 @@
 
 	let passed = $derived(testResults.filter((t) => t.passed === true).length);
 	let total = $derived(testResults.length);
-	let prevAllPassed = false;
 
+	/** @type {HTMLDivElement | undefined} */
+	let panel = $state();
+
+	// Every run replaces the results array. One that ends with failures shakes the
+	// panel once: "not yet". (Reset also replaces it, but with no failures.)
 	$effect(() => {
-		if (allPassed && !prevAllPassed) {
-			prevAllPassed = true;
-			fireConfetti();
-		}
-		if (!allPassed) prevAllPassed = false;
+		if (testResults.some((t) => t.passed === false)) untrack(() => shake(panel));
 	});
-
-	async function fireConfetti() {
-		const { default: confetti } = await import('canvas-confetti');
-		confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#FF9F1C', '#fbbf24', '#10b981', '#fcd34d'] });
-		setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { x: 0.1, y: 0.5 } }), 200);
-		setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { x: 0.9, y: 0.5 } }), 350);
-	}
 </script>
 
-<div class="panel">
+<div class="panel" class:passed={allPassed} bind:this={panel}>
 	<div class="header">
 		<h3>Tests</h3>
 		<!-- Progress pill: shows passing count even before Run Tests -->
@@ -46,7 +42,12 @@
 	</button>
 
 	{#if allPassed}
-		<p class="success">All tests pass. Keep going.</p>
+		<p class="success">
+			<svg class="check" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<path d="M5 12.5l4.5 4.5L19 7.5" in:draw={{ duration: dur('base'), easing: EASE.enter }} />
+			</svg>
+			All tests pass. Keep going.
+		</p>
 	{/if}
 
 	<HintPanel {hints} />
@@ -61,7 +62,10 @@
 		border: 1px solid var(--border);
 		border-radius: 18px;
 		background: color-mix(in srgb, var(--surface-elevated) 78%, transparent);
+		transition: border-color var(--dur-base) var(--ease-enter);
 	}
+
+	.panel.passed { border-color: var(--success); }
 
 	.header {
 		display: flex;
@@ -86,7 +90,7 @@
 		border-radius: 999px;
 		background: var(--error-muted);
 		color: var(--error);
-		transition: background 0.2s, color 0.2s;
+		transition: background var(--dur-base), color var(--dur-base);
 	}
 
 	.progress.all {
@@ -105,25 +109,25 @@
 		font-size: 0.88rem;
 		font-weight: 800;
 		cursor: pointer;
-		transition: background 0.15s, transform 0.15s;
+		transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-enter);
 	}
 
 	.run-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
 	.run-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 	.success {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
 		text-align: center;
 		font-size: 0.86rem;
 		font-weight: 800;
 		color: var(--success);
 		margin: 0;
-		animation: pop 0.3s ease;
 	}
 
-	@keyframes pop {
-		from { transform: scale(0.96); opacity: 0; }
-		to { transform: scale(1); opacity: 1; }
-	}
+	.check path { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 
 

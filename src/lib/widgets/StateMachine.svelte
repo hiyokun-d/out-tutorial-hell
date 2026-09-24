@@ -1,6 +1,6 @@
 <script>
 	import { tick, untrack } from 'svelte';
-	import { prefersReducedMotion } from '$lib/utils/motion.js';
+	import { DUR, EASE_CSS, reducedMotion, cancelAnimations } from '$lib/motion.js';
 
 	/**
 	 * Nodes and edges. Highlights the active state, accepts an input and walks it
@@ -89,7 +89,7 @@
 
 	/** @param {Edge} edge */
 	async function travel(edge) {
-		if (prefersReducedMotion() || !svgEl || !tokenEl) return;
+		if (reducedMotion.current || !svgEl || !tokenEl) return;
 		await tick();
 		const path = /** @type {SVGPathElement | null} */ (svgEl.querySelector(`[data-edge="${edges.indexOf(edge)}"]`));
 		if (!path || !tokenEl.animate) return;
@@ -98,11 +98,13 @@
 			const p = path.getPointAtLength((len * i) / 12);
 			return { transform: `translate(${p.x}px, ${p.y}px)`, opacity: i === 12 ? 0 : 1 };
 		});
-		tokenEl.animate(frames, { duration: 420, easing: 'ease-in-out' });
+		tokenEl.animate(frames, { duration: DUR.teach, easing: EASE_CSS.move });
 	}
 
+	// Instant: stops a running walk and any token mid-flight.
 	function reset() {
 		runId++;
+		cancelAnimations(tokenEl);
 		running = false;
 		text = initialInput;
 		tokens = null;
@@ -185,7 +187,8 @@
 			if (stale()) return;
 		}
 		const id = ++runId;
-		const delay = prefersReducedMotion() ? 0 : 520;
+		// One step per token flight, so each arrow is finished before the next starts.
+		const delay = reducedMotion.current ? 0 : DUR.teach;
 		running = true;
 		while (id === runId && tokens && !halted && pos < tokens.length) {
 			step();
@@ -483,11 +486,12 @@
 	.events { margin-top: 0.75rem; }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.sym { transition: opacity 0.3s ease, transform 0.3s ease; }
-		.edge.next { animation: breathe 1.4s ease-in-out infinite alternate; }
-		.nudge { animation: nudge 0.35s ease-out; }
-		.enter { animation: rise 0.3s ease-out; }
-		.node.on { animation: pop 0.3s ease-out; transform-box: fill-box; transform-origin: center; }
+		.sym { transition: opacity var(--dur-base) var(--ease-enter), transform var(--dur-base) var(--ease-enter); }
+		/* Finite: draws the eye to the next arrow, then holds still (no infinite loops). */
+		.edge.next { animation: breathe var(--dur-teach) var(--ease-move) 4 alternate; }
+		.nudge { animation: nudge calc(var(--dur-fast) * 2) linear; }
+		.enter { animation: rise var(--dur-base) var(--ease-enter); }
+		.node.on { animation: pop var(--dur-base) var(--ease-back); transform-box: fill-box; transform-origin: center; }
 	}
 
 	@keyframes breathe {
@@ -497,8 +501,8 @@
 
 	@keyframes nudge {
 		0%, 100% { transform: translateX(0); }
-		25% { transform: translateX(-5px); }
-		60% { transform: translateX(4px); }
+		20%, 60% { transform: translateX(-3px); }
+		40%, 80% { transform: translateX(3px); }
 	}
 
 	@keyframes rise {

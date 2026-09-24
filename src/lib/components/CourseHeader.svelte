@@ -35,7 +35,7 @@
 
 <header>
 	<div class="top">
-		<div class="icon-wrap">
+		<div class="icon-wrap" style:view-transition-name={courseId ? `vt-icon-${courseId}` : null}>
 			<IconComponent size={32} strokeWidth={2.1} class="course-icon" />
 		</div>
 		<div class="info">
@@ -45,7 +45,7 @@
 					<span class="lang-tag">{course.language}</span>
 				{/if}
 			</div>
-			<h1>{course.title}</h1>
+			<h1><span class="vt-box" style:view-transition-name={courseId ? `vt-title-${courseId}` : null}>{course.title}</span></h1>
 			<p>{course.description}</p>
 			<p class="author-credit">
 				Course by
@@ -57,7 +57,7 @@
 			</p>
 		</div>
 		{#if course.coverArt}
-			<CourseArt art={course.coverArt} alt={course.title} class="cover" animate replay />
+			<CourseArt art={course.coverArt} alt={course.title} class="cover" animate replay vtName={courseId ? `vt-cover-${courseId}` : ''} />
 		{/if}
 	</div>
 
@@ -68,7 +68,7 @@
 				<span>{completedCount}/{lessons.length} lessons finished locally</span>
 			</div>
 			<div class="progress-bar">
-				<div class="progress-fill" style="width: {pct}%"></div>
+				<div class="progress-fill" style="transform: scaleX({pct / 100})"></div>
 			</div>
 		</div>
 	{/if}
@@ -107,6 +107,9 @@
 	}
 
 	.info { flex: 1; min-width: 0; }
+
+	/* One box: a named element split across lines would abort the view transition. */
+	.vt-box { display: inline-block; }
 
 	.top :global(.cover) {
 		width: clamp(220px, 30%, 320px);
@@ -171,7 +174,7 @@
 		text-decoration: none;
 		font-weight: 800;
 		border-bottom: 1px solid transparent;
-		transition: border-color 0.15s ease;
+		transition: border-color var(--dur-fast) var(--ease-enter);
 	}
 
 	.author-link:hover {
@@ -205,7 +208,8 @@
 		height: 100%;
 		background: var(--accent);
 		border-radius: 999px;
-		transition: width 0.4s ease;
+		transform-origin: left;
+		transition: transform var(--dur-slow) var(--ease-enter);
 	}
 
 	@media (max-width: 720px) {

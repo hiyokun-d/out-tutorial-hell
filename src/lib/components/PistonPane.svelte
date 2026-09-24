@@ -8,7 +8,7 @@
 	let label = $derived(langLabel(language));
 </script>
 
-<div class="pane" data-lenis-prevent>
+<div class="pane">
 	<div class="bar">
 		<span class="label">Output</span>
 		{#if running}
@@ -26,9 +26,9 @@
 
 	<div class="terminal">
 		{#if running}
-			<div class="waiting">
-				<span class="spinner">⠋</span>
+			<div class="waiting" aria-busy="true">
 				Running {label}…
+				<span class="skeleton bar" aria-hidden="true"></span>
 			</div>
 		{:else if error}
 			<div class="line stderr">Error: {error}</div>
@@ -134,12 +134,12 @@
 		padding: 0.5rem 0;
 	}
 
-	.spinner {
-		display: inline-block;
-		animation: spin 0.6s linear infinite;
-	}
-
-	@keyframes spin {
-		to { transform: rotate(360deg); }
+	.bar {
+		display: block;
+		flex: 1;
+		max-width: 12rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--sandbox-text-muted) 18%, transparent);
 	}
 </style>

@@ -24,6 +24,14 @@
 	const uid = $props.id();
 
 	let index = $state(0);
+	// Reset jumps straight back: the cursor and caption don't animate the unwind.
+	let snap = $state(false);
+
+	function reset() {
+		snap = true;
+		index = 0;
+		requestAnimationFrame(() => requestAnimationFrame(() => (snap = false)));
+	}
 
 	let now = $derived(stops[index].t);
 	let stop = $derived(stops[index]);
@@ -52,10 +60,10 @@
 	}
 </script>
 
-<section class="widget timeline" aria-label={title}>
+<section class="widget timeline" class:snap aria-label={title}>
 	<div class="widget-head">
 		<p class="widget-title">{title}</p>
-		<button class="w-btn" onclick={() => (index = 0)}>Reset</button>
+		<button class="w-btn" onclick={reset}>Reset</button>
 	</div>
 
 	<div class="chart">
@@ -248,11 +256,15 @@
 	.log li.ok { color: var(--success); }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.span, .dot { transition: opacity 0.35s ease; }
-		.cursor { transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
-		.ping { animation: ping 0.9s ease-out 0.35s; }
-		.log li { animation: log-in 0.35s ease-out both; }
-		.caption { animation: log-in 0.3s ease-out; }
+		.span, .dot { transition: opacity var(--dur-base) var(--ease-enter); }
+		/* The same cursor glides both ways, so Prev is Next played backwards. */
+		.cursor { transition: transform var(--dur-teach) var(--ease-move); }
+		/* Pings as the cursor arrives. */
+		.ping { animation: ping var(--dur-teach) var(--ease-enter) var(--dur-slow); }
+		.log li { animation: log-in var(--dur-base) var(--ease-enter) both; }
+		.caption { animation: log-in var(--dur-base) var(--ease-enter); }
+		.snap .cursor, .snap .span, .snap .dot { transition: none; }
+		.snap .caption, .snap .ping { animation: none; }
 	}
 
 	@keyframes ping {

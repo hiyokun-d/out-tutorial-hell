@@ -65,8 +65,9 @@
 		history = [...history, target];
 	}
 
+	// Reset is instant: nobody wants to watch the unwind.
 	function reset() {
-		dir = 'back';
+		dir = 'none';
 		history = [0];
 	}
 </script>
@@ -104,7 +105,7 @@
 
 		{#if step.cells?.length}
 			{#if step.cellsTitle}<p class="cells-title">{step.cellsTitle}</p>{/if}
-			<MemoryView cells={step.cells} previous={previousStep?.cells ?? null} />
+			<MemoryView cells={step.cells} previous={dir === 'none' ? null : (previousStep?.cells ?? null)} {dir} />
 		{/if}
 
 		{#if step.callout}
@@ -177,9 +178,10 @@
 	.nav { justify-content: flex-end; }
 
 	@media (prefers-reduced-motion: no-preference) {
-		.dot { transition: transform 0.25s ease, background-color 0.25s ease; }
-		.panel.fwd { animation: from-right 0.32s cubic-bezier(0.2, 0.7, 0.2, 1); }
-		.panel.back { animation: from-left 0.32s cubic-bezier(0.2, 0.7, 0.2, 1); }
+		.dot { transition: transform var(--dur-fast) var(--ease-enter), background-color var(--dur-fast); }
+		/* Forward slides in from the right; Back plays the same motion mirrored. */
+		.panel.fwd { animation: from-right var(--dur-teach) var(--ease-enter); }
+		.panel.back { animation: from-left var(--dur-teach) var(--ease-enter); }
 	}
 
 	@keyframes from-right {

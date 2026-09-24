@@ -3,6 +3,17 @@
 	import { xp, xpProgress } from '$lib/stores/xp.js';
 	import { page } from '$app/stores';
 	import { BookOpen, Flame, Home, Map, Trophy, Zap } from '@lucide/svelte';
+	import { Tween } from 'svelte/motion';
+	import { untrack } from 'svelte';
+	import { dur, EASE } from '$lib/motion.js';
+
+	// XP counts up instead of snapping: 120 → 140 shows how much you gained,
+	// not only the new total. The first value (page load) is set without counting.
+	const shownXp = new Tween(untrack(() => $xp.xp), { easing: EASE.enter });
+	$effect(() => {
+		const target = $xp.xp;
+		untrack(() => shownXp.set(target, { duration: dur('teach') }));
+	});
 
 	function isRoadmapActive(pathname) {
 		return pathname === '/courses' || (pathname.startsWith('/courses/') && pathname !== '/courses/new-coder');
@@ -35,7 +46,8 @@
 			<div class="xp-chip" title="{$xp.xp} XP total">
 				<Trophy size={15} strokeWidth={2.3} />
 				<span>Lv {$xp.level}</span>
-				<div class="mini-bar" aria-hidden="true"><i style="width:{$xpProgress * 100}%"></i></div>
+				<span class="xp-num">{Math.round(shownXp.current)} XP</span>
+				<div class="mini-bar" aria-hidden="true"><i style="transform:scaleX({$xpProgress})"></i></div>
 			</div>
 			{#if $xp.streak > 1}
 				<div class="streak" title="Day streak"><Flame size={14} fill="currentColor" /> {$xp.streak}d</div>
@@ -104,7 +116,7 @@
 		font-weight: 850;
 		text-decoration: none;
 		white-space: nowrap;
-		transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+		transition: background var(--dur-fast) var(--ease-enter), color var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast) var(--ease-enter);
 	}
 
 	.nav-pill a:hover {
@@ -160,7 +172,11 @@
 		height: 100%;
 		border-radius: inherit;
 		background: var(--accent);
+		transform-origin: left;
+		transition: transform var(--dur-teach) var(--ease-enter);
 	}
+
+	.xp-num { color: var(--text-muted); font-variant-numeric: tabular-nums; }
 
 	.streak {
 		gap: 0.3rem;

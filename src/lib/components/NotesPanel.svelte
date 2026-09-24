@@ -74,7 +74,7 @@
 		line-height: 1.6;
 		padding: 0.6rem 0.75rem;
 		outline: none;
-		transition: border-color 0.15s;
+		transition: border-color var(--dur-fast);
 	}
 
 	textarea::placeholder {

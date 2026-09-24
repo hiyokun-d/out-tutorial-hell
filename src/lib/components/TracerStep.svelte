@@ -1,6 +1,6 @@
 <script>
 	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { dur, EASE } from '$lib/motion.js';
 
 	/** @type {{
 	 *   traceIndex: number,
@@ -28,7 +28,7 @@
 	<div
 		class="card"
 		style="--sc: {stepColor}; border-left-color: {stepColor}"
-		in:fly={{ y: -10, duration: 200, easing: cubicOut }}
+		in:fly={{ y: -10, duration: dur('base'), easing: EASE.enter }}
 	>
 		<div class="card-top">
 			<span class="type-badge" style="background:{stepColor}20; color:{stepColor}">
@@ -68,7 +68,7 @@
 		gap: 0.3rem;
 		position: relative;
 		overflow: hidden;
-		transition: border-left-color 0.25s ease;
+		transition: border-left-color var(--dur-base) var(--ease-enter);
 	}
 
 	.card::after {
@@ -78,7 +78,7 @@
 		width: 50px;
 		background: linear-gradient(to right, color-mix(in srgb, var(--sc) 10%, transparent), transparent);
 		pointer-events: none;
-		transition: background 0.25s ease;
+		transition: background var(--dur-base) var(--ease-enter);
 	}
 
 	.card-top {
@@ -96,7 +96,7 @@
 		text-transform: uppercase;
 		white-space: nowrap;
 		flex-shrink: 0;
-		transition: background 0.25s ease, color 0.25s ease;
+		transition: background var(--dur-base) var(--ease-enter), color var(--dur-base) var(--ease-enter);
 	}
 
 	.iter-badge {

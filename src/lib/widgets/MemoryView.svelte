@@ -11,15 +11,26 @@
 	 */
 
 	/**
-	 * @type {{ title?: string, cells?: Cell[], previous?: Cell[] | null, frames?: Frame[] }}
+	 * `dir` is the direction of the last move: 'back' plays the value change in reverse,
+	 * 'none' (Reset) shows the state without animating.
+	 *
+	 * @type {{ title?: string, cells?: Cell[], previous?: Cell[] | null, frames?: Frame[], dir?: 'fwd' | 'back' | 'none' }}
 	 */
-	let { title = '', cells = [], previous = null, frames = [] } = $props();
+	let { title = '', cells = [], previous = null, frames = [], dir = 'fwd' } = $props();
 
 	let index = $state(0);
+	// Standalone mode tracks its own direction.
+	let ownDir = $state(/** @type {'fwd' | 'back' | 'none'} */ ('fwd'));
 
 	let standalone = $derived(frames.length > 0);
+	let moveDir = $derived(standalone ? ownDir : dir);
 	let shown = $derived(standalone ? frames[index].cells : cells);
-	let before = $derived(standalone ? (index > 0 ? frames[index - 1].cells : null) : previous);
+	// Going back, the frame we came from is the one after this one.
+	let before = $derived(
+		standalone
+			? ownDir === 'none' ? null : ownDir === 'back' ? (frames[index + 1]?.cells ?? null) : index > 0 ? frames[index - 1].cells : null
+			: previous
+	);
 	let caption = $derived(standalone ? (frames[index].caption ?? '') : '');
 
 	/** Previous value of a cell, for the slide-out, or null if it's new. @param {Cell} cell */
@@ -36,14 +47,14 @@
 	}
 </script>
 
-<div class="memory" class:widget={standalone}>
+<div class="memory {moveDir}" class:widget={standalone}>
 	{#if standalone}
 		<div class="widget-head">
 			<p class="widget-title">{title || 'Memory'}</p>
 			<div class="widget-controls">
-				<button class="w-btn" onclick={() => index--} disabled={index === 0}>Prev</button>
-				<button class="w-btn" onclick={() => index++} disabled={index === frames.length - 1}>Next</button>
-				<button class="w-btn" onclick={() => (index = 0)}>Reset</button>
+				<button class="w-btn" onclick={() => ((ownDir = 'back'), index--)} disabled={index === 0}>Prev</button>
+				<button class="w-btn" onclick={() => ((ownDir = 'fwd'), index++)} disabled={index === frames.length - 1}>Next</button>
+				<button class="w-btn" onclick={() => ((ownDir = 'none'), (index = 0))}>Reset</button>
 			</div>
 		</div>
 		<p class="position">Step {index + 1} of {frames.length}</p>
@@ -132,9 +143,12 @@
 
 	@media (prefers-reduced-motion: no-preference) {
 		/* The old value lifts away as the new one drops in: you see *what* changed. */
-		.cell.changed .value { animation: value-in 0.55s ease-out 0.15s both; }
-		.old { animation: value-out 0.55s ease-in both; }
-		.cell { transition: border-color 0.3s ease, background-color 0.3s ease; }
+		.cell.changed .value { animation: value-in var(--dur-teach) var(--ease-back) var(--dur-fast) both; }
+		.old { animation: value-out var(--dur-teach-out) var(--ease-exit) both; }
+		/* Back: the same motion reversed — new value drops from above, old sinks away. */
+		.back .cell.changed .value { animation-name: value-in-rev; }
+		.back .old { animation-name: value-out-rev; }
+		.cell { transition: border-color var(--dur-base) var(--ease-enter), background-color var(--dur-base) var(--ease-enter); }
 	}
 
 	@keyframes value-in {
@@ -145,5 +159,15 @@
 	@keyframes value-out {
 		from { opacity: 1; transform: none; }
 		to { opacity: 0; transform: translateY(-12px); }
+	}
+
+	@keyframes value-in-rev {
+		from { opacity: 0; transform: translateY(-10px); }
+		to { opacity: 1; transform: none; }
+	}
+
+	@keyframes value-out-rev {
+		from { opacity: 1; transform: none; }
+		to { opacity: 0; transform: translateY(12px); }
 	}
 </style>

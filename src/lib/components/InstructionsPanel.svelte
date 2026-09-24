@@ -29,7 +29,7 @@
 	let showNotes = $state(false);
 </script>
 
-<aside class="panel" data-lenis-prevent>
+<aside class="panel">
 	<div class="panel-top">
 		<Breadcrumb {course} {lesson} />
 		<button class="notes-toggle" onclick={() => (showNotes = !showNotes)}>
@@ -93,7 +93,7 @@
 		color: var(--text-muted);
 		cursor: pointer;
 		white-space: nowrap;
-		transition: border-color 0.15s, color 0.15s, background 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
 		flex-shrink: 0;
 	}
 

@@ -70,7 +70,7 @@
 		border-radius: 18px;
 		padding: 0.45rem 0.65rem;
 		cursor: pointer;
-		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
 	}
 
 	button:hover {

@@ -87,6 +87,22 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: rgba(255, 177, 95, 0.18);
 	--sidebar-ring: oklch(0.708 0 0);
+
+	/* Motion tokens — mirror DUR / EASE_CSS in src/lib/motion.js. Never hardcode
+	   a duration or curve; use these. Exits run at 0.6x (the *-out values). */
+	--dur-fast: 120ms;
+	--dur-base: 200ms;
+	--dur-slow: 320ms;
+	--dur-teach: 480ms;
+	--dur-fast-out: 72ms;
+	--dur-base-out: 120ms;
+	--dur-slow-out: 192ms;
+	--dur-teach-out: 288ms;
+	--stagger-step: 40ms;
+	--ease-enter: cubic-bezier(0.215, 0.61, 0.355, 1); /* cubicOut */
+	--ease-exit: cubic-bezier(0.55, 0.055, 0.675, 0.19); /* cubicIn */
+	--ease-move: cubic-bezier(0.645, 0.045, 0.355, 1); /* cubicInOut */
+	--ease-back: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* backOut — widgets only */
 }
 
 *,
@@ -162,28 +178,6 @@ textarea {
 }
 ::-webkit-scrollbar-thumb:hover {
 	background-color: var(--text-muted);
-}
-
-/* Lenis smooth scrolling integrations */
-html.lenis,
-html.lenis body {
-	height: auto;
-}
-
-.lenis-smooth {
-	scroll-behavior: auto !important;
-}
-
-.lenis-smooth [data-lenis-prevent] {
-	overscroll-behavior: contain;
-}
-
-.lenis-stopped {
-	overflow: hidden;
-}
-
-.lenis-scrolling iframe {
-	pointer-events: none;
 }
 
 @theme inline {
@@ -879,46 +873,54 @@ html.lenis body {
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────────────
-   All of it opt-out, transform + opacity only, one-shot (no loops over 2s). */
+   Every animation answers: where did this come from, where did it go, what just
+   changed, or how are these two related. Transform + opacity only. Durations and
+   curves come from the --dur-* / --ease-* tokens on :root. */
 @media (prefers-reduced-motion: no-preference) {
-	.widget { animation: widget-in 0.4s ease-out both; }
-	.widget-loading { animation: none; }
+	.widget { animation: rise-in var(--dur-base) var(--ease-enter) both; }
+	.widget.skeleton { animation: none; }
 
-	.reveal-pending {
-		opacity: 0;
-		transform: translateY(18px);
-	}
-	.reveal-pending.revealed {
-		opacity: 1;
-		transform: none;
-		transition:
-			opacity 0.5s ease-out var(--reveal-delay, 0ms),
-			transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+	/* A short list arriving: first six items 40ms apart, the rest together. */
+	.stagger-in {
+		animation: rise-in var(--dur-fast) var(--ease-enter) both;
+		animation-delay: calc(min(var(--i, 0), 6) * var(--stagger-step));
 	}
 
 	/* Course art that explains itself: groups tagged seq-1…seq-8 appear in the
-	   order the mechanism happens. seq-key gets one extra pulse. */
+	   order the mechanism happens. seq-key gets one extra emphasis. */
 	.art.play [class*='seq-'] {
 		transform-box: fill-box;
 		transform-origin: center;
-		animation: art-step 0.42s ease-out both;
+		animation: art-step var(--dur-slow) var(--ease-enter) both;
 	}
-	.art.play .seq-1 { animation-delay: 0ms; }
-	.art.play .seq-2 { animation-delay: 170ms; }
-	.art.play .seq-3 { animation-delay: 340ms; }
-	.art.play .seq-4 { animation-delay: 510ms; }
-	.art.play .seq-5 { animation-delay: 680ms; }
-	.art.play .seq-6 { animation-delay: 850ms; }
-	.art.play .seq-7 { animation-delay: 1020ms; }
-	.art.play .seq-8 { animation-delay: 1190ms; }
+	.art.play .seq-2 { animation-delay: calc(var(--dur-base) * 1); }
+	.art.play .seq-3 { animation-delay: calc(var(--dur-base) * 2); }
+	.art.play .seq-4 { animation-delay: calc(var(--dur-base) * 3); }
+	.art.play .seq-5 { animation-delay: calc(var(--dur-base) * 4); }
+	.art.play .seq-6 { animation-delay: calc(var(--dur-base) * 5); }
+	.art.play .seq-7 { animation-delay: calc(var(--dur-base) * 6); }
+	.art.play .seq-8 { animation-delay: calc(var(--dur-base) * 7); }
 	.art.play .seq-key {
 		animation-name: art-step-key;
-		animation-duration: 0.7s;
+		animation-duration: var(--dur-teach);
+		animation-timing-function: var(--ease-back);
+	}
+
+	/* Loading placeholder: the one infinite loop allowed on the site. */
+	.skeleton::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 7%, transparent), transparent);
+		transform: translateX(-100%);
+		animation: shimmer calc(var(--dur-teach) * 3) var(--ease-move) infinite;
 	}
 }
 
-@keyframes widget-in {
-	from { opacity: 0; transform: translateY(10px); }
+.skeleton { position: relative; overflow: hidden; }
+
+@keyframes rise-in {
+	from { opacity: 0; transform: translateY(8px); }
 	to { opacity: 1; transform: none; }
 }
 
@@ -928,16 +930,56 @@ html.lenis body {
 }
 
 @keyframes art-step-key {
-	0% { opacity: 0; transform: scale(0.7); }
-	55% { opacity: 1; transform: scale(1.12); }
-	100% { opacity: 1; transform: scale(1); }
+	from { opacity: 0; transform: scale(0.8); }
+	to { opacity: 1; transform: scale(1); }
 }
 
-/* Page cross-fade (View Transitions API). Short, opacity only. */
+@keyframes shimmer {
+	to { transform: translateX(100%); }
+}
+
+/* ── Route transitions (View Transitions API, wired in +layout.svelte) ──────────
+   Default: plain cross-fade. Lesson → lesson: slide in the direction of travel.
+   Course card → course page: title, icon and cover are shared elements
+   (view-transition-name set per slug in CourseCard / CourseHeader). */
+/* Named only while a transition runs: a permanent name makes .main-content a
+   stacking context, which would put in-page dialogs under the sticky top bar. */
+:root[data-vt] .main-content { view-transition-name: page; }
+
 @media (prefers-reduced-motion: no-preference) {
-	::view-transition-old(root),
-	::view-transition-new(root) {
-		animation-duration: 220ms;
-		animation-timing-function: ease-out;
+	::view-transition-group(*) {
+		animation-duration: var(--dur-slow);
+		animation-timing-function: var(--ease-move);
+	}
+	::view-transition-old(*) {
+		animation-duration: var(--dur-base-out);
+		animation-timing-function: var(--ease-exit);
+	}
+	::view-transition-new(*) {
+		animation-duration: var(--dur-base);
+		animation-timing-function: var(--ease-enter);
+	}
+
+	:root[data-vt='next']::view-transition-old(page) { animation: vt-out-left var(--dur-slow-out) var(--ease-exit) both; }
+	:root[data-vt='next']::view-transition-new(page) { animation: vt-in-right var(--dur-slow) var(--ease-enter) both; }
+	:root[data-vt='prev']::view-transition-old(page) { animation: vt-out-right var(--dur-slow-out) var(--ease-exit) both; }
+	:root[data-vt='prev']::view-transition-new(page) { animation: vt-in-left var(--dur-slow) var(--ease-enter) both; }
+}
+
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(48px); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-48px); } }
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-48px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(48px); } }
+
+/* ── Reduced motion ────────────────────────────────────────────────────────────
+   Belt and braces for anything animated outside the tokens: state still changes,
+   it just doesn't move. JS reads the same query via reducedMotion in motion.js. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
 	}
 }

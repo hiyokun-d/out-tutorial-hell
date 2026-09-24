@@ -23,9 +23,9 @@
 
 <a href="/courses/{course.id}" class="course-card">
 	{#if course.coverArt}
-		<CourseArt art={course.coverArt} decorative class="card-cover" animate />
+		<CourseArt art={course.coverArt} decorative class="card-cover" animate vtName="vt-cover-{course.id}" />
 	{:else}
-		<div class="icon-wrap">
+		<div class="icon-wrap" style:view-transition-name="vt-icon-{course.id}">
 			<IconComponent size={25} strokeWidth={2.2} class="course-icon" />
 		</div>
 	{/if}
@@ -33,8 +33,8 @@
 	<div class="info">
 		<div class="card-header-row">
 			<h2>
-				{#if course.coverArt}<IconComponent size={17} strokeWidth={2.4} class="title-icon" aria-hidden="true" />{/if}
-				{course.title}
+				{#if course.coverArt}<span class="title-icon-wrap vt-box" style:view-transition-name="vt-icon-{course.id}"><IconComponent size={17} strokeWidth={2.4} class="title-icon" aria-hidden="true" /></span>{/if}
+				<span class="vt-box" style:view-transition-name="vt-title-{course.id}">{course.title}</span>
 			</h2>
 			<span class="badge {course.difficulty.toLowerCase()}">{course.difficulty}</span>
 		</div>
@@ -76,7 +76,7 @@
 		border-radius: 18px;
 		text-decoration: none;
 		color: var(--text);
-		transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+		transition: transform var(--dur-fast) var(--ease-enter), border-color var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast) var(--ease-enter);
 		box-shadow: var(--base-shadow);
 		min-height: 156px;
 	}
@@ -105,6 +105,9 @@
 		flex-shrink: 0;
 		align-self: flex-start;
 	}
+
+	/* One box each: a named element split across lines would abort the view transition. */
+	.vt-box { display: inline-block; }
 
 	h2 :global(.title-icon) {
 		color: var(--accent-strong);
@@ -213,7 +216,7 @@
 		text-decoration: underline;
 		text-underline-offset: 2px;
 		text-decoration-color: transparent;
-		transition: text-decoration-color 0.15s ease;
+		transition: text-decoration-color var(--dur-fast) var(--ease-enter);
 	}
 
 	.author-btn:hover {

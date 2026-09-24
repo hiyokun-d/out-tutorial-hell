@@ -19,6 +19,9 @@
 	import { buildPythonTracerCode, parsePythonTrace } from '$lib/utils/python-tracer.js';
 	import { markComplete, isComplete } from '$lib/utils/progress.js';
 	import { browser } from '$app/environment';
+	import { fly, scale } from 'svelte/transition';
+	import { Check } from '@lucide/svelte';
+	import { motionState, dur, EASE } from '$lib/motion.js';
 	import { goto } from '$app/navigation';
 
 	/** @type {{ lesson: any, course: any, prev: any, next: any, config?: any, courseSlug?: string, lessonId?: string }} */
@@ -301,7 +304,7 @@
 	class:dragging
 	style={sandboxOpen ? `grid-template-columns: ${leftPct}fr 4px ${100 - leftPct}fr` : undefined}
 >
-	<main class:sandbox-active={sandboxOpen} data-lenis-prevent={sandboxOpen || undefined}>
+	<main class:sandbox-active={sandboxOpen}>
 		<div class="top-bar">
 			<Breadcrumb {course} {lesson} />
 			<div class="top-actions">
@@ -321,7 +324,12 @@
 			<h1>{lesson.title}</h1>
 		</header>
 
-		<article class="content">
+		<!-- Enters on client-side navigation. When a route transition is already sliding
+		     the page, it stands down so the two don't stack. -->
+		<article
+			class="content"
+			in:fly|global={{ y: 8, duration: motionState.transition ? 0 : dur('base'), easing: EASE.enter }}
+		>
 			{#if lesson.figureArt}
 				<figure class="lesson-figure">
 					<CourseArt art={lesson.figureArt} alt={lesson.title} class={lesson.figureArtNarrow ? 'wide-only' : ''} animate replay />
@@ -341,7 +349,10 @@
 			{#if !completed}
 				<button class="mark-btn" onclick={handleMarkRead}>Mark as Read</button>
 			{:else}
-				<span class="done-label">Lesson complete</span>
+				<span class="done-label">
+					<span class="done-check" in:scale={{ start: 0.8, duration: dur('base'), easing: EASE.back }}><Check size={16} strokeWidth={3} /></span>
+					Lesson complete
+				</span>
 			{/if}
 		</div>
 
@@ -356,7 +367,7 @@
 			aria-label="Resize panels"
 			onmousedown={startResize}
 		></div>
-		<aside class="sandbox-panel" data-lenis-prevent>
+		<aside class="sandbox-panel">
 			<!-- Header bar -->
 			<div class="panel-bar">
 				<span class="panel-label">Sandbox</span>
@@ -454,7 +465,7 @@
 					<div class="step-progress-wrap">
 						<div
 							class="step-progress-fill"
-							style="width:{traceEvents.length > 1 ? (traceIndex / (traceEvents.length - 1)) * 100 : 100}%; background:{currentStepColor}"
+							style="transform:scaleX({traceEvents.length > 1 ? traceIndex / (traceEvents.length - 1) : 1}); background:{currentStepColor}"
 						></div>
 					</div>
 
@@ -534,7 +545,7 @@
 	.resize-handle {
 		background: color-mix(in srgb, var(--border) 72%, transparent);
 		cursor: col-resize;
-		transition: background 0.15s;
+		transition: background var(--dur-fast);
 		position: relative;
 		flex-shrink: 0;
 	}
@@ -604,7 +615,7 @@
 		border-radius: 6px;
 		color: var(--text-muted);
 		cursor: pointer;
-		transition: border-color 0.15s, color 0.15s, background 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
 		white-space: nowrap;
 	}
 
@@ -646,9 +657,10 @@
 
 	.lesson-footer { margin: 2rem 0 1.5rem; display: flex; align-items: center; }
 
-	.mark-btn { padding: 0.6rem 1.4rem; background: var(--accent); color: #160d14; border: none; border-radius: 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+	.mark-btn { padding: 0.6rem 1.4rem; background: var(--accent); color: #160d14; border: none; border-radius: 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background var(--dur-fast); }
 	.mark-btn:hover { background: var(--accent-hover); }
-	.done-label { font-size: 0.875rem; font-weight: 600; color: var(--success); }
+	.done-label { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.875rem; font-weight: 600; color: var(--success); }
+	.done-check { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--success-muted); }
 
 	.sandbox-panel {
 		display: flex;
@@ -684,7 +696,7 @@
 		font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.6rem;
 		background: var(--accent-muted); border: 1px solid var(--accent);
 		border-radius: 5px; color: var(--accent); cursor: pointer;
-		transition: background 0.15s, color 0.15s;
+		transition: background var(--dur-fast), color var(--dur-fast);
 	}
 	.trace-btn:hover:not(:disabled) { background: var(--accent); color: #160d14; }
 	.trace-btn:disabled { opacity: 0.5; cursor: default; }
@@ -707,7 +719,7 @@
 		text-transform: uppercase;
 		white-space: nowrap;
 		flex-shrink: 0;
-		transition: background 0.2s, color 0.2s, border-color 0.2s;
+		transition: background var(--dur-base), color var(--dur-base), border-color var(--dur-base);
 	}
 
 	.trace-keyboard-hint {
@@ -722,7 +734,7 @@
 		font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.5rem;
 		background: none; border: 1px solid var(--sandbox-border); border-radius: 5px;
 		color: var(--sandbox-text-muted); cursor: pointer;
-		transition: border-color 0.15s, color 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast);
 		white-space: nowrap; flex-shrink: 0;
 	}
 	.exit-trace-btn:hover { border-color: var(--error); color: var(--error); }
@@ -730,7 +742,7 @@
 	.close-btn {
 		background: none; border: none; color: var(--sandbox-text-dim); cursor: pointer;
 		font-size: 0.75rem; padding: 0.1rem 0.25rem; border-radius: 4px;
-		transition: color 0.15s; margin-left: auto; flex-shrink: 0;
+		transition: color var(--dur-fast); margin-left: auto; flex-shrink: 0;
 	}
 	.close-btn:hover { color: var(--error); }
 
@@ -755,7 +767,7 @@
 		animation: none;
 		background: color-mix(in srgb, var(--step-color, var(--accent)) 12%, transparent);
 		border-left: 3px solid var(--step-color, var(--accent));
-		transition: background 0.2s ease, border-left-color 0.2s ease;
+		transition: background var(--dur-base) var(--ease-enter), border-left-color var(--dur-base) var(--ease-enter);
 	}
 
 	.sandbox-lower {
@@ -789,17 +801,10 @@
 	.step-progress-wrap { height: 3px; background: var(--sandbox-bar-bg); flex-shrink: 0; overflow: hidden; position: relative; }
 	.step-progress-fill {
 		height: 100%;
-		transition: width 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.3s ease;
+		transform-origin: left;
+		transition: transform var(--dur-base) var(--ease-move), background var(--dur-base) var(--ease-enter);
 		border-radius: 0 2px 2px 0;
 		position: relative;
-	}
-	.step-progress-fill::after {
-		content: '';
-		position: absolute;
-		right: 0; top: 0; bottom: 0;
-		width: 20px;
-		background: linear-gradient(to right, transparent, rgba(255,255,255,0.3));
-		border-radius: 0 2px 2px 0;
 	}
 
 	.step-controls {
@@ -817,7 +822,7 @@
 		padding: 0.25rem 0.75rem;
 		background: var(--surface); border: 1px solid var(--border);
 		border-radius: 6px; color: var(--text-muted); cursor: pointer;
-		transition: border-color 0.15s, color 0.15s;
+		transition: border-color var(--dur-fast), color var(--dur-fast);
 		white-space: nowrap;
 	}
 	.step-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }

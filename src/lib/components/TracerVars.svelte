@@ -1,7 +1,7 @@
 <script>
 	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
-	import { cubicOut } from 'svelte/easing';
+	import { dur, EASE } from '$lib/motion.js';
 
 	/** @type {{ vars: Record<string,any>, prevVars: Record<string,any>, changedNames: Set<string> }} */
 	let { vars, prevVars, changedNames } = $props();
@@ -48,21 +48,21 @@
 				class="bubble"
 				class:changed={entry.changed}
 				style="--tc: {entry.color}"
-				animate:flip={{ duration: 260, easing: cubicOut }}
-				in:fly={{ y: 14, duration: 220, easing: cubicOut }}
-				out:fly={{ y: -8, duration: 140, easing: cubicOut }}
+				animate:flip={{ duration: dur('base'), easing: EASE.move }}
+				in:fly={{ y: 14, duration: dur('base'), easing: EASE.enter }}
+				out:fly={{ y: -8, duration: dur('base', { exit: true }), easing: EASE.exit }}
 			>
 				<div class="bubble-top">
 					<span class="var-name">{entry.name}</span>
 					<span class="type-badge type-{entry.desc.type}">{entry.desc.type}</span>
 				</div>
 				{#key entry.desc.display}
-					<div class="var-value type-{entry.desc.type}" in:fly={{ y: -5, duration: 160, easing: cubicOut }}>
+					<div class="var-value type-{entry.desc.type}" in:fly={{ y: -5, duration: dur('fast'), easing: EASE.enter }}>
 						{entry.desc.display}
 					</div>
 				{/key}
 				{#if entry.changed && entry.prevDesc}
-					<div class="was-prev" in:fly={{ y: 4, duration: 130, easing: cubicOut }}>
+					<div class="was-prev" in:fly={{ y: 4, duration: dur('fast'), easing: EASE.enter }}>
 						← {entry.prevDesc.display}
 					</div>
 				{/if}
@@ -106,7 +106,7 @@
 		max-width: 160px;
 		position: relative;
 		overflow: hidden;
-		transition: border-color 0.22s ease, box-shadow 0.22s ease;
+		transition: border-color var(--dur-base) var(--ease-enter), box-shadow var(--dur-base) var(--ease-enter);
 	}
 
 	.bubble::before {
@@ -122,7 +122,7 @@
 	.bubble.changed {
 		border-color: var(--tc, var(--accent));
 		box-shadow: 0 0 12px -3px color-mix(in srgb, var(--tc, var(--accent)) 60%, transparent);
-		animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+		animation: pop var(--dur-base) var(--ease-back);
 	}
 
 	@keyframes pop {
